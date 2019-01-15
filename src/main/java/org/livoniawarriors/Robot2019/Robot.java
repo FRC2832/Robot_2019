@@ -2,11 +2,15 @@ package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import org.livoniawarriors.Robot2019.commands.*;
+import org.livoniawarriors.Robot2019.subsystems.*;
 
 public class Robot extends TimedRobot {
-
+    public static Logger logger;
+    public static DriveTrain driveTrain;
     @Override
     public void robotInit() {
+        logger = new Logger();
     }
 
     @Override
