@@ -3,15 +3,16 @@ package org.livoniawarriors.Robot2019;
 import org.livoniawarriors.Robot2019.subsystems.Elevator;
 
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 public class Robot extends TimedRobot {
 
     public static Elevator elevator;
+    public static Joystick joystick;
 
     @Override
     public void robotInit() {
         elevator = new Elevator();
+        joystick = new Joystick(0);
     }
 
     @Override

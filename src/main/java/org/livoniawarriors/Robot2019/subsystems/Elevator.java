@@ -11,6 +11,8 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import org.livoniawarriors.Robot2019.commands.MoveElevatorManually;
+
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 public class Elevator extends Subsystem {
@@ -26,6 +28,7 @@ public class Elevator extends Subsystem {
 
     public double getElevatorHeight() {
         return elevatorMotor.getEncoder().getPosition();
+        //TODO: add math to convert from encoders to height of the elevator
     }
 
     public void setElevatorMotor(double speed) {
@@ -34,8 +37,7 @@ public class Elevator extends Subsystem {
 
     @Override
     public void initDefaultCommand() {
-        // Set the default command for a subsystem here.
-        // setDefaultCommand(new MySpecialCommand());
+        setDefaultCommand(new MoveElevatorManually());
     }
 
     public enum elevatorHeights {

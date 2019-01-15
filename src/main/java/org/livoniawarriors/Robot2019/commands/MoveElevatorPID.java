@@ -24,7 +24,7 @@ public class MoveElevatorPID extends Command implements PIDOutput, PIDSource {
 	private final double D = 0.5;
     private final double F = 0.0;
     
-    private final double TOLERANCE = 2;
+    private final double TOLERANCE = 2; // +- how many inches
 
     private PIDSourceType sourceType;
     private PIDController controller;
@@ -56,28 +56,38 @@ public class MoveElevatorPID extends Command implements PIDOutput, PIDSource {
     // Called repeatedly when this Command is scheduled to run
     @Override
     protected void execute() {
+        
     }
 
     // Make this return true when this Command no longer needs to run execute()
     @Override
     protected boolean isFinished() {
-        return false;
+        if (Math.abs(Robot.elevator.getElevatorHeight() - targetHeight) < TOLERANCE) {
+            //Log successfully reaching target height
+            return true;
+        } else {
+            return false;
+        }
     }
 
     // Called once after isFinished returns true
     @Override
     protected void end() {
+        controller.disable();
+        Robot.elevator.setElevatorMotor(0);
     }
 
     // Called when another command which requires one or more of the same
     // subsystems is scheduled to run
     @Override
     protected void interrupted() {
+
     }
 
     @Override
 	public void pidWrite(double output) {
-		//This is the output of the PID
+        //This is the output of the PID
+        Robot.elevator.setElevatorMotor(output);
 	}
 
 	@Override
