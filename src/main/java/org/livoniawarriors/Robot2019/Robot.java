@@ -1,16 +1,19 @@
 package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 public class Robot extends TimedRobot {
 
+    public static Lidar lidar;
+
     @Override
     public void robotInit() {
+        lidar = new Lidar();
     }
 
     @Override
     public void robotPeriodic() {
+        lidar.update();
     }
 
     @Override
