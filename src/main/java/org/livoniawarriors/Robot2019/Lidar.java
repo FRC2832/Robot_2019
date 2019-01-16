@@ -1,9 +1,6 @@
 package org.livoniawarriors.Robot2019;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.stream.Collectors;
@@ -12,11 +9,15 @@ public class Lidar {
 
     private Socket client;
     private Transform transform;
+    private BufferedReader input;
+    private BufferedWriter output;
 
     public Lidar() {
         transform = new Transform();
         try {
-            client = new Socket("169.254.25.245", 1234);
+            client = new Socket("169.254.25.245", 1234); // try http://frcvision.local instead of static
+            input = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            output = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -24,13 +25,23 @@ public class Lidar {
 
     public void update() {
         try {
-            InputStream stream = client.getInputStream();
-            BufferedReader input = new BufferedReader(new InputStreamReader(stream));
             String line;
             while((line = input.readLine()) != null) {
-                if(line.equals("A"))
+                if(line.equals("transform"))
                     updateTransform(input);
+                else if(line.startsWith("error"))
+                    System.err.println(line);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendMessage(String message) {
+        try {
+            output.write(message);
+            output.newLine();
+            output.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -71,13 +82,12 @@ public class Lidar {
 
         @Override
         public String toString() {
-            StringBuffer buffer = new StringBuffer();
-            buffer.append(x);
-            buffer.append(",");
-            buffer.append(y);
-            buffer.append(",");
-            buffer.append(rotation);
-            return buffer.toString();
+            return "(" + x + ", " + y + ", " + rotation + ")"; // StringBuilder usage is boilerplate code in this instance
         }
+    }
+
+    public void dispose() throws IOException {
+        if(client != null)
+            client.close();
     }
 }

@@ -49,4 +49,14 @@ public class Robot extends TimedRobot {
     public void testPeriodic() {
 
     }
+
+    @Override
+    protected void finalize() {
+        super.finalize();
+        try {
+            lidar.dispose();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -29,10 +29,14 @@ from breezyslam.algorithms import RMHC_SLAM
 from breezyslam.sensors import RPLidarA1 as LaserModel
 from rplidar import RPLidar as Lidar
 from roboviz import MapVisualizer
+from networktables import NetworkTables
+import wpilib
 import socket
 
 if __name__ == '__main__':
-
+    #NetworkTables.initialize()
+    #sd = NetworkTables.getTable('SmartDashboard')
+    wpilib.CameraServer.launch()
     # Connect to Lidar unit
     lidar = Lidar(LIDAR_DEVICE)
 
@@ -61,6 +65,7 @@ if __name__ == '__main__':
     s = socket.socket()
     s.bind(('', port))
     s.listen(5)
+
     while True:
 
         # Extract (quality, angle, distance) triples from current scan
@@ -89,8 +94,9 @@ if __name__ == '__main__':
         # Display map and robot pose, exiting gracefully if user closes it
         #if not viz.display(x / 1000., y / 1000., theta, mapbytes):
         #    exit(0)
+        # health, error_code = lidar.get_health() #incorporate health checks
         c, addr = s.accept()
-        c.send('A\n' + x + '\n' + y + '\n' + theta + '\n')
+        c.send('transform\n' + x + '\n' + y + '\n' + theta + '\n')
         c.close()
 
     # Shut down the lidar connection
