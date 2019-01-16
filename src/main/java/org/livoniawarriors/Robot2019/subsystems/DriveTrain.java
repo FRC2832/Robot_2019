@@ -11,10 +11,10 @@ import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 public class DriveTrain extends Subsystem {
-    final static int DRIVE_MOTOR_FR = 69;
-    final static int DRIVE_MOTOR_FL = 420;
-    final static int DRIVE_MOTOR_BR = 666;
-    final static int DRIVE_MOTOR_BL = 42;
+    final static int DRIVE_MOTOR_FR = 3;
+    final static int DRIVE_MOTOR_FL = 6;
+    final static int DRIVE_MOTOR_BR = 9;
+    final static int DRIVE_MOTOR_BL = 12;
 
     private Talon fr, fl, br, bl;
     public DriveTrain() {
