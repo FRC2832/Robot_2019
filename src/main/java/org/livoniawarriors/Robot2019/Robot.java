@@ -5,12 +5,14 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import org.livoniawarriors.Robot2019.commands.*;
 import org.livoniawarriors.Robot2019.subsystems.*;
 
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot implements Logger.ILogInterface {
     public static Logger logger;
     public static DriveTrain driveTrain;
     @Override
     public void robotInit() {
         logger = new Logger();
+        this.log("kill yourself", "this is working", Logger.type.STRINGS);
+        System.out.println(logger.getData(Logger.type.STRINGS));
     }
 
     @Override
