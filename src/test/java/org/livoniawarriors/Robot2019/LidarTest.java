@@ -9,8 +9,8 @@ public class LidarTest {
         assertEquals(0, 0);
         Lidar lidar = new Lidar();
         // Temp
-        while (true) {
-            lidar.update();
-        }
+        //while (true) {
+        //    lidar.update();
+        //}
     }
 }
