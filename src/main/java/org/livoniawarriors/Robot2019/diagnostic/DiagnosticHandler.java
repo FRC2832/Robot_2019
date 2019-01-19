@@ -8,10 +8,9 @@
 package org.livoniawarriors.Robot2019.diagnostic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import edu.wpi.first.wpilibj.command.Subsystem;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import org.livoniawarriors.Robot2019.diagnostic.Diagnosable;
@@ -33,80 +32,84 @@ public class DiagnosticHandler {
    */
 	public void diagnoseSubsystem(Class<?> subsystem, Object... testVal) {
     	try {
-    		Class<?> subsys = Class.forName(subsystem.toString());
-
     		//Get all methods in the Subsystem
-    		Method methodList[] = subsys.getDeclaredMethods();
-
-    		ArrayList<Object> results = new ArrayList();
+			Method methods[] = subsystem.getDeclaredMethods();
+			Object s = subsystem.newInstance();
+			//Keep track of which test values are used: true if they have
+			//been used, false if they haven't
+			Map<Object, Boolean> values = new HashMap<>();
+			//Populate map
+			for(Object o : testVal) {
+				values.put(o, false);
+			}
 
     		//Iterate over every method
-    		for(int i = 0; i < methodList.length; i++) {
-        		Method func = methodList[i];
-				Type returnType = func.getReturnType();
-				Boolean success;
+    		for(Method m : methods) {
+				Type returnType = m.getReturnType();
+				String name = m.getName();
+				List<Object> methodVals = new ArrayList<Object>();
+				Boolean success = false;
+				String report = "failed";
 
         		//List parameter types of func
-        		Class<?>[] paramType = func.getParameterTypes();
-        		Object[] obj = new Object[paramType.length];
-
+        		Class<?>[] paramType = m.getParameterTypes();
         		//Check if method is Diagnosable
-        		if(func.isAnnotationPresent(Diagnosable.class)) {
-        			Annotation annotation = func.getAnnotation(Diagnosable.class);
-        			Diagnosable diag = (Diagnosable) annotation;
+        		if(m.isAnnotationPresent(Diagnosable.class)) {
+        			Annotation annotation = m.getAnnotation(Diagnosable.class);
+        			Diagnosable diagnosable = (Diagnosable) annotation;
           
         			//Make sure diagnostic is turned on
-        			if(diag.diagOn()) {
+        			if(diagnosable.diagOn()) {
             			//Get params and then run the test
-            			for(int j = 0; j < paramType.length; j++) {
-                			obj[j] = paramType[j].newInstance();
-              			} 
-            			//Access specific result by results.get(i)
-            			results.add(func.invoke(func, obj));
-        
-						System.out.println(results.get(i));
-
-						//If return value is numeric
-						//TODO: figure out what is going on here
-        				if(returnType == double.class || returnType == int.class || returnType == float.class) {
-							double trialVal;
-							if(results.get(i) instanceof double[]) {
-								trialVal = (double) results.get(i);
-							} else if(results.get(i) instanceof int[]) {
-								trialVal = (int) results.get(i);
-							} else if(results.get(i) instanceof float[]) {
-								trialVal = (float) results.get(i);
-							} else {
-								trialVal = 0;
+            			for(int i = 0; i < paramType.length; i++) {
+							if(values.get(testVal[i]).equals(false)) {
+								methodVals.add(testVal[i]);
+								values.put(testVal[i], true);
 							}
+							
+						} 
+						methodVals.toArray(new Object[0]);
+						//Invoke method with array of values
+						Object result = m.invoke(s, methodVals);
+						//Log results
+						System.out.println(result);
 
-						
-        					if(trialVal > diag.expValL() && trialVal < diag.expValH()) {
-								success = true;
-          					} else {
-								success = false;			
-							}
-						} else if(returnType == boolean.class) {
-							boolean trialValB = (boolean) results.get(i);
-							if(trialValB == diag.expValBool()) {
+						//Test the values
+						if(returnType.equals(double.class) || returnType.equals(int.class)) {
+							Double r = (Double) result;
+							success = (r <= diagnosable.expValH() && r >= diagnosable.expValL());
+							report = Double.toString(r);
+						} else if(returnType.equals(float.class)) {
+							//Convert to allow comparing float result and double exp values
+						} else if(returnType.equals(boolean.class)) {
+							Boolean r = (Boolean) result;
+							if(diagnosable.expValBool() == r) {
 								success = true;
 							} else {
 								success = false;
 							}
+							report = Boolean.toString(r);
 						} else {
-
+							success = false;
+							System.out.println("Failed");
 						}
-										
-					} else {
 
 					}
+				}
+				if(success) {
+					System.out.println(name + "ran successfully");
+					System.out.println("The resultant value was " + report);
 				} else {
-
+					System.out.println(name + "failed with the value" + report);
 				}
 			}
-		} catch(Throwable e) {
-				//TODO: add proper logging
-				System.err.println(e);
+		} catch(IllegalAccessException e) {
+			//TODO: add proper logging
+			System.out.println(e);
+		} catch(InstantiationException e) {
+			System.out.println(e);
+		} catch(InvocationTargetException e) {
+			System.out.println(e);
 		}
 	}
 }
