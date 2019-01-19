@@ -2,13 +2,11 @@ package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.buttons.Button;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class InputHandler implements Subsystem {
+public class UserInput implements ISubsystem {
 
     public static float DEADZONE = 0.1f;
 
@@ -96,7 +94,9 @@ public class InputHandler implements Subsystem {
 
         @Override
         public double getRawAxis(int axis) {
-            return Math.max(super.getRawAxis(axis), DEADZONE);
+            if(super.getRawAxis(axis) < DEADZONE)
+                return 0;
+            return super.getRawAxis(axis) - DEADZONE;
         }
 
         /**

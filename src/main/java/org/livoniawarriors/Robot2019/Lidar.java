@@ -12,6 +12,8 @@ public class Lidar {
     private BufferedReader input;
     private BufferedWriter output;
 
+    private static final int MAX_BUFFER_READS = 100;
+
     public Lidar() {
         transform = new Transform();
         try {
@@ -26,11 +28,15 @@ public class Lidar {
     public void update() {
         try {
             String line;
+            int reads = 0;
             while((line = input.readLine()) != null) {
                 if(line.equals("transform"))
                     updateTransform(input);
                 else if(line.startsWith("error"))
                     System.err.println(line);
+                reads++;
+                if(reads >= MAX_BUFFER_READS)
+                    break;
             }
         } catch (IOException e) {
             e.printStackTrace();

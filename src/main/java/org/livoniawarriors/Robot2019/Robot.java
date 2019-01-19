@@ -1,29 +1,38 @@
 package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.*;
+import org.livoniawarriors.Robot2019.subsystems.*;
 
 import java.util.*;
 
 public class Robot extends TimedRobot {
 
-    private List<Subsystem> subsystems;
+    private List<ISubsystem> subsystems;
     private Map<String, IControlModule> modules;
     private IControlModule activeModule;
     public IControlModule defaultModule;
-    private IControlModule fallbackModule; // The one switched to if a module finishes. If null, it defaults to the first registered module
+    private IControlModule fallbackModule; // The one switched to if a module finishes. If null, it defaults to the last registered module
 
-    public SensorySubsystem sensorySubsystem;
-    public InputHandler inputHandler;
+    public PeripheralSubsystem peripheralSubsystem;
+    public UserInput userInput;
+    public Diagnostic diagnostic;
+    public DriveTrain driveTrain;
+    public FlameThrower flameThrower;
+    public GamePlay gamePlay;
 
     /**
      * Registers stuff and sets default module, optionally
      */
     private void register() {
-        registerSubsystem(sensorySubsystem = new SensorySubsystem());
-        registerSubsystem(inputHandler = new InputHandler());
+        registerSubsystem(peripheralSubsystem = new PeripheralSubsystem());
+        registerSubsystem(userInput = new UserInput());
+        registerSubsystem(diagnostic = new Diagnostic());
+        registerSubsystem(driveTrain = new DriveTrain());
+        registerSubsystem(flameThrower = new FlameThrower());
+        registerSubsystem(gamePlay = new GamePlay());
         registerControlModule(new TestAutonModule()); // This is the default one for now
         registerControlModule(new TestTeleopModule());
-        setDefaultModule("TestTeleopModule");
+        setDefaultModule(TestTeleopModule.class);
     }
 
     /**
@@ -40,7 +49,7 @@ public class Robot extends TimedRobot {
      * Registers the subsystem, doesn't do much at present
      * @param subsystem to register
      */
-    private void registerSubsystem(Subsystem subsystem) {
+    private void registerSubsystem(ISubsystem subsystem) {
         if(subsystems.contains(subsystem))
             System.err.println("Duplicate registration of subsystem: " + subsystem.getClass().getName()); // @Todo logging
         subsystems.add(subsystem);
@@ -50,10 +59,10 @@ public class Robot extends TimedRobot {
         defaultModule = module;
     }
 
-    private void setDefaultModule(String module) {
-        if(!modules.containsKey(module))
-            System.err.println("Module not registered: " + module); // @Todo logging
-        setDefaultModule(modules.get(module));
+    private void setDefaultModule(Class<? extends IControlModule> module) {
+        if(!modules.containsKey(module.getSimpleName()))
+            System.err.println("Module not registered: " + module.getSimpleName()); // @Todo logging
+        setDefaultModule(modules.get(module.getSimpleName()));
     }
 
     /**
@@ -87,7 +96,7 @@ public class Robot extends TimedRobot {
         }
 
         // Initialize things
-        subsystems.forEach(Subsystem::init);
+        subsystems.forEach(ISubsystem::init);
         modules.forEach((name, module) -> module.init());
     }
 
@@ -127,7 +136,7 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         // This statement is just an example of usage
-        if(inputHandler.getController(0).getButtonReleased(ControlMapping.testButton)) {
+        if(userInput.getController(0).getButtonReleased(ControlMapping.testButton)) {
 
         }
 
@@ -165,7 +174,7 @@ public class Robot extends TimedRobot {
     protected void finalize() {
         super.finalize();
         try {
-            for (Subsystem subsystem: subsystems)
+            for (ISubsystem subsystem: subsystems)
                 subsystem.dispose();
         } catch (Exception e) {
             e.printStackTrace();// @Todo logging

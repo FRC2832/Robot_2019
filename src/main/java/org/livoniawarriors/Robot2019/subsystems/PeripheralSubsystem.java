@@ -1,8 +1,11 @@
-package org.livoniawarriors.Robot2019;
+package org.livoniawarriors.Robot2019.subsystems;
+
+import org.livoniawarriors.Robot2019.Lidar;
+import org.livoniawarriors.Robot2019.ISubsystem;
 
 import java.io.IOException;
 
-public class SensorySubsystem implements Subsystem {
+public class PeripheralSubsystem implements ISubsystem {
 
     private Lidar lidar;
 

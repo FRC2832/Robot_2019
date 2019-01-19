@@ -1,6 +1,6 @@
 package org.livoniawarriors.Robot2019;
 
-public interface Subsystem {
+public interface ISubsystem {
     void init();
 
     void update(boolean enabled);
