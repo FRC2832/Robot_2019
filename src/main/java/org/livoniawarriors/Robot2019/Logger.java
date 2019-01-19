@@ -7,81 +7,62 @@
 
 package org.livoniawarriors.Robot2019;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.livoniawarriors.Robot2019.commands.Drive;
-import org.livoniawarriors.Robot2019.subsystems.DriveTrain;
-
-import edu.wpi.first.wpilibj.command.Command;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  * <b>ABANDON HOPE ALL YE WHO ENTER HERE</b><br><br>
  * Add your docs here.
  */
 public class Logger {
-    public static enum type {NUMBERS, STRINGS};
-    public Map<Class<?>, Boolean> whitelist = Map.of(Drive.class, true);
-    //                                     data
-    //                        command      type   name       data
-    public ArrayList<Map<Map<Class<?>, Map<type, String>>, String>> logData = new ArrayList<>();
-    public void log(String a, String name, type t, Class<?> command) {
-        if(whitelist.get(command)) {
-            logData.add(Map.of(Map.of(command, Map.of(t, name)), a));
+    public static enum tag {NONE};
+    private BufferedWriter writer;
+
+    public Logger() {
+        try {
+            this.writer = new BufferedWriter(new FileWriter(new File("logData.txt")));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    }
-
-    public interface ILogInterface {
-        public default void log(String a, String name, type t) {
-            Robot.logger.log(a, name, t, this.getClass());
-        }
-    }
-
-    public ArrayList<String> getData(type t) {
-        ArrayList<String> data = new ArrayList<>();
-
-        //isolate the type
-        for(Map<Map<Class<?>, Map<type, String>>, String> element : logData) 
-            for(Entry<Map<Class<?>, Map<type, String>>, String> element2 : element.entrySet()) 
-                for(Entry<Class<?>, Map<type, String>> element3 : element2.getKey().entrySet()) 
-                    for(Entry<type, String> element4 : element3.getValue().entrySet())
-                        //check is the type is the desired one
-                        if(element4.getKey().equals(t)) 
-                            //add the data to the output array
-                            data.add(element.get(element.get(Map.of(element2.getKey(), Map.of(element4.getKey(), element4.getValue())))));
-        return data;
+        
     }
     
-    public ArrayList<String> getData(String name) {
-        ArrayList<String> data = new ArrayList<>();
-
-        //isolate the name
-        for(Map<Map<Class<?>, Map<type, String>>, String> element : logData) 
-            for(Entry<Map<Class<?>, Map<type, String>>, String> element2 : element.entrySet()) 
-                for(Entry<Class<?>, Map<type, String>> element3 : element2.getKey().entrySet()) 
-                    for(Entry<type, String> element4 : element3.getValue().entrySet())
-                        //check if the name is the desired one
-                        if(element4.getValue().equals(name)) 
-                            //add the data to the output array
-                            data.add(element.get(element.get(Map.of(element2.getKey(), Map.of(element4.getKey(), element4.getValue())))));
-        return data;
+    public void log(String name, double data) {
+        try {
+            writer.write(formatData(name, tag.NONE, tag.NONE, data));
+            writer.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public ArrayList<String> getData(Class<?> command) {
-        ArrayList<String> data = new ArrayList<>();
-
-        //isolate the command class
-        for(Map<Map<Class<?>, Map<type, String>>, String> element : logData) 
-            for(Entry<Map<Class<?>, Map<type, String>>, String> element2 : element.entrySet()) 
-                for(Entry<Class<?>, Map<type, String>> element3 : element2.getKey().entrySet()) 
-                    //check if the command class is the desired one
-                    if(element3.getKey().equals(command))
-                        //get all the way down to the lowest layers (type & name)
-                        for(Entry<type, String> element4 : element3.getValue().entrySet())
-                            //add the data to the output array 
-                            data.add(element.get(element.get(Map.of(element2.getKey(), Map.of(element4.getKey(), element4.getValue())))));
-        return data;
+    public void log(String name, tag t1, double data) {
+        try {
+            writer.write(formatData(name, t1, tag.NONE, data));
+            writer.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
+    public void log(String name, tag t1, tag t2, double data) {
+        try {
+            writer.write(formatData(name, t1, t2, data));
+            writer.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String formatData(String name, tag t1, tag t2, double data) {
+        String output = "Name:";
+        output += name;
+        output += t1.equals(tag.NONE) ? "" : "; Tags:" + t1;
+        output += t2.equals(tag.NONE) ? "" : ", " + t2;
+        output += "; Value: " + Double.toString(data);
+        return output;
+    }
+
  }
