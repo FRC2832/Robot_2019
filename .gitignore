@@ -161,6 +161,7 @@ bin/
 
 # intellij
 .idea/
+*.iml
 
 # python venv
 37venv
