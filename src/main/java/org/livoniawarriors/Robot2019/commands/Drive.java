@@ -15,17 +15,18 @@ package org.livoniawarriors.Robot2019.commands;
 /*----------------------------------------------------------------------------*/
 
 import edu.wpi.first.wpilibj.command.Command;
-import org.livoniawarriors.Robot2019.Logger;
+
+import org.livoniawarriors.Robot2019.logging.*;
 import org.livoniawarriors.Robot2019.Robot;
 
 /**
  * An example command.  You can replace me with your own command.
  */
-public class Drive extends Command implements Logger.ILogInterface {
+public class Drive extends Command {
   public Drive() {
     // Use requires() here to declare subsystem dependencies
     requires(Robot.driveTrain);
-    this.log("test");
+    Robot.logger.log("test", 1234, SeverityLevel.FOUR, Tag.EXAMPLE_COMMAND);
   }
 
   // Called just before this Command runs the first time

@@ -5,19 +5,19 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package org.livoniawarriors.Robot2019;
+package org.livoniawarriors.Robot2019.logging;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * <b>ABANDON HOPE ALL YE WHO ENTER HERE</b><br><br>
  * Add your docs here.
  */
 public class Logger {
-    public static enum tag {NONE};
     private BufferedWriter writer;
 
     public Logger() {
@@ -29,38 +29,25 @@ public class Logger {
         
     }
     
-    public void log(String name, double data) {
+    public void log(String name, double data, SeverityLevel s, Tag...t) {
         try {
-            writer.write(formatData(name, tag.NONE, tag.NONE, data));
+            writer.write(formatData(name, data, s, t));
             writer.newLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void log(String name, tag t1, double data) {
-        try {
-            writer.write(formatData(name, t1, tag.NONE, data));
-            writer.newLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void log(String name, tag t1, tag t2, double data) {
-        try {
-            writer.write(formatData(name, t1, t2, data));
-            writer.newLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String formatData(String name, tag t1, tag t2, double data) {
+    public String formatData(String name, double data, SeverityLevel s, Tag...t) {
         String output = "Name:";
         output += name;
-        output += t1.equals(tag.NONE) ? "" : "; Tags:" + t1;
-        output += t2.equals(tag.NONE) ? "" : ", " + t2;
+        output += "; Severity: " + s.name();
+        if(!t[0].equals(null)) {
+            output += "; Tags: " + t[0];
+            for(Tag t0 : Arrays.asList(t).subList(1, t.length)) {
+                output += ", " + t0.name();
+            }
+        }
         output += "; Value: " + Double.toString(data);
         return output;
     }

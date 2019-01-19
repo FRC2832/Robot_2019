@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import org.livoniawarriors.Robot2019.commands.*;
 import org.livoniawarriors.Robot2019.subsystems.*;
+import org.livoniawarriors.Robot2019.logging.*;
 
 public class Robot extends TimedRobot {
     public static Logger logger;
@@ -11,7 +12,6 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         logger = new Logger();
-        logger.log("yeet", 100);
     }
 
     @Override
