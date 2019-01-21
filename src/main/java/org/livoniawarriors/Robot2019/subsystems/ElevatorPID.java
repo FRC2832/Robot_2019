@@ -11,37 +11,68 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import org.livoniawarriors.Robot2019.commands.MoveElevatorManually;
+import edu.wpi.first.wpilibj.command.PIDSubsystem;
 
-import edu.wpi.first.wpilibj.command.Subsystem;
-
-public class Elevator extends Subsystem {
+/**
+ * Elevator subsystem that includes a PID controller to control the elevator
+ */
+public class ElevatorPID extends PIDSubsystem {
 
     private final static int ELEVATOR_MOTOR = 5; //TODO: set to real number
-
     CANSparkMax elevatorMotor; 
 
-    public Elevator() {
+    public static final double TOLERANCE = 1;
+
+    public ElevatorPID() {
+        super("ElevatorPID", 1, 0, 0.5);  //PID Values
         elevatorMotor = new CANSparkMax(ELEVATOR_MOTOR, MotorType.kBrushless);
         elevatorMotor.setIdleMode(IdleMode.kBrake);
+        
+        setAbsoluteTolerance(TOLERANCE);
+        setOutputRange(-1, 1);
+        setInputRange(Double.MIN_VALUE, Double.MAX_VALUE);
+        setSetpoint(ElevatorHeights.LowHatch.getHeight());
+
+        enable();
+
     }
+
+    /**
+     * Moves the elevator to the desired height
+     * @param height use the ElevatorHeights enum to specify the height the elevator needs to go to
+     */
+
+    public void setElevatorHeight(ElevatorHeights height) {
+        setSetpoint(height.getHeight());
+
+    }
+
+    /**
+     * @return the height of the elevator in inches
+     */
 
     public double getElevatorHeight() {
         return elevatorMotor.getEncoder().getPosition();
-        //TODO: add math to convert from encoders to height of the elevator
-    }
-
-    public void setElevatorMotor(double speed) {
-        elevatorMotor.set(speed);
+        //TODO: add math to convert to inch position of elevator
     }
 
     @Override
     public void initDefaultCommand() {
-        setDefaultCommand(new MoveElevatorManually());
+        // setDefaultCommand(new Command());
     }
 
-    public enum elevatorHeights {
-    
+    @Override
+    protected double returnPIDInput() {
+        return getElevatorHeight();
+    }
+
+    @Override
+    protected void usePIDOutput(double output) {
+        elevatorMotor.set(output);
+    }
+
+    public enum ElevatorHeights {
+        
         LowHatch(0), LowPort(8.5),
         MidHatch(28), MidPort(36.5),
         TopHatch(56), TopPort(64.5),
@@ -49,7 +80,7 @@ public class Elevator extends Subsystem {
 
         private final double height;
 
-        elevatorHeights(double height) {
+        ElevatorHeights(double height) {
             this.height = height;
         }
 
