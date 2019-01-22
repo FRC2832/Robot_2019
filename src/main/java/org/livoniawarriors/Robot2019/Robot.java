@@ -1,26 +1,115 @@
 package org.livoniawarriors.Robot2019;
 
-import org.livoniawarriors.Robot2019.subsystems.ElevatorPID;
-
 import edu.wpi.first.wpilibj.*;
+import org.livoniawarriors.Robot2019.subsystems.*;
+import org.livoniawarriors.Robot2019.subsystems.gameplay.*;
+
+import java.util.*;
 
 public class Robot extends TimedRobot {
 
-    public static ElevatorPID elevator;
-    public static XboxController xboxController;
+    private List<ISubsystem> subsystems;
+    private Map<String, IControlModule> modules;
+    private IControlModule activeModule;
+    public IControlModule defaultModule;
+    private IControlModule fallbackModule; // The one switched to if a module finishes. If null, it defaults to the last registered module
+
+    public PeripheralSubsystem peripheralSubsystem;
+    public UserInput userInput;
+    public Diagnostic diagnostic;
+    public DriveTrain driveTrain;
+    public FlameThrower flameThrower;
+    public GamePlay gamePlay;
+
+    /**
+     * Registers stuff and sets default module, optionally
+     */
+    private void register() {
+        registerSubsystem(peripheralSubsystem = new PeripheralSubsystem());
+        registerSubsystem(userInput = new UserInput());
+        registerSubsystem(diagnostic = new Diagnostic());
+        registerSubsystem(driveTrain = new DriveTrain());
+        registerSubsystem(flameThrower = new FlameThrower());
+        registerSubsystem(gamePlay = new GamePlay());
+        registerControlModule(new TestAutonModule()); // This is the default one for now
+        registerControlModule(new TestTeleopModule());
+        setDefaultModule(TestTeleopModule.class);
+    }
+
+    /**
+     * Registers a control module
+     * @param module to register
+     */
+    private void registerControlModule(IControlModule module) {
+        if(modules.containsKey(module.getClass().getSimpleName()))
+            System.err.println("Duplicate registration of module: " + module.getClass().getName());// @Todo logging
+        modules.put(module.getClass().getSimpleName(), module);
+    }
+
+    /**
+     * Registers the subsystem, doesn't do much at present
+     * @param subsystem to register
+     */
+    private void registerSubsystem(ISubsystem subsystem) {
+        if(subsystems.contains(subsystem))
+            System.err.println("Duplicate registration of subsystem: " + subsystem.getClass().getName()); // @Todo logging
+        subsystems.add(subsystem);
+    }
+
+    private void setDefaultModule(IControlModule module) {
+        defaultModule = module;
+    }
+
+    private void setDefaultModule(Class<? extends IControlModule> module) {
+        if(!modules.containsKey(module.getSimpleName()))
+            System.err.println("Module not registered: " + module.getSimpleName()); // @Todo logging
+        setDefaultModule(modules.get(module.getSimpleName()));
+    }
+
+    /**
+     * Switches the current module
+     * @param name of the module's class
+     */
+    private void setActiveModule(String name, IControlModule fallbackModule) {
+        activeModule.stop();
+        this.fallbackModule = fallbackModule;
+        activeModule = modules.get(name);
+        activeModule.start();
+    }
+
+    /**
+     * Switches the current module
+     * @param name of the module's class
+     */
+    private void setActiveModule(String name) {
+        setActiveModule(name, activeModule);
+    }
 
     @Override
     public void robotInit() {
-        elevator = new ElevatorPID();
-        xboxController = new XboxController(0);
+        subsystems = new ArrayList<>();
+        modules = new LinkedHashMap<>();
+
+        register();
+
+        if(defaultModule == null) { // Set default to first registered if it isn't set
+            modules.forEach((name, module) -> setDefaultModule(module));
+        }
+
+        // Initialize things
+        subsystems.forEach(ISubsystem::init);
+        modules.forEach((name, module) -> module.init());
     }
 
     @Override
     public void robotPeriodic() {
+        subsystems.forEach(subsystem -> subsystem.update(isEnabled()));
     }
 
     @Override
     public void disabledInit() {
+        activeModule.stop();
+        activeModule = null;
     }
 
     @Override
@@ -37,21 +126,36 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
+        if(activeModule != null)
+            activeModule.start();
+        else {
+            activeModule = defaultModule;
+            defaultModule.start();
+        }
     }
 
     @Override
     public void teleopPeriodic() {
+        // This statement is just an example of usage
+        if(userInput.getController(0).getButtonReleased(ControlMapping.testButton)) {
 
-        if (xboxController.getAButtonPressed()) {
-            elevator.setElevatorHeight(ElevatorPID.ElevatorHeights.LowHatch);
         }
-        if (xboxController.getXButtonPressed()) {
-            elevator.setElevatorHeight(ElevatorPID.ElevatorHeights.MidHatch);
-        }
-        if (xboxController.getYButtonPressed()) {
-            elevator.setElevatorHeight(ElevatorPID.ElevatorHeights.TopHatch);
-        } 
 
+        if(activeModule == null) {
+            activeModule = defaultModule;
+            activeModule.init();
+        }
+
+        activeModule.update();
+
+        if(activeModule.isFinished()) {
+            activeModule.stop();
+            if(fallbackModule != null)
+                activeModule = fallbackModule;
+            else
+                activeModule = defaultModule;
+            activeModule.start();
+        }
     }
 
     @Override
@@ -62,5 +166,19 @@ public class Robot extends TimedRobot {
     @Override
     public void testPeriodic() {
 
+    }
+
+    /**
+     * Disposes stuff. We don't care about errors here. Gets rid of needless catches for streams and such.
+     */
+    @Override
+    protected void finalize() {
+        super.finalize();
+        try {
+            for (ISubsystem subsystem: subsystems)
+                subsystem.dispose();
+        } catch (Exception e) {
+            e.printStackTrace();// @Todo logging
+        }
     }
 }
