@@ -61,8 +61,10 @@ public class Elevator implements PIDSource, PIDOutput {
      * @return the height of the elevator in inches
      */
     public double getElevatorHeight() {
-        return elevatorMotor.getEncoder().getPosition();
-        //TODO: add math to convert to inch position of elevator
+        return elevatorMotor.getEncoder().getPosition() * (2 * Math.PI) / 7;
+        //Pulley has a 1 inch radius and 2 pi circumfrence
+        //The gearbox has a ratio of 7:1
+        //Therefore to go from encoders to elevator height we multiply by 2pi and divide by 7
     }
 
     public void update(boolean isEnabled) {
