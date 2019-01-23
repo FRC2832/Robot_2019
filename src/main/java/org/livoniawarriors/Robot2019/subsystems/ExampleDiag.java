@@ -23,8 +23,6 @@ public class ExampleDiag extends Subsystem {
   // A method that gives some value
   @Diagnosable(expValH = 10, expValL = -10)
   public double giveValue(double value) {
-//    double expValHigh = giveValue(value + 10); // Figure out the upper end of expected values
-//    double expValLow  = giveValue(value - 10); // Figure out the lower end of expected values
 
     return value * value;
   }
