@@ -1,0 +1,6 @@
+sudo: false
+language: java
+install: true
+script: ./gradlew build
+after_success: ./gradlew bintrayUpload
+jdk: oraclejdk9
