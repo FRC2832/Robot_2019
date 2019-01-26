@@ -11,14 +11,14 @@ public class Diagnostic implements ISubsystem {
     @Override
     public void init() {
         diag = new DiagnosticHandler();
-        /* Elevator */
-        diag.diagnoseMethod(Elevator.class, "getElevatorHeight");
-        diag.diagnoseMethod(Elevator.class, "pidGet");
     
     }
 
     @Override
     public void update(boolean enabled) {
+        /* Elevator */
+        diag.diagnoseMethod(Elevator.class, "getElevatorHeight");
+        diag.diagnoseMethod(Elevator.class, "pidGet");
 
 
     }
