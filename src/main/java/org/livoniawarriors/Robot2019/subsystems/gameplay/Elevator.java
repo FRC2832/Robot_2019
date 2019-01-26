@@ -11,6 +11,8 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import org.livoniawarriors.Robot2019.subsystems.diagnostic.Diagnosable;
+
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
@@ -60,6 +62,7 @@ public class Elevator implements PIDSource, PIDOutput {
     /**
      * @return the height of the elevator in inches
      */
+    @Diagnosable(exp=50, range=3) //TODO: set correct expected value
     public double getElevatorHeight() {
         return elevatorMotor.getEncoder().getPosition() * (2 * Math.PI) / 7;
         //Pulley has a 1 inch radius and 2 pi circumfrence
@@ -95,6 +98,7 @@ public class Elevator implements PIDSource, PIDOutput {
 		return sourceType;
 	}
 
+    @Diagnosable(exp=50, range=3) //TODO: Set correct values for diagnostic
 	@Override
 	public double pidGet() {
 		return getElevatorHeight();

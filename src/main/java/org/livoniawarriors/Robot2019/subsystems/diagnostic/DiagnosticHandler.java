@@ -20,7 +20,7 @@ public class DiagnosticHandler {
 	 * @param name The name of the method to diagnose
 	 * @param values The values to be tested
 	 */
-	private void diagnoseMethod(Class<?> subsystem, String name, Object... values) {
+	public void diagnoseMethod(Class<?> subsystem, String name, Object... values) {
 		try {
 			boolean succeeded = false;
 			Object s = subsystem.newInstance();
@@ -43,23 +43,22 @@ public class DiagnosticHandler {
 							System.out.println("Result: " + result.toString()); //Check result
 							double range = diagnosable.range();
 							double exp = diagnosable.exp();
-							boolean expBool = diagnosable.expBoolean();
-							if(returnType.equals(boolean.class)) {
-								succeeded = ((boolean)result == expBool);
-							} else if(returnType.equals(double.class) || returnType.equals(float.class)
+							if(returnType.equals(double.class) || returnType.equals(float.class)
 							|| returnType.equals(int.class)) {
 								double dResult = (double) result;
-								succeeded = (Math.abs(exp - dResult) < Math.abs(exp * range));
+								if(diagnosable.nonNegative() && dResult < 0) {
+									succeeded = false;
+								} else {
+									succeeded = ((Math.abs(exp - dResult) < Math.abs(exp + range)) && 
+								  	  (Math.abs(exp - dResult) > Math.abs(exp - range)));
+								}
 							} else {
 								System.out.println("Could not diagnose: unknown return type.");
 							}
 						} catch(InvocationTargetException e) {
-							System.out.println("An error had occured:");
-							System.out.println(e);
-							Throwable cause = e.getCause();
-							System.out.println(cause.getMessage());
-							System.out.println("Dave, this conversation can serve no purpose anymore.");
-
+							System.err.println("An error had occured:");
+							System.err.println(e.getMessage());
+							System.err.println("Dave, this conversation can serve no purpose anymore.");
 						}
 					} else {
 						System.out.println("Annotation is not present.");
@@ -76,11 +75,9 @@ public class DiagnosticHandler {
 			}
 		//TODO: add better error handling
 		} catch(IllegalAccessException | InstantiationException e) {
-			System.out.println("An error had occured:");
-			System.out.println(e);
-			Throwable cause = e.getCause();
-			System.out.println(cause.getMessage());
-			System.out.println("Dave, this conversation can serve no purpose anymore.");
+			System.err.println("An error had occured:");
+			System.err.println(e.getMessage());
+			System.err.println("Dave, this conversation can serve no purpose anymore.");
 		}
 	}
 /*	public void DiagnposeSubsystem(Class<?> subsystem, ) {

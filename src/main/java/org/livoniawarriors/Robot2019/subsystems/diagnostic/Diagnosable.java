@@ -18,5 +18,5 @@ public @interface Diagnosable {
 
     double range() default 1;
     double exp() default 0;
-    boolean expBoolean() default false;
+    boolean nonNegative() default false;
 } 
