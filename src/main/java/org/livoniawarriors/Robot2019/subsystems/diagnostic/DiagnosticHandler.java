@@ -1,7 +1,6 @@
 package org.livoniawarriors.Robot2019.subsystems.diagnostic;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import org.livoniawarriors.Robot2019.subsystems.diagnostic.Diagnosable;
@@ -80,25 +79,4 @@ public class DiagnosticHandler {
 			System.err.println("Dave, this conversation can serve no purpose anymore.");
 		}
 	}
-/*	public void DiagnposeSubsystem(Class<?> subsystem, ) {
-//		try {
-			Object[] value;
-//			Object s = subsystem.newInstance();
-			Method allMethods[] = subsystem.getDeclaredMethods();
-			for(Method m : allMethods) {
-				String name = m.getName();
-				if(test.containsKey(name)) {
-					value = test.get(name);
-					diagnoseMethod(subsystem, name, );
-				} else {
-					continue;
-				}
-								
-			}
-
-//		} catch(InstantiationException | IllegalAccessException e) {
-
-//		}
-	}
-*/
 }
