@@ -6,4 +6,4 @@ before_install:
 - wget -P "lib/" https://github.com/FRC2832/Robot_2019/raw/travis.ci/SparkMax-java-1.0.26.jar
 script: ./gradlew build
 after_success: ./gradlew bintrayUpload
-jdk: oraclejdk9
+jdk: oraclejdk11
