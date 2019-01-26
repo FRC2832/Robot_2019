@@ -2,7 +2,7 @@ plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2019.1.1"
 }
-sourceCompatibility = 1.8
+sourceCompatibility = 11.0
 
 def ROBOT_MAIN_CLASS = "org.livoniawarriors.Robot2019.Main"
 
