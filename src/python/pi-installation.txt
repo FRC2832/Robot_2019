@@ -1,0 +1,3 @@
+'sudo apt-get install python3-pip'
+'sudo apt-get install python3-dev'
+copy breezyslam to pi and cd to directory, run 'sudo python3 setup.py install'

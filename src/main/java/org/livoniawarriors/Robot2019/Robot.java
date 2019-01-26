@@ -1,16 +1,23 @@
 package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.livoniawarriors.Robot2019.subsystems.*;
 
+import java.io.File;
 import java.util.*;
 
 public class Robot extends TimedRobot {
 
+    private static Robot instance;
+
     private List<ISubsystem> subsystems;
     private Map<String, IControlModule> modules;
     private IControlModule activeModule;
-    public IControlModule defaultModule;
+    private IControlModule defaultModule;
     private IControlModule fallbackModule; // The one switched to if a module finishes. If null, it defaults to the last registered module
 
     public PeripheralSubsystem peripheralSubsystem;
@@ -19,6 +26,18 @@ public class Robot extends TimedRobot {
     public DriveTrain driveTrain;
     public FlameThrower flameThrower;
     public GamePlay gamePlay;
+
+    final static Logger logger = LogManager.getLogger(Robot.class);
+
+    public static Robot getInstance() {
+        return instance;
+    }
+
+    public Robot() {
+        instance = this;
+        LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
+        context.setConfigLocation(Filesystem.getDeployDirectory().toURI());
+    }
 
     /**
      * Registers stuff and sets default module, optionally
@@ -33,6 +52,7 @@ public class Robot extends TimedRobot {
         registerControlModule(new TestAutonModule()); // This is the default one for now
         registerControlModule(new TestTeleopModule());
         setDefaultModule(TestTeleopModule.class);
+        logger.log(Level.ERROR, "Hello");
     }
 
     /**
@@ -91,7 +111,7 @@ public class Robot extends TimedRobot {
 
         register();
 
-        if(defaultModule == null) { // Set default to first registered if it isn't set
+        if(defaultModule == null) { // Set default to last registered if it isn't set
             modules.forEach((name, module) -> setDefaultModule(module));
         }
 
@@ -107,8 +127,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledInit() {
-        activeModule.stop();
-        activeModule = null;
+        if(activeModule != null) {
+            activeModule.stop();
+            activeModule = null;
+        }
     }
 
     @Override
@@ -137,12 +159,12 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
         // This statement is just an example of usage
         if(userInput.getController(0).getButtonReleased(ControlMapping.testButton)) {
-
+            
         }
 
         if(activeModule == null) {
             activeModule = defaultModule;
-            activeModule.init();
+            activeModule.start();
         }
 
         activeModule.update();

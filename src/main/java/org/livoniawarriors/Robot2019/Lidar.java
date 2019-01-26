@@ -7,15 +7,20 @@ import java.util.stream.Collectors;
 
 public class Lidar {
 
+    private static final int MAX_READ = 100;
+    
     private Socket client;
     private Transform transform;
     private BufferedReader input;
     private BufferedWriter output;
 
-    private static final int MAX_BUFFER_READS = 100;
-
     public Lidar() {
         transform = new Transform();
+    }
+
+    private boolean tryConnect() {
+        if(client != null)
+            return true;
         try {
             client = new Socket("169.254.25.245", 1234); // try http://frcvision.local instead of static
             input = new BufferedReader(new InputStreamReader(client.getInputStream()));
@@ -23,33 +28,38 @@ public class Lidar {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return client != null;
     }
 
     public void update() {
-        try {
-            String line;
-            int reads = 0;
-            while((line = input.readLine()) != null) {
-                if(line.equals("transform"))
-                    updateTransform(input);
-                else if(line.startsWith("error"))
-                    System.err.println(line);
-                reads++;
-                if(reads >= MAX_BUFFER_READS)
-                    break;
+        if(false && tryConnect()) {
+            try {
+                String line;
+                int read = 0;
+                while ((line = input.readLine()) != null) {
+                    if (line.equals("transform"))
+                        updateTransform(input);
+                    else if (line.startsWith("error"))
+                        System.err.println(line);
+                    read++;
+                    if (read >= MAX_READ)
+                        break;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
     private void sendMessage(String message) {
-        try {
-            output.write(message);
-            output.newLine();
-            output.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(false && tryConnect()) {
+            try {
+                output.write(message);
+                output.newLine();
+                output.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
