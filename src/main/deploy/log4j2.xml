@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+    <Properties>
+        <Property name="basePath">/home/lvuser/logging</Property>
+    </Properties>
+
+    <Appenders>
+        <RollingFile name="roll-by-time"
+                     fileName="${basePath}/log.log"
+                     filePattern="${basePath}/log.%d{MM-dd-yyyy-HH-mm}.log.gz"
+                     ignoreExceptions="false">
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %p %m%n</Pattern>
+            </PatternLayout>
+            <TimeBasedTriggeringPolicy/>
+        </RollingFile>
+
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.livoniawarriors.Robot2019" level="debug" additivity="true">
+            <appender-ref ref="fileLogger" level="debug"/>
+        </Logger>
+        <Root level="debug" additivity="false">
+            <appender-ref ref="console"/>
+        </Root>
+    </Loggers>
+</Configuration>

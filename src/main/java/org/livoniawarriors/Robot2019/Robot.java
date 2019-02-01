@@ -1,5 +1,6 @@
 package org.livoniawarriors.Robot2019;
 
+import edu.wpi.first.hal.can.CANJNI;
 import edu.wpi.first.wpilibj.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -9,6 +10,8 @@ import org.livoniawarriors.Robot2019.subsystems.*;
 import org.livoniawarriors.Robot2019.subsystems.gameplay.*;
 
 import java.io.File;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Robot extends TimedRobot {
@@ -28,7 +31,7 @@ public class Robot extends TimedRobot {
     public FlameThrower flameThrower;
     public GamePlay gamePlay;
 
-    final static Logger logger = LogManager.getLogger(Robot.class);
+    final Logger logger;
 
     public static Robot getInstance() {
         return instance;
@@ -36,8 +39,14 @@ public class Robot extends TimedRobot {
 
     public Robot() {
         instance = this;
-        LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
-        context.setConfigLocation(Filesystem.getDeployDirectory().toURI());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyy-MM-dd-HH-mm-ss");
+        System.setProperty("current.date", dateFormat.format(new Date()));
+        System.setProperty("log4j.configurationFile", Paths.get(Filesystem.getDeployDirectory().toString(), "log4j2.xml").toString());
+        //LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
+        //context.setConfigLocation(Paths.get(Filesystem.getDeployDirectory().toString(), "log4j2.xml").toUri());
+        //logger = context.getLogger(Robot.class.getSimpleName());
+        //logger = LogManager.getLogger(Robot.class);
+        logger = LogManager.getLogger(Robot.class);
     }
 
     /**
