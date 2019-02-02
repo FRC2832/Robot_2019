@@ -1,15 +1,16 @@
 package org.livoniawarriors.Robot2019;
 
+import edu.wpi.first.wpilibj.Ultrasonic;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Encoder;
+
 public class PeripheralsModule
 {   
-    private DigitalInput limSwitch;
     private Ultrasonic proxSensor;
     
     public void init()
     {
-        limSwitch = new DigitalInput(-1); //TODO: change port
         proxSensor = new Ultrasonic(-1,-1); //TODO: change output port and input port
-
         proxSensor.setEnabled(false);
         proxSensor.setAutomaticMode(false);
     }
@@ -24,14 +25,9 @@ public class PeripheralsModule
         return e.getRaw() * 2*Math.PI*radius;
     }
 
-    public boolean limSwitchStatus()
-    {
-        return limSwitch.get();
-    }
-
     public double proxSensorDistance()
     {
-        setEnabled(true);
+        proxSensor.setEnabled(true);
         proxSensor.ping();
         return proxSensor.getRangeMM();
     }
