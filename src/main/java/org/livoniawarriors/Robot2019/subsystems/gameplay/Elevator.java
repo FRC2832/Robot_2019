@@ -55,8 +55,26 @@ public class Elevator implements PIDSource, PIDOutput {
     public void setElevatorHeight(ElevatorHeights height) {
         pidController.setSetpoint(height.getHeight());
 
+        pidController.setOutputRange(-MAX_MOTOR_SPEED, MAX_MOTOR_SPEED);
+        pidController.setInputRange(Double.MIN_VALUE, Double.MAX_VALUE);
+        pidController.setSetpoint(ElevatorHeights.LowHatch.getHeight());
+        pidController.setContinuous(true);
+
     }
 
+    /**
+     * Moves the elevator to the desired height
+    }
+
+        pidController.setOutputRange(-MAX_MOTOR_SPEED, MAX_MOTOR_SPEED);
+        pidController.setInputRange(Double.MIN_VALUE, Double.MAX_VALUE);
+        pidController.setSetpoint(ElevatorHeights.LowHatch.getHeight());
+        pidController.setContinuous(true);
+
+}
+
+    /**
+     * Moves the elevator to the desired height
     /**
      * @return the height of the elevator in inches
      */

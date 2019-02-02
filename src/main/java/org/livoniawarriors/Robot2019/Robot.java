@@ -7,11 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.livoniawarriors.Robot2019.subsystems.*;
-<<<<<<< HEAD
-import org.livoniawarriors.Robot2019.subsystems.Logging;
 import org.livoniawarriors.Robot2019.subsystems.flamethrower.FlameThrower;
-=======
->>>>>>> parent of 9db4af0... Fixed elevator and added todos and let's say a few more things to make this a commit message that is long enough for everyone to stop complaining about the simplicity of my commit messages.
 import org.livoniawarriors.Robot2019.subsystems.gameplay.*;
 import org.livoniawarriors.Robot2019.subsystems.peripherals.PeripheralSubsystem;
 
