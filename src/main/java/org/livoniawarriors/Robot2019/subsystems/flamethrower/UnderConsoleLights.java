@@ -1,6 +1,5 @@
-package org.livoniawarriors.Robot2019;
+package org.livoniawarriors.Robot2019.subsystems.flamethrower;
 
-import edu.wpi.first.wpilibj.Timer;
 import java.util.ArrayList;
 import java.lang.Math;
 

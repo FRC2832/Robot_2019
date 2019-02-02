@@ -1,4 +1,4 @@
-package org.livoniawarriors.Robot2019.subsystems;
+package org.livoniawarriors.Robot2019.subsystems.flamethrower;
 
 import org.livoniawarriors.Robot2019.ISubsystem;
 

@@ -1,4 +1,4 @@
-package org.livoniawarriors.Robot2019;
+package org.livoniawarriors.Robot2019.subsystems.flamethrower;
 
 public class Color {
     private short red;

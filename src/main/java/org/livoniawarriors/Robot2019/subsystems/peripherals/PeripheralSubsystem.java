@@ -1,6 +1,5 @@
-package org.livoniawarriors.Robot2019.subsystems;
+package org.livoniawarriors.Robot2019.subsystems.peripherals;
 
-import org.livoniawarriors.Robot2019.Lidar;
 import org.livoniawarriors.Robot2019.ISubsystem;
 
 import java.io.IOException;

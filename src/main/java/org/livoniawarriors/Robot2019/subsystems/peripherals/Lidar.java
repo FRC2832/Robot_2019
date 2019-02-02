@@ -1,4 +1,4 @@
-package org.livoniawarriors.Robot2019;
+package org.livoniawarriors.Robot2019.subsystems.peripherals;
 
 import java.io.*;
 import java.net.ServerSocket;

@@ -6,7 +6,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.livoniawarriors.Robot2019.subsystems.*;
 import org.livoniawarriors.Robot2019.subsystems.Logging;
+import org.livoniawarriors.Robot2019.subsystems.flamethrower.FlameThrower;
 import org.livoniawarriors.Robot2019.subsystems.gameplay.*;
+import org.livoniawarriors.Robot2019.subsystems.peripherals.PeripheralSubsystem;
 
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
