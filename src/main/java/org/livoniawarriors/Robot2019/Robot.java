@@ -1,20 +1,25 @@
 package org.livoniawarriors.Robot2019;
 
+import edu.wpi.first.hal.can.CANJNI;
 import edu.wpi.first.wpilibj.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.livoniawarriors.Robot2019.subsystems.*;
+<<<<<<< HEAD
 import org.livoniawarriors.Robot2019.subsystems.Logging;
 import org.livoniawarriors.Robot2019.subsystems.flamethrower.FlameThrower;
+=======
+>>>>>>> parent of 9db4af0... Fixed elevator and added todos and let's say a few more things to make this a commit message that is long enough for everyone to stop complaining about the simplicity of my commit messages.
 import org.livoniawarriors.Robot2019.subsystems.gameplay.*;
 import org.livoniawarriors.Robot2019.subsystems.peripherals.PeripheralSubsystem;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-//Todo: Make this a super class
 public class Robot extends TimedRobot {
 
     private static Robot instance;
@@ -27,13 +32,12 @@ public class Robot extends TimedRobot {
 
     public PeripheralSubsystem peripheralSubsystem;
     public UserInput userInput;
-    public Logging logging;
+    public Diagnostic diagnostic;
     public DriveTrain driveTrain;
     public FlameThrower flameThrower;
     public GamePlay gamePlay;
 
     final Logger logger;
-    Notifier diagnosticNotifier;
 
     public static Robot getInstance() {
         return instance;
@@ -57,7 +61,7 @@ public class Robot extends TimedRobot {
     private void register() {
         registerSubsystem(peripheralSubsystem = new PeripheralSubsystem());
         registerSubsystem(userInput = new UserInput());
-        registerSubsystem(logging = new Logging());
+        registerSubsystem(diagnostic = new Diagnostic());
         registerSubsystem(driveTrain = new DriveTrain());
         registerSubsystem(flameThrower = new FlameThrower());
         registerSubsystem(gamePlay = new GamePlay());
@@ -65,13 +69,6 @@ public class Robot extends TimedRobot {
         registerControlModule(new TestTeleopModule());
         setDefaultModule(TestTeleopModule.class);
         logger.log(Level.ERROR, "Hello");
-    }
-
-    private void diagnose() {
-        for (var subsystem: subsystems) {
-            if (subsystem instanceof IDiagnosible)
-                ((IDiagnosible) subsystem).diagnose();
-        }
     }
 
     /**
@@ -137,7 +134,6 @@ public class Robot extends TimedRobot {
         // Initialize things
         subsystems.forEach(ISubsystem::init);
         modules.forEach((name, module) -> module.init());
-        diagnosticNotifier = new Notifier(this::diagnose);
     }
 
     @Override
