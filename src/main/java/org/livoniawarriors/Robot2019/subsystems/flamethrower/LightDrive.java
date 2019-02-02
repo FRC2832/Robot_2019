@@ -1,4 +1,4 @@
-package org.livoniawarriors.Robot2019;
+package org.livoniawarriors.Robot2019.subsystems.flamethrower;
 
 import edu.wpi.first.hal.can.CANJNI;
 import edu.wpi.first.hal.can.CANMessageNotFoundException;

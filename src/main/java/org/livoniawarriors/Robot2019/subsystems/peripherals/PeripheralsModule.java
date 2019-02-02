@@ -1,4 +1,4 @@
-package org.livoniawarriors.Robot2019;
+package org.livoniawarriors.Robot2019.subsystems.peripherals;
 
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.DigitalInput;

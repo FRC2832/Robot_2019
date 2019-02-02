@@ -94,9 +94,9 @@ public class UserInput implements ISubsystem {
 
         @Override
         public double getRawAxis(int axis) {
-            if(super.getRawAxis(axis) < DEADZONE)
+            if(Math.abs(super.getRawAxis(axis)) < DEADZONE)
                 return 0;
-            return super.getRawAxis(axis) - DEADZONE;
+            return (Math.abs(super.getRawAxis(axis)) - DEADZONE) * Math.signum(super.getRawAxis(axis));
         }
 
         /**
