@@ -15,11 +15,12 @@ import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
+import org.livoniawarriors.Robot2019.IDiagnosible;
 
 /**
  * Elevator not-subsystem that includes a PID controller to control the elevator
  */
-public class Elevator implements PIDSource, PIDOutput {
+public class Elevator implements PIDSource, PIDOutput, IDiagnosible {
 
     private final static int ELEVATOR_MOTOR = 5; //TODO: set to real number
     CANSparkMax elevatorMotor; 
@@ -35,6 +36,8 @@ public class Elevator implements PIDSource, PIDOutput {
 
 
     public Elevator() {
+        //Todo: Zero encoder at init
+
         elevatorMotor = new CANSparkMax(ELEVATOR_MOTOR, MotorType.kBrushless);
         elevatorMotor.setIdleMode(IdleMode.kBrake);
 
@@ -57,6 +60,11 @@ public class Elevator implements PIDSource, PIDOutput {
 
     }
 
+    @Override
+    public void diagnose() {
+
+    }
+
     /**
      * @return the height of the elevator in inches
      */
@@ -69,11 +77,11 @@ public class Elevator implements PIDSource, PIDOutput {
 
     public void update(boolean isEnabled) {
         if (isEnabled) {
-            if (pidController.isEnabled()) {
+            if (!pidController.isEnabled()) {
                 pidController.enable();
             }   
         } else {
-            if (!pidController.isEnabled()) {
+            if (pidController.isEnabled()) {
                 pidController.disable();
             }
             elevatorMotor.set(0.0);

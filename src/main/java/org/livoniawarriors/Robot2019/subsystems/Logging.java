@@ -2,7 +2,7 @@ package org.livoniawarriors.Robot2019.subsystems;
 
 import org.livoniawarriors.Robot2019.ISubsystem;
 
-public class Diagnostic implements ISubsystem {
+public class Logging implements ISubsystem {
 
     @Override
     public void init() {
