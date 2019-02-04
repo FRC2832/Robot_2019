@@ -31,4 +31,5 @@ public class PeripheralsModule
         proxSensor.ping();
         return proxSensor.getRangeMM();
     }
+    
 }

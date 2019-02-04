@@ -1,4 +1,4 @@
-package org.livoniawarriors.Robot2019.subsystems;
+package org.livoniawarriors.Robot2019.subsystems.diagnostic;
 
 import org.livoniawarriors.Robot2019.ISubsystem;
 
