@@ -7,8 +7,6 @@
 
 package org.livoniawarriors.Robot2019.subsystems.gameplay;
 
-import static org.junit.Assert.assertEquals;
-
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import org.livoniawarriors.Robot2019.Robot;
