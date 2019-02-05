@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.livoniawarriors.Robot2019.subsystems.*;
 import org.livoniawarriors.Robot2019.subsystems.diagnostic.Diagnostic;
+import org.livoniawarriors.Robot2019.subsystems.diagnostic.IDiagnosable;
 import org.livoniawarriors.Robot2019.subsystems.flamethrower.FlameThrower;
 import org.livoniawarriors.Robot2019.subsystems.gameplay.*;
 import org.livoniawarriors.Robot2019.subsystems.peripherals.PeripheralSubsystem;
@@ -37,6 +38,8 @@ public class Robot extends TimedRobot {
     public DriverStation driverStation;
 
     public final Logger logger;
+
+    private int timer;
 
     public static Robot getInstance() {
         return instance;
@@ -132,12 +135,22 @@ public class Robot extends TimedRobot {
 
         // Initialize things
         subsystems.forEach(ISubsystem::init);
-        modules.forEach((name, module) -> module.init());
+        modules.forEach((name, module) -> module.init());        
     }
 
     @Override
     public void robotPeriodic() {
+        timer++;
         subsystems.forEach(subsystem -> subsystem.update(isEnabled()));
+        if(!driverStation.isFMSAttached()) {
+            if(timer % 15000 == 0) {
+                subsystems.forEach(subsystem->{
+                    if(subsystem instanceof IDiagnosable) {
+                        ((IDiagnosable)subsystem).diagnose();
+                    }
+                });
+            }
+        }
     }
 
     @Override
