@@ -4,8 +4,6 @@ import org.livoniawarriors.Robot2019.ISubsystem;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.subsystems.diagnostic.IDiagnosable;
 
-import edu.wpi.first.wpilibj.DriverStation;
-
 public class GamePlay implements ISubsystem, IDiagnosable {
 
 	private Elevator elevator;
