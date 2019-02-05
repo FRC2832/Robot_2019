@@ -9,10 +9,10 @@ import org.livoniawarriors.Robot2019.UserInput;
 
 public class DriveTrain implements ISubsystem {
 
-    private final static int DRIVE_MOTER_FL = 11;
-    private final static int DRIVE_MOTER_FR = 13;
-    private final static int DRIVE_MOTER_BL = 23;
-    private final static int DRIVE_MOTER_BR = 24;
+    public final static int DRIVE_MOTER_FL = 10;
+    public final static int DRIVE_MOTER_FR = 24;
+    public final static int DRIVE_MOTER_BL = 11;
+    public final static int DRIVE_MOTER_BR = 25;
 
     private DifferentialDrive drive;
 
