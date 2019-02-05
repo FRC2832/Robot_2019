@@ -7,9 +7,17 @@
 
 package org.livoniawarriors.Robot2019.subsystems.gameplay;
 
+import static org.junit.Assert.assertEquals;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import org.livoniawarriors.Robot2019.Robot;
+import org.livoniawarriors.Robot2019.UserInput;
+import org.livoniawarriors.Robot2019.UserInput.Button;
+
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 
 /**
  * Add your docs here.
@@ -26,10 +34,63 @@ public class GamePieceManipulatorJake {
     private DoubleSolenoid flower, tilter;
     private WPI_TalonSRX leftIntakeMotor, rightIntakeMotor;
 
+    private UserInput.Controller controller;
+
+    boolean intakeDown;
+
     public GamePieceManipulatorJake() {
         flower = new DoubleSolenoid(FLOWER_IN, FLOWER_OUT);
         tilter = new DoubleSolenoid(TILTER_DOWN, TILTER_UP);
         leftIntakeMotor = new WPI_TalonSRX(LEFT_INTAKE);
         rightIntakeMotor = new WPI_TalonSRX(RIGHT_INTAKE);
+    
+        controller = Robot.getInstance().userInput.getController(1);
+        
+        intakeDown = false; //TODO: find out if intake starts up or down
     }
+
+    public void update(boolean isEnabled) {
+        if (isEnabled) {
+            if (intakeDown) {
+                if (controller.getTriggerAxis(Hand.kLeft) != 0) {
+                    leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
+                } else {
+                    leftIntakeMotor.set(0);
+                }
+                if (controller.getTriggerAxis(Hand.kRight) != 0) {
+                    rightIntakeMotor.set(controller.getTriggerAxis(Hand.kRight));
+                } else {
+                    rightIntakeMotor.set(0);
+                }
+            }
+
+            if (controller.getButtonPressed(Button.Y)) {
+                moveIntakeUp();
+            }
+            if (controller.getButtonPressed(Button.B)) {
+                moveIntakeDown();
+            }
+            
+            if (controller.getButtonPressed(Button.A)) {
+                if (!intakeDown) {
+                    flower.set(flower.get() == Value.kReverse ? Value.kForward : Value.kReverse);
+                }
+            }
+        }
+    }
+
+    private void moveIntakeUp() {
+        if (flower.get() == Value.kReverse) {
+            tilter.set(Value.kReverse);
+            intakeDown = false;
+        }
+    }
+
+    private void moveIntakeDown() {
+        if (flower.get() == Value.kReverse) {
+            tilter.set(Value.kForward);
+            intakeDown = true;
+        }
+    }
+
 }
