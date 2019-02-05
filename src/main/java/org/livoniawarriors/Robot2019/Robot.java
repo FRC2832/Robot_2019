@@ -26,14 +26,14 @@ public class Robot extends TimedRobot {
     private IControlModule defaultModule;
     private IControlModule fallbackModule; // The one switched to if a module finishes. If null, it defaults to the last registered module
 
-    public PeripheralSubsystem peripheralSubsystem;
-    public UserInput userInput;
-    public Diagnostic diagnostic;
-    public DriveTrain driveTrain;
-    public FlameThrower flameThrower;
-    public GamePlay gamePlay;
+    public static PeripheralSubsystem peripheralSubsystem;
+    public static UserInput userInput;
+    public static Diagnostic diagnostic;
+    public static DriveTrain driveTrain;
+    public static FlameThrower flameThrower;
+    public static GamePlay gamePlay;
 
-    public final Logger logger;
+    public static Logger logger;
 
     public static Robot getInstance() {
         return instance;

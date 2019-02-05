@@ -13,7 +13,7 @@ public class Lidar {
 
     private static final int MAX_READ = 100;
     private static final float CONNECT_ATTEMPT_DELAY = 1;
-    private static final String PI_ADDRESS = "";
+    private static final String PI_ADDRESS = "http://frcvision.local"; // Fix MEEEE
 
     private Socket client;
     private Transform transform;
@@ -27,9 +27,7 @@ public class Lidar {
         notifier.startPeriodic(CONNECT_ATTEMPT_DELAY);
     }
 
-    private boolean tryConnect() {
-        if(client != null)
-            return true;
+    private void tryConnect() {
         try {
             client = new Socket(PI_ADDRESS, 1234); // try http://frcvision.local instead of static
             input = new BufferedReader(new InputStreamReader(client.getInputStream()));
@@ -37,7 +35,6 @@ public class Lidar {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return client != null;
     }
 
     public void update() {
