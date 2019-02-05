@@ -28,8 +28,8 @@ public class GamePieceManipulatorJake {
     private final static int LEFT_INTAKE = 15;
     private final static int TILTER_UP = 4;
     private final static int TILTER_DOWN = 5;
-    private final static int FLOWER_IN = 1; //TODO: Set to real value
-    private final static int FLOWER_OUT = 2;
+    private final static int FLOWER_IN = 2;
+    private final static int FLOWER_OUT = 3;
 
     private DoubleSolenoid flower, tilter;
     private WPI_TalonSRX leftIntakeMotor, rightIntakeMotor;
@@ -72,25 +72,69 @@ public class GamePieceManipulatorJake {
             }
             
             if (controller.getButtonPressed(Button.A)) {
-                if (!intakeDown) {
+                moveFlower();
+            }
+        }
+    }
+
+    private void moveFlower() {
+        if (!intakeDown) {
+            flower.set(flower.get() == Value.kReverse ? Value.kForward : Value.kReverse);
+        } else {
+            moveIntakeDown();
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(500);
+                    } catch(InterruptedException e) {
+                        Robot.getInstance().logger.error("Thread failed to sleep ", e);
+                    }
                     flower.set(flower.get() == Value.kReverse ? Value.kForward : Value.kReverse);
                 }
-            }
+            }.start();
         }
     }
 
     private void moveIntakeUp() {
         if (flower.get() == Value.kReverse) {
-            tilter.set(Value.kReverse);
-            intakeDown = false;
+            tilter.set(Value.kReverse); 
+        } else {
+            flower.set(Value.kReverse);
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(500);
+                    } catch(InterruptedException e) {
+                        Robot.getInstance().logger.error("Thread failed to sleep ", e);
+                    }
+                    tilter.set(Value.kReverse);
+                }
+            }.start();
         }
+        intakeDown = false;
     }
 
     private void moveIntakeDown() {
         if (flower.get() == Value.kReverse) {
             tilter.set(Value.kForward);
-            intakeDown = true;
+            
+        } else {
+            flower.set(Value.kReverse);
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(500);
+                    } catch(InterruptedException e) {
+                        Robot.getInstance().logger.error("Thread failed to sleep ", e);
+                    }
+                    tilter.set(Value.kForward);
+                }
+            }.start();
         }
+        intakeDown = true;
     }
 
 }
