@@ -5,8 +5,8 @@
     </Properties>
 
     <Appenders>
-        <RollingFile name="roll-by-time"
-                     fileName="${basePath}/log.log"
+        <RollingFile name="fileLogger"
+                     fileName="${basePath}/log-${date:yyyy-MM-dd-HH-mm-ss-SSS}.log"
                      filePattern="${basePath}/log.%d{MM-dd-yyyy-HH-mm}.log.gz"
                      ignoreExceptions="false">
             <PatternLayout>

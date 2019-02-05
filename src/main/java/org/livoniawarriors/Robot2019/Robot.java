@@ -28,16 +28,16 @@ public class Robot extends TimedRobot {
     private IControlModule defaultModule;
     private IControlModule fallbackModule; // The one switched to if a module finishes. If null, it defaults to the last registered module
 
-    public PeripheralSubsystem peripheralSubsystem;
-    public UserInput userInput;
-    public Diagnostic diagnostic;
-    public DriveTrain driveTrain;
-    public FlameThrower flameThrower;
-    public GamePlay gamePlay;
+    public static PeripheralSubsystem peripheralSubsystem;
+    public static UserInput userInput;
+    public static Diagnostic diagnostic;
+    public static DriveTrain driveTrain;
+    public static FlameThrower flameThrower;
+    public static GamePlay gamePlay;
 
     public DriverStation driverStation;
 
-    public final Logger logger;
+    public static Logger logger;
 
     private int timer;
 
@@ -50,11 +50,8 @@ public class Robot extends TimedRobot {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyy-MM-dd-HH-mm-ss");
         System.setProperty("current.date", dateFormat.format(new Date()));
         System.setProperty("log4j.configurationFile", Paths.get(Filesystem.getDeployDirectory().toString(), "log4j2.xml").toString());
-        //LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
-        //context.setConfigLocation(Paths.get(Filesystem.getDeployDirectory().toString(), "log4j2.xml").toUri());
-        //logger = context.getLogger(Robot.class.getSimpleName());
-        //logger = LogManager.getLogger(Robot.class);
         logger = LogManager.getLogger(Robot.class);
+        logger.error("Hi");
     }
 
     /**
@@ -70,7 +67,6 @@ public class Robot extends TimedRobot {
         registerControlModule(new TestAutonModule()); // This is the default one for now
         registerControlModule(new TestTeleopModule());
         setDefaultModule(TestTeleopModule.class);
-        logger.log(Level.ERROR, "Hello");
     }
 
     /**
@@ -108,10 +104,18 @@ public class Robot extends TimedRobot {
      * @param name of the module's class
      */
     private void setActiveModule(String name, IControlModule fallbackModule) {
-        activeModule.stop();
+        try {
+            activeModule.stop();
+        } catch (Throwable t) {
+            logger.error(activeModule.getClass().getSimpleName(), t);
+        }
         this.fallbackModule = fallbackModule;
         activeModule = modules.get(name);
-        activeModule.start();
+        try {
+            activeModule.start();
+        } catch (Throwable t) {
+            logger.error(activeModule.getClass().getSimpleName(), t);
+        }
     }
 
     /**
@@ -134,14 +138,20 @@ public class Robot extends TimedRobot {
         }
 
         // Initialize things
-        subsystems.forEach(ISubsystem::init);
-        modules.forEach((name, module) -> module.init());        
+        subsystems.forEach(ISubsystem::init); // No need for try catch, if this fails, all is lost
+        modules.forEach((name, module) -> module.init());
     }
 
     @Override
     public void robotPeriodic() {
         timer++;
-        subsystems.forEach(subsystem -> subsystem.update(isEnabled()));
+        subsystems.forEach(subsystem -> {
+            try {
+                subsystem.update(isEnabled());
+            } catch (Throwable t) {
+                logger.error(activeModule.getClass().getSimpleName(), t);
+            }
+        });
         if(!driverStation.isFMSAttached()) {
             if(timer % 15000 == 0) {
                 subsystems.forEach(subsystem->{
@@ -156,7 +166,11 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledInit() {
         if(activeModule != null) {
-            activeModule.stop();
+            try {
+                activeModule.stop();
+            } catch (Throwable t) {
+                logger.error(activeModule.getClass().getSimpleName(), t);
+            }
             activeModule = null;
         }
     }
@@ -175,35 +189,55 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        if(activeModule != null)
-            activeModule.start();
+        if(activeModule != null) {
+            try {
+                activeModule.start();
+            } catch (Throwable t) {
+                logger.error(activeModule.getClass().getSimpleName(), t);
+            }
+        }
         else {
             activeModule = defaultModule;
-            defaultModule.start();
+            try {
+                defaultModule.start();
+            } catch (Throwable t) {
+                logger.error(activeModule.getClass().getSimpleName(), t);
+            }
         }
     }
 
     @Override
     public void teleopPeriodic() {
-        // This statement is just an example of usage
-        if(userInput.getController(0).getButtonReleased(ControlMapping.testButton)) {
-            
-        }
-
         if(activeModule == null) {
             activeModule = defaultModule;
-            activeModule.start();
+            try {
+                activeModule.start();
+            } catch (Throwable t) {
+                logger.error(activeModule.getClass().getSimpleName(), t);
+            }
         }
 
-        activeModule.update();
+        try {
+            activeModule.update();
+        } catch (Throwable t) {
+            logger.error(activeModule.getClass().getSimpleName(), t);
+        }
 
         if(activeModule.isFinished()) {
-            activeModule.stop();
+            try {
+                activeModule.stop();
+            } catch (Throwable t) {
+                logger.error(activeModule.getClass().getSimpleName(), t);
+            }
             if(fallbackModule != null)
                 activeModule = fallbackModule;
             else
                 activeModule = defaultModule;
-            activeModule.start();
+            try {
+                activeModule.start();
+            } catch (Throwable t) {
+                logger.error(activeModule.getClass().getSimpleName(), t);
+            }
         }
     }
 
