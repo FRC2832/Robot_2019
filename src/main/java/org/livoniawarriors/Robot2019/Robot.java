@@ -34,7 +34,9 @@ public class Robot extends TimedRobot {
     public FlameThrower flameThrower;
     public GamePlay gamePlay;
 
-    final Logger logger;
+    public DriverStation driverStation;
+
+    public final Logger logger;
 
     public static Robot getInstance() {
         return instance;

@@ -11,6 +11,8 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import org.apache.logging.log4j.Level;
+import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.subsystems.diagnostic.IDiagnosable;
 
 import edu.wpi.first.wpilibj.PIDController;
@@ -127,15 +129,17 @@ public class Elevator implements PIDSource, PIDOutput, IDiagnosable {
 	@Override
 	public void diagnose() {
 		double testElevHeight = getElevatorHeight();
-		//TODO: Add proper logging
 		if(testElevHeight >= 0 && testElevHeight <= 100) {
 			System.out.println("Method getElevatorHeight() is reported as a success with the value of " 
-			+ Double.toString(testElevHeight));
+			  + Double.toString(testElevHeight));
+			Robot.getInstance().logger.log(Level.ERROR, 
+			  String.format("Method getElevatorHeight() returned value {0} and did not detect failure", testElevHeight));
 		} else {
 			System.out.println("Method getElevatorHeight() is reported as a failure with the value of "
-			+ Double.toString(testElevHeight));
+			  + Double.toString(testElevHeight));
+			Robot.getInstance().logger.log(Level.ERROR, 
+			  String.format("Method getElevatorHeight() returned value {0} and DETECTED FAILURE!!!", testElevHeight));
 		}
 		
 	}
-
 }

@@ -5,12 +5,15 @@ import java.lang.reflect.Method;
 public interface IDiagnosable {
     
     /**
-     * In diagnose(), run a method.
-     * Then, test the method by inputing arbitrary values
-     * and comparing the result to an expected value.
-     * If the result is outside of the expected range, we will know something
-     * is wrong and in need of further investigation
-     */
+     * HOW TO USE THIS TOOL: <p>
+     * Example 1: <p>
+     * 	double result = methodInDoubt(testValue); <p>
+	 * 	if(result > lowEndOfRange && result < highEndOfRange) { <p>
+	 * 		log("methodInDoubt was a success with the value " + result); <p>
+	 * 	} else { <p>
+	 * 		log("methodInDoubt was a failue with the value " + result); <p>
+	 * 	}
+    */
     void diagnose();
     
 }
