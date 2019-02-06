@@ -153,7 +153,7 @@ public class Robot extends TimedRobot {
             }
         });
         if(!driverStation.isFMSAttached()) {
-            if(timer % 15000 == 0) {
+            if(timer % 200 == 0) {
                 subsystems.forEach(subsystem->{
                     if(subsystem instanceof IDiagnosable) {
                         ((IDiagnosable)subsystem).diagnose();
