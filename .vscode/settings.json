@@ -8,11 +8,7 @@
     "**/.DS_Store": true,
     "bin/": true,
     ".classpath": true,
-    ".project": true,
-    "**/.classpath": true,
-    "**/.project": true,
-    "**/.settings": true,
-    "**/.factorypath": true
+    ".project": true
   },
   "wpilib.online": true,
   "python.pythonPath": "37venv\\Scripts\\python.exe"
