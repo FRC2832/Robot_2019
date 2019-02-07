@@ -7,6 +7,8 @@ import org.apache.logging.log4j.Logger;
 import org.livoniawarriors.Robot2019.modules.TestAutonModule;
 import org.livoniawarriors.Robot2019.modules.TestTeleopModule;
 import org.livoniawarriors.Robot2019.subsystems.*;
+import org.livoniawarriors.Robot2019.subsystems.diagnostic.Diagnostic;
+import org.livoniawarriors.Robot2019.subsystems.diagnostic.IDiagnosable;
 import org.livoniawarriors.Robot2019.subsystems.flamethrower.FlameThrower;
 import org.livoniawarriors.Robot2019.subsystems.gameplay.*;
 import org.livoniawarriors.Robot2019.subsystems.peripherals.PeripheralSubsystem;
@@ -44,6 +46,8 @@ public class Robot extends TimedRobot {
     private final Notifier csvNotifier;
     private final static double CSV_UPDATE_PERIOD = 0.04;
 
+    private int timer;
+
     // Get the robot
     public static Robot getInstance() {
         return instance;
@@ -52,8 +56,6 @@ public class Robot extends TimedRobot {
     // "Making the baby is the fun part."
     Robot() {
         instance = this;
-        //SimpleDateFormat dateFormat = new SimpleDateFormat("yyy-MM-dd-HH-mm-ss");
-        //System.setProperty("current.date", dateFormat.format(new Date()));
         csvBuffer = new HashMap<>();
         System.setProperty("log4j.configurationFile", Paths.get(Filesystem.getDeployDirectory().toString(), "log4j2.xml").toString());
         logger = LogManager.getLogger("LogLogger");
@@ -177,6 +179,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+        timer++;
         subsystems.forEach(subsystem -> {
             try {
                 subsystem.update(isEnabled());
@@ -184,6 +187,15 @@ public class Robot extends TimedRobot {
                 logger.error(activeModule.getClass().getSimpleName(), t);
             }
         });
+        if(!DriverStation.getInstance().isFMSAttached()) {
+            if(timer % 200 == 0) {
+                subsystems.forEach(subsystem->{
+                    if(subsystem instanceof IDiagnosable) {
+                        ((IDiagnosable)subsystem).diagnose();
+                    }
+                });
+            }
+        }
     }
 
     @Override
