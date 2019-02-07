@@ -7,7 +7,7 @@ public class TestTeleopModule implements IControlModule {
 
     @Override
     public void init() {
-        controller = Robot.getInstance().userInput.getController(0);
+        controller = Robot.userInput.getController(0);
     }
 
     @Override
@@ -17,7 +17,7 @@ public class TestTeleopModule implements IControlModule {
 
     @Override
     public void update() {
-        Robot.getInstance().driveTrain.tankDrive(controller.getY(GenericHID.Hand.kLeft), controller.getY(GenericHID.Hand.kRight));
+        Robot.driveTrain.tankDrive(controller.getY(GenericHID.Hand.kLeft), controller.getY(GenericHID.Hand.kRight));
     }
 
     @Override
