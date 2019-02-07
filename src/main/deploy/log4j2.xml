@@ -15,7 +15,7 @@
             </PatternLayout>
         </File>
         <File name="csvLogger"
-              fileName="${sys:logFolder:-/home/lvuser/logging}/csv/csv-${date:yyyy-MM-dd-HH-mm-ss-SSS}.log">
+              fileName="${sys:logFolder:-/home/lvuser/logging}/csv/csv-${date:yyyy-MM-dd-HH-mm-ss-SSS}.csv">
             <TimestampedCsvParameterLayout delimiter=","/>
         </File>
         <Console name="console" target="SYSTEM_OUT">

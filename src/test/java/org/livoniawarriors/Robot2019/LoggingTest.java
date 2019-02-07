@@ -15,7 +15,7 @@ public class LoggingTest {
     public void TestStuff() {
         System.setProperty("log4j.configurationFile", Paths.get(Filesystem.getOperatingDirectory().toString(), "/src/main/deploy/log4j2.xml").toString());
         System.setProperty("logFolder", Paths.get(Filesystem.getOperatingDirectory().toString(), "/logging").toString());
-        var logger = LogManager.getLogger(Robot.class);
+        var logger = LogManager.getLogger("CsvLogger");
 
         logger.log(Level.getLevel("CSV"), "", "a", "b", "c");
         logger.log(Level.getLevel("CSV"), "", "1", "2", "3");
