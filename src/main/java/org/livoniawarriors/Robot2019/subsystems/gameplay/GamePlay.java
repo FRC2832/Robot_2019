@@ -28,7 +28,6 @@ public class GamePlay implements ISubsystem, IDiagnosable {
     public void csv(ICsvLogger csv) {
 
     }
-	}
 
 	@Override
 	public void diagnose() {
