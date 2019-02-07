@@ -130,6 +130,7 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         subsystems = new ArrayList<>();
         modules = new LinkedHashMap<>();
+        driverStation = DriverStation.getInstance();
 
         register();
 
