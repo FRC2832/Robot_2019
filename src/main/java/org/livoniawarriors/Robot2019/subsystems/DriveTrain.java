@@ -14,10 +14,11 @@ public class DriveTrain implements ISubsystem {
     public final static int DRIVE_MOTER_BR = 25;
 
     private DifferentialDrive drive;
+    private PowerDistributionPanel pdp;
 
     @Override
     public void csv(ICsvLogger csv) {
-        csv.log("Voltage", new PowerDistributionPanel().getVoltage());
+        csv.log("Voltage", pdp.getVoltage());
     }
 
     @Override
@@ -30,6 +31,7 @@ public class DriveTrain implements ISubsystem {
         //talonBL.setInverted(true);
         talonBR.follow(talonFR);
         drive = new DifferentialDrive(talonFL, talonFR);
+        pdp = new PowerDistributionPanel();
     }
 
     public void tankDrive(double left, double right) {

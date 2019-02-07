@@ -53,7 +53,7 @@ public class Robot extends TimedRobot {
         return instance;
     }
 
-    // "Making the baby is the fun part."
+    // "Making the baby is the fun part." - Robots
     Robot() {
         instance = this;
         csvBuffer = new HashMap<>();
@@ -161,7 +161,6 @@ public class Robot extends TimedRobot {
         // Set default to first registered if it isn't set
         if(defaultModule == null)
             setDefaultModule((IControlModule) modules.entrySet().toArray()[0]);
-
 
         // Initialize things
         logger.info("Initializing subsystems");

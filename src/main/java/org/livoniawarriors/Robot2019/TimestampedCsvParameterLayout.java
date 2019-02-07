@@ -48,8 +48,6 @@ public class TimestampedCsvParameterLayout extends AbstractCsvLayout {
         Message message = event.getMessage();
         Object[] parameters = message.getParameters();
         StringBuilder buffer = getStringBuilder();
-        //if(parameters.length == 0)
-        //    return "";
         if(initialized)
             buffer.append(Timer.getFPGATimestamp() + ",");
         else {
