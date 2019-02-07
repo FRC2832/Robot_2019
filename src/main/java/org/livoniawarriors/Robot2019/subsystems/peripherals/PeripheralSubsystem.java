@@ -1,5 +1,6 @@
 package org.livoniawarriors.Robot2019.subsystems.peripherals;
 
+import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.ISubsystem;
 
 import java.io.IOException;
@@ -21,5 +22,9 @@ public class PeripheralSubsystem implements ISubsystem {
     @Override
     public void dispose() throws IOException {
         lidar.dispose();
+    }
+    @Override
+    public void csv(ICsvLogger csv) {
+
     }
 }

@@ -1,5 +1,6 @@
 package org.livoniawarriors.Robot2019.subsystems;
 
+import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.ISubsystem;
 
 public class Diagnostic implements ISubsystem {
@@ -16,6 +17,11 @@ public class Diagnostic implements ISubsystem {
 
     @Override
     public void dispose() throws Exception {
+
+    }
+
+    @Override
+    public void csv(ICsvLogger csv) {
 
     }
 }

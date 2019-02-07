@@ -1,11 +1,10 @@
 package org.livoniawarriors.Robot2019.subsystems;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.ISubsystem;
-import org.livoniawarriors.Robot2019.Robot;
-import org.livoniawarriors.Robot2019.UserInput;
 
 public class DriveTrain implements ISubsystem {
 
@@ -15,6 +14,11 @@ public class DriveTrain implements ISubsystem {
     private final static int DRIVE_MOTER_BR = 24;
 
     private DifferentialDrive drive;
+
+    @Override
+    public void csv(ICsvLogger csv) {
+        csv.log("Voltage", new PowerDistributionPanel().getVoltage());
+    }
 
     @Override
     public void init() {

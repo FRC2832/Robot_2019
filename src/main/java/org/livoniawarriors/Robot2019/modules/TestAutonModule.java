@@ -1,4 +1,6 @@
-package org.livoniawarriors.Robot2019;
+package org.livoniawarriors.Robot2019.modules;
+
+import org.livoniawarriors.Robot2019.IControlModule;
 
 public class TestAutonModule implements IControlModule {
     @Override

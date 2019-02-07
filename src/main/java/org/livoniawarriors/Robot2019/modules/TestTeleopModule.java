@@ -1,6 +1,9 @@
-package org.livoniawarriors.Robot2019;
+package org.livoniawarriors.Robot2019.modules;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import org.livoniawarriors.Robot2019.IControlModule;
+import org.livoniawarriors.Robot2019.Robot;
+import org.livoniawarriors.Robot2019.UserInput;
 
 public class TestTeleopModule implements IControlModule {
     private UserInput.Controller controller;

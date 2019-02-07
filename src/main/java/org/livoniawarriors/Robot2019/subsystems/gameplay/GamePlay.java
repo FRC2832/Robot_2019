@@ -1,5 +1,6 @@
 package org.livoniawarriors.Robot2019.subsystems.gameplay;
 
+import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.ISubsystem;
 
 public class GamePlay implements ISubsystem {
@@ -19,6 +20,11 @@ public class GamePlay implements ISubsystem {
 
     @Override
     public void dispose() throws Exception {
+
+    }
+
+    @Override
+    public void csv(ICsvLogger csv) {
 
     }
 }
