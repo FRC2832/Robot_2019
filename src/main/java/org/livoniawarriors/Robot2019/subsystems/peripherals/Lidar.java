@@ -3,6 +3,7 @@ package org.livoniawarriors.Robot2019.subsystems.peripherals;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.PIDBase;
 import edu.wpi.first.wpilibj.PIDController;
+import org.livoniawarriors.Robot2019.Robot;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -33,7 +34,7 @@ public class Lidar {
             input = new BufferedReader(new InputStreamReader(client.getInputStream()));
             output = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
         } catch (IOException e) {
-            e.printStackTrace();
+            Robot.logger.error("Couldn't connect to LIDAR", e);
         }
     }
 
@@ -54,7 +55,7 @@ public class Lidar {
                         break;
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                Robot.logger.error("Lidar", e);
             }
         }
     }
@@ -66,7 +67,7 @@ public class Lidar {
                 output.newLine();
                 output.flush();
             } catch (IOException e) {
-                e.printStackTrace();
+                Robot.logger.error("Lidar", e);
             }
         }
     }
