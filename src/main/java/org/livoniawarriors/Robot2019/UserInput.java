@@ -33,6 +33,11 @@ public class UserInput implements ISubsystem {
 
     }
 
+    @Override
+    public void csv(ICsvLogger csv) {
+
+    }
+
     public class Controller extends GenericHID {
 
         private double startTime;
