@@ -58,6 +58,11 @@ public class UserInput implements ISubsystem {
 
     }
 
+    @Override
+    public void csv(ICsvLogger csv) {
+
+    }
+
     public class Controller extends GenericHID {
 
         private double startTime;
@@ -177,7 +182,7 @@ public class UserInput implements ISubsystem {
         A(1),
         B(2),
         X(3),
-        k(4),
+        Y(4),
         BACK(7),
         START(8);
 
