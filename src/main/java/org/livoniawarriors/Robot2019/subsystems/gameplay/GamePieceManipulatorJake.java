@@ -42,7 +42,7 @@ public class GamePieceManipulatorJake {
         leftIntakeMotor = new WPI_TalonSRX(LEFT_INTAKE);
         rightIntakeMotor = new WPI_TalonSRX(RIGHT_INTAKE);
     
-        controller = Robot.getInstance().userInput.getController(1);
+        controller = Robot.userInput.getController(1);
         
         intakeDown = false; //TODO: find out if intake starts up or down
     }
