@@ -2,15 +2,39 @@ package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.SendableBase;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 
 public class UserInput implements ISubsystem {
 
     public static float DEADZONE = 0.1f;
 
     private List<Controller> controllers;
+    public NetworkTable table;
+    NetworkTableInstance inst = NetworkTableInstance.getDefault();
+    HashMap<String, ShuffleboardTab> NetworkTable = new HashMap<>();
+    SendableChooser chooser = new SendableChooser<>();
+
+    public void createValue(ShuffleboardTab selectedTab, String title, Integer handle, Object value) {
+        NetworkTableEntry currentEntry = new NetworkTableEntry(inst, handle);
+        currentEntry.setValue(value);
+        currentEntry = table.getEntry(title);
+        currentEntry = selectedTab.add(title, value).getEntry();
+        NetworkTable.put(title, selectedTab);
+    }
+
+    public void updateValue(String title, Object value) {
+        NetworkTableEntry selectedEntry = table.getEntry(title);
+        selectedEntry.setValue(value);
+    }
 
     public Controller getController(int player) {
         return controllers.get(player);
@@ -21,6 +45,7 @@ public class UserInput implements ISubsystem {
         controllers = new ArrayList<>();
         controllers.add(new Controller(0));
         controllers.add(new Controller(1));
+        table = inst.getTable("datatable");
     }
 
     @Override
