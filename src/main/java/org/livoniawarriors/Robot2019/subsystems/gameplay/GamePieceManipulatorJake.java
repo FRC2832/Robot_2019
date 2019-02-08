@@ -83,7 +83,7 @@ public class GamePieceManipulatorJake {
                     try {
                         Thread.sleep(500);
                     } catch(InterruptedException e) {
-                        Robot.getInstance().logger.error("Thread failed to sleep ", e);
+                        Robot.logger.error("Thread failed to sleep ", e);
                     }
                     flower.set(flower.get() == Value.kReverse ? Value.kForward : Value.kReverse);
                 }
@@ -102,7 +102,7 @@ public class GamePieceManipulatorJake {
                     try {
                         Thread.sleep(500);
                     } catch(InterruptedException e) {
-                        Robot.getInstance().logger.error("Thread failed to sleep ", e);
+                        Robot.logger.error("Thread failed to sleep ", e);
                     }
                     tilter.set(Value.kReverse);
                 }
@@ -123,7 +123,7 @@ public class GamePieceManipulatorJake {
                     try {
                         Thread.sleep(500);
                     } catch(InterruptedException e) {
-                        Robot.getInstance().logger.error("Thread failed to sleep ", e);
+                        Robot.logger.error("Thread failed to sleep ", e);
                     }
                     tilter.set(Value.kForward);
                 }
