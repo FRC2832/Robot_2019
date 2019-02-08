@@ -2,6 +2,7 @@ package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ public class UserInput implements ISubsystem {
         controllers = new ArrayList<>();
         controllers.add(new Controller(0));
         controllers.add(new Controller(1));
+        Shuffleboard.getTab("tab").add(new LogPutton());
     }
 
     @Override
@@ -30,6 +32,11 @@ public class UserInput implements ISubsystem {
 
     @Override
     public void dispose() {
+
+    }
+
+    @Override
+    public void diagnose() {
 
     }
 
