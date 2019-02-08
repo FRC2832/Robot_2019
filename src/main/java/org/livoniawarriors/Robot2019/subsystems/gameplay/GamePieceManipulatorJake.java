@@ -64,12 +64,9 @@ public class GamePieceManipulatorJake {
 
             if (controller.getButtonPressed(Button.Y)) {
                 moveIntakeUp();
-            }
-            if (controller.getButtonPressed(Button.B)) {
+            } else if (controller.getButtonPressed(Button.B)) {
                 moveIntakeDown();
-            }
-            
-            if (controller.getButtonPressed(Button.A)) {
+            } else if (controller.getButtonPressed(Button.A)) {
                 moveFlower();
             }
         }
