@@ -157,7 +157,7 @@ public class UserInput implements ISubsystem {
         A(1),
         B(2),
         X(3),
-        k(4),
+        Y(4),
         BACK(7),
         START(8);
 
