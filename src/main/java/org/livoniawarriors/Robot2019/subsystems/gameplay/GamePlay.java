@@ -5,14 +5,14 @@ import org.livoniawarriors.Robot2019.subsystems.diagnostic.IDiagnosable;
 
 public class GamePlay implements ISubsystem, IDiagnosable {
 
-    private Elevator elevator;
-    private GamePieceManipulatorJake gamePieceManipulatorJake;
+	private Elevator elevator;
+	private GamePieceManipulatorJake gamePieceManipulatorJake;
 
 	@Override
 	public void init() {
 		elevator = new Elevator();
 		gamePieceManipulatorJake = new GamePieceManipulatorJake();
-    }
+	}
 
 	@Override
 	public void update(boolean enabled) {
