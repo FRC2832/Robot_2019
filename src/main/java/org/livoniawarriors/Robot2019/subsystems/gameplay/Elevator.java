@@ -13,29 +13,37 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import org.apache.logging.log4j.Level;
 import org.livoniawarriors.Robot2019.Robot;
+import org.livoniawarriors.Robot2019.UserInput;
+import org.livoniawarriors.Robot2019.UserInput.Button;
 import org.livoniawarriors.Robot2019.subsystems.diagnostic.IDiagnosable;
 
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 
 /**
  * Elevator not-subsystem that includes a PID controller to control the elevator
  */
 public class Elevator implements PIDSource, PIDOutput, IDiagnosable {
 
-	private final static int ELEVATOR_MOTOR = 5; //TODO: set to real number
+	private final static int ELEVATOR_MOTOR = 22;
 	CANSparkMax elevatorMotor; 
 
 	private static final double TOLERANCE = 1; // +- how many inches is acceptable
 	private static final double MAX_MOTOR_SPEED = 0.7;
 	private static final double P = 1.0;
 	private static final double I = 0.0;
-	private static final double D = 0.5;
+    private static final double D = 0.5;
+    private static final double F = 0.2;
 
 	private PIDController pidController;
-	private PIDSourceType sourceType;
+    private PIDSourceType sourceType;
+    
+    private UserInput.Controller controller;
+
+    private boolean manual = false;
 
 
 	public Elevator() {
@@ -50,6 +58,8 @@ public class Elevator implements PIDSource, PIDOutput, IDiagnosable {
 		pidController.setSetpoint(ElevatorHeights.LowHatch.getHeight());
 		pidController.setContinuous(true);
 
+        controller = Robot.getInstance().userInput.getController(0);
+        
 	}
 
 	/**
@@ -72,16 +82,40 @@ public class Elevator implements PIDSource, PIDOutput, IDiagnosable {
 	}
 
 	public void update(boolean isEnabled) {
-		if (isEnabled) {
-			if (pidController.isEnabled()) {
-				pidController.enable();
-			}   
-		} else {
-			if (!pidController.isEnabled()) {
-				pidController.disable();
-			}
-			elevatorMotor.set(0.0);
-		}
+        if (!manual) {
+            if (isEnabled) {
+                if (!pidController.isEnabled()) {
+                    pidController.enable();
+                }   
+            } else {
+                if (pidController.isEnabled()) {
+                    pidController.disable();
+                }
+                elevatorMotor.set(0.0);
+            }
+
+            if (controller.getButton(Button.A)) {
+                setElevatorHeight(ElevatorHeights.LowHatch);
+            }
+            
+            if (controller.getButton(Button.X)) {
+                setElevatorHeight(ElevatorHeights.MidHatch);
+                System.out.println("Setting elevator to Mid Hatch");
+            }
+            if (controller.getButton(Button.Y)) {
+                setElevatorHeight(ElevatorHeights.TopHatch);
+                System.out.println("Setting elevator to Top Hatch");
+            }
+        } else {
+            if (controller.getTriggerAxis(Hand.kRight) != 0) {
+                elevatorMotor.set(controller.getTriggerAxis(Hand.kRight) * MAX_MOTOR_SPEED);
+            } else if (controller.getTriggerAxis(Hand.kLeft) != 0) {
+                elevatorMotor.set(-1 * controller.getTriggerAxis(Hand.kLeft) * MAX_MOTOR_SPEED);
+            } else {
+                elevatorMotor.set(0);
+            }
+        }
+        
 	}
 
 	@Override
