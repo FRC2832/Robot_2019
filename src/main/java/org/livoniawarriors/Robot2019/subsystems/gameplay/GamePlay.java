@@ -10,14 +10,14 @@ public class GamePlay implements ISubsystem, IDiagnosable {
 
 	@Override
 	public void init() {
-        elevator = new Elevator();
-        gamePieceManipulatorJake = new GamePieceManipulatorJake();
-	}
+		elevator = new Elevator();
+		gamePieceManipulatorJake = new GamePieceManipulatorJake();
+    }
 
 	@Override
 	public void update(boolean enabled) {
-        elevator.update(enabled);
-        gamePieceManipulatorJake.update(enabled);
+		elevator.update(enabled);
+		gamePieceManipulatorJake.update(enabled);
 	}
 
 	@Override
