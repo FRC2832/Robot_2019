@@ -145,7 +145,7 @@ public class Robot extends TimedRobot {
      */
     private void logCSV() {
         subsystems.forEach(s -> s.csv(csvBufferWriter));
-        csvLogger.info("csv", csvBuffer.values().toArray());
+        csvLogger.log(Level.getLevel("CSV"), "", csvBuffer.values().toArray());
     }
 
     /**
