@@ -33,33 +33,42 @@ public class Elevator implements PIDSource, PIDOutput, IDiagnosable {
 
 	private static final double TOLERANCE = 1; // +- how many inches is acceptable
 	private static final double MAX_MOTOR_SPEED = 0.7;
-	private static final double P = 1.0;
-	private static final double I = 0.0;
-    private static final double D = 0.5;
-    private static final double F = 0.2;
+    
+    private static final double movingP = 10.0;
+	private static final double movingI = 0.0;
+    private static final double movingD = 0.5;
+    private static final double movingF = 0.7;
+
+    private static final double maintainerP = 1.0;
+	private static final double maintainerI = 0.0;
+    private static final double maintainerD = 0.5;
+    private static final double maintainerF = 0.2;
 
 	private PIDController pidController;
     private PIDSourceType sourceType;
     
     private UserInput.Controller controller;
 
-    private boolean manual = false;
-
+    private boolean manual = true;
+    private boolean movingPID;
+    private ElevatorHeights currentSetHeight;
 
 	public Elevator() {
 		elevatorMotor = new CANSparkMax(ELEVATOR_MOTOR, MotorType.kBrushless);
 		elevatorMotor.setIdleMode(IdleMode.kBrake);
 
-		pidController = new PIDController(P, I, D, this, this, 0.01);
-
+        pidController = new PIDController(movingP, movingI, movingD, movingF, this, this, 0.01);
+ 
 		pidController.setAbsoluteTolerance(TOLERANCE);
 		pidController.setOutputRange(-MAX_MOTOR_SPEED, MAX_MOTOR_SPEED);
 		pidController.setInputRange(Double.MIN_VALUE, Double.MAX_VALUE);
-		pidController.setSetpoint(ElevatorHeights.LowHatch.getHeight());
-		pidController.setContinuous(true);
+        pidController.setContinuous(true);
 
-        controller = Robot.getInstance().userInput.getController(0);
+        controller = Robot.userInput.getController(0);
         
+        currentSetHeight = ElevatorHeights.LowHatch;
+
+        setElevatorHeight(ElevatorHeights.LowHatch);
 	}
 
 	/**
@@ -67,26 +76,54 @@ public class Elevator implements PIDSource, PIDOutput, IDiagnosable {
 	 * @param height use the ElevatorHeights enum to specify the height the elevator needs to go to
 	 */
 	public void setElevatorHeight(ElevatorHeights height) {
-		pidController.setSetpoint(height.getHeight());
-
-	}
+        pidController.setSetpoint(height.getHeight());
+        pidController.reset();
+        currentSetHeight = height;
+        setToMovingPID();
+        pidController.enable();
+    }
+    
+    private void setToMovingPID() {
+        pidController.setPID(movingP, movingI, movingD, movingF);
+        movingPID = true;
+    }
+    
+    private void setToMaintiningPID() {
+        pidController.setPID(maintainerP, maintainerI, maintainerD, maintainerF);
+        movingPID = false;
+    }
 
 	/**
 	 * @return the height of the elevator in inches
+     * TODO: update with new mechanical information
 	 */
 	public double getElevatorHeight() {
-		return elevatorMotor.getEncoder().getPosition() * (2 * Math.PI) / 7;
+		return elevatorMotor.getEncoder().getPosition() * (2 * Math.PI) / 21;
 		//Pulley has a 1 inch radius and 2 pi circumfrence
-		//The gearbox has a ratio of 7:1
-		//Therefore to go from encoders to elevator height we multiply by 2pi and divide by 7
+		//The gearbox has a ratio of 21:1
+		//Therefore to go from encoders to elevator height we multiply by 2pi and divide by 21
 	}
 
 	public void update(boolean isEnabled) {
         if (!manual) {
             if (isEnabled) {
                 if (!pidController.isEnabled()) {
-                    pidController.enable();
-                }   
+                    if (pidController.onTarget()) {
+                        setToMaintiningPID();
+                    }
+                }
+
+                if (controller.getButtonPressed(Button.A)) {
+                    setElevatorHeight(ElevatorHeights.LowHatch);
+                    System.out.println("Setting elevator to Low Hatch");
+                } else if (controller.getButtonPressed(Button.X)) {
+                    setElevatorHeight(ElevatorHeights.MidHatch);
+                    System.out.println("Setting elevator to Mid Hatch");
+                } else if (controller.getButtonPressed(Button.Y)) {
+                    setElevatorHeight(ElevatorHeights.TopHatch);
+                    System.out.println("Setting elevator to Top Hatch");
+                }
+                
             } else {
                 if (pidController.isEnabled()) {
                     pidController.disable();
@@ -94,33 +131,26 @@ public class Elevator implements PIDSource, PIDOutput, IDiagnosable {
                 elevatorMotor.set(0.0);
             }
 
-            if (controller.getButton(Button.A)) {
-                setElevatorHeight(ElevatorHeights.LowHatch);
-            }
-            
-            if (controller.getButton(Button.X)) {
-                setElevatorHeight(ElevatorHeights.MidHatch);
-                System.out.println("Setting elevator to Mid Hatch");
-            }
-            if (controller.getButton(Button.Y)) {
-                setElevatorHeight(ElevatorHeights.TopHatch);
-                System.out.println("Setting elevator to Top Hatch");
-            }
         } else {
             if (controller.getTriggerAxis(Hand.kRight) != 0) {
                 elevatorMotor.set(controller.getTriggerAxis(Hand.kRight) * MAX_MOTOR_SPEED);
             } else if (controller.getTriggerAxis(Hand.kLeft) != 0) {
                 elevatorMotor.set(-1 * controller.getTriggerAxis(Hand.kLeft) * MAX_MOTOR_SPEED);
+                System.out.println("Moving motor up " + controller.getTriggerAxis(Hand.kLeft));
             } else {
                 elevatorMotor.set(0);
             }
         }
+
+        System.out.println("Current Elevator Height: " + getElevatorHeight());
         
 	}
 
 	@Override
 	public void pidWrite(double output) {
-		elevatorMotor.set(output);
+        if (!manual) {
+            elevatorMotor.set(output);
+        }
 	}
 
 	@Override
@@ -159,7 +189,9 @@ public class Elevator implements PIDSource, PIDOutput, IDiagnosable {
 			return height;
 		}
 
-	}
+    }
+    
+
 	@Override
 	public void diagnose() {
 		double testElevHeight = getElevatorHeight();
