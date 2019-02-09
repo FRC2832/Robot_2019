@@ -47,6 +47,10 @@ public class PeripheralSubsystem implements ISubsystem {
 
     }
 
+    @Override
+    public void diagnose() {
+
+    }
 
     public void resetEncoder(Encoder e){
         e.reset();

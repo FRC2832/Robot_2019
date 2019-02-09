@@ -71,6 +71,7 @@ public class UserInput implements ISubsystem {
         controllers.add(new Controller(0));
         controllers.add(new Controller(1));
         table = inst.getTable("datatable");
+        Shuffleboard.getTab("tab").add(new LogButton());
     }
 
     @Override
@@ -80,6 +81,11 @@ public class UserInput implements ISubsystem {
 
     @Override
     public void dispose() {
+
+    }
+
+    @Override
+    public void diagnose() {
 
     }
 
