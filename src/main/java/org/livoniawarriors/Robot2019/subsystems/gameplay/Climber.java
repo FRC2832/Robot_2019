@@ -46,7 +46,7 @@ public class Climber {
 		//Maybe have a SmartDashboard button to "arm" the climber?
 		if(Robot.userInput.getController(0).getButton(Button.BUMPER_R)
 			&& Robot.userInput.getController(1).getButton(Button.BUMPER_R)) {
-			if(GamePlay.elevator.getElevatorHeight() == 0) {
+			if(Robot.gamePlay.getElevator().getElevatorHeight() == 0) {
 				launchClimber();
 			} else {
 				System.out.println("CLIMBER will NOT run: elevator is up!");
