@@ -37,6 +37,5 @@ public class GamePlay implements ISubsystem, IDiagnosable {
 	@Override
 	public void diagnose() {
 		elevator.diagnose();
-		climber.diagnose();
 	}
 }
