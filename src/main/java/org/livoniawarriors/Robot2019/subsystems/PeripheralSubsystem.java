@@ -11,7 +11,6 @@ public class PeripheralSubsystem implements ISubsystem {
 
     private Lidar lidar;
     private AnalogInput pressureSensor;
-    private double pressure;
 
     @Override
     public void init() {
@@ -22,7 +21,6 @@ public class PeripheralSubsystem implements ISubsystem {
     @Override
     public void update(boolean enabled) {
         lidar.update();
-        pressure = 250d * (double)pressureSensor.getVoltage() / 5d - 25d;
     }
 
     @Override
@@ -31,6 +29,6 @@ public class PeripheralSubsystem implements ISubsystem {
     }
 
     public double getPressure() {
-        return pressure;
+        return 250d * (double)pressureSensor.getVoltage() / 5d - 25d;
     }
 }
