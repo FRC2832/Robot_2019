@@ -200,7 +200,7 @@ public class Robot extends TimedRobot {
             try {
                 subsystem.update(isEnabled());
             } catch (Throwable t) {
-                logger.error(activeModule.getClass().getSimpleName(), t);
+                logger.error(subsystem.getClass().getSimpleName(), t);
             }
         });
     }
@@ -243,7 +243,7 @@ public class Robot extends TimedRobot {
             try {
                 defaultModule.start();
             } catch (Throwable t) {
-                logger.error(activeModule.getClass().getSimpleName(), t);
+                logger.error(defaultModule.getClass().getSimpleName(), t);
             }
         }
     }
