@@ -241,9 +241,9 @@ public class Robot extends TimedRobot {
         else {
             activeModule = defaultModule;
             try {
-                defaultModule.start();
+                activeModule.start();
             } catch (Throwable t) {
-                logger.error(defaultModule.getClass().getSimpleName(), t);
+                logger.error(activeModule.getClass().getSimpleName(), t);
             }
         }
     }
