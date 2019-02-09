@@ -10,8 +10,8 @@ public class Auton {
 
     //Waypoints for a path
     Waypoint testPoints[] = new Waypoint[] {
-        new Waypoint(59.328,  15.470, 0),
-        new Waypoint(59.328, 151.413, 0)
+        new Waypoint(1.699,  3.85, 0),
+        new Waypoint(5.316, 3.85, 0)
     };
 
     Trajectory.Config testConfig = new Trajectory.Config(
