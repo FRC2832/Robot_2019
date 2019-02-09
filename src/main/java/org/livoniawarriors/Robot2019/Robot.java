@@ -51,7 +51,6 @@ public class Robot extends TimedRobot {
         return instance;
     }
 
-    // "Making the baby is the fun part." - Robots
     Robot() {
         instance = this;
         csvBuffer = new HashMap<>();
