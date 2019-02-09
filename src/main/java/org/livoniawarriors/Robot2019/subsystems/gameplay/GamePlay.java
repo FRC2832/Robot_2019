@@ -5,7 +5,7 @@ import org.livoniawarriors.Robot2019.ISubsystem;
 
 public class GamePlay implements ISubsystem {
 
-	protected static Elevator elevator;
+	private Elevator elevator;
 	private GamePieceManipulatorJake gamePieceManipulatorJake;
 	private Climber climber;
 
@@ -21,6 +21,10 @@ public class GamePlay implements ISubsystem {
 		elevator.update(enabled);
 		gamePieceManipulatorJake.update(enabled);
 		climber.update(enabled);
+	}
+	
+	public Elevator getElevator() {
+		return elevator;
 	}
 
 	@Override
