@@ -11,7 +11,7 @@ import org.livoniawarriors.Robot2019.UserInput.Button;
 public class Climber {
 
 	private static final int CLIMB_MOTOR = 13;
-	private final double STOP_TURN_VALUE = 9000; //TODO: Needs to be determined
+	private final double STOP_TURN_VALUE = 370; //*Should* be right, mathematically speaking
 	private CANSparkMax climbMotor; //NEO motor to control climber
 	private CANEncoder climbEncoder;
 
