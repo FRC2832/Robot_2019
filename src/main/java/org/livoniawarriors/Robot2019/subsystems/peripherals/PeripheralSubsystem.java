@@ -20,6 +20,8 @@ public class PeripheralSubsystem implements ISubsystem {
     private static final int PRESSURE_SENSOR_PORT = 1;
     private AnalogInput pressureSensor;
 
+    private REVDigitBoard digitBoard;
+
     @Override
     public void init() {
         lidar = new Lidar();
@@ -27,11 +29,13 @@ public class PeripheralSubsystem implements ISubsystem {
         proxSensor.setEnabled(false);
         proxSensor.setAutomaticMode(false);
         pressureSensor = new AnalogInput(PRESSURE_SENSOR_PORT);
+        digitBoard = new REVDigitBoard();
     }
 
     @Override
     public void update(boolean enabled) {
         lidar.update();
+        digitBoard.display(Double.toString(getPressure()));
     }
 
     @Override
