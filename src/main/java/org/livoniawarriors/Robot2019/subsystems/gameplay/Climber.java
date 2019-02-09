@@ -24,7 +24,7 @@ public class Climber {
 		climbEncoder = climbMotor.getEncoder();
 	}
 	public void init() {
-		climbMotorSpeed = 0.2;
+		climbMotorSpeed = 0.2; //TODO: set to value retrieved from dashboard
 	}
 
 	public void launchClimber() {
