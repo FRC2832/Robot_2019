@@ -20,31 +20,33 @@ public class UserInput implements ISubsystem {
     public static float DEADZONE = 0.1f;
 
     private List<Controller> controllers;
-    NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    public NetworkTable table = inst.getTable("table");
-    SendableChooser<String> chooser = new SendableChooser<>();
+    private NetworkTableInstance inst;
+    private NetworkTable table;
+    private SendableChooser<String> chooser;
+    private HashMap<String, Integer> tableEntries;
     
-
     public void createValue(String selectedTab, String title, int handle, Object value) {
-        if (null != selectedTab && null != title && null != value){
-            ShuffleboardTab currentTab = Shuffleboard.getTab(selectedTab);
-            NetworkTableEntry currentEntry = new NetworkTableEntry(inst, handle);
-            currentEntry.setValue(value);
-            currentEntry = table.getEntry(title);
-            currentEntry = currentTab.add(title, value).getEntry();
+        if (tableEntries.containsKey(title)){
+            if (null != selectedTab && null != title && null != value){
+                ShuffleboardTab currentTab = Shuffleboard.getTab(selectedTab);
+                NetworkTableEntry currentEntry = new NetworkTableEntry(inst, handle);
+                currentEntry.setValue(value);
+                currentEntry = table.getEntry(title);
+                currentEntry = currentTab.add(title, value).getEntry();
+                tableEntries.put(title, handle);
+            }
+            else {
+                Robot.logger.log(Level.DEBUG, "Null value added to shuffleboard. ID10T error.");
+            }
         }
         else {
-            Robot.logger.log(Level.DEBUG, "Null value added to shuffleboard. ID10T error.");
-        }
-    }
-
-    public void updateValue(String title, Object value) {
-        if (null != title && null != value) {
-            NetworkTableEntry selectedEntry = table.getEntry(title);
-            selectedEntry.setValue(value);
-        }
-        else {
-            Robot.logger.log(Level.DEBUG, "Can't update a null value to shuffleboard :who:");
+            if (null != title && null != value) {
+                NetworkTableEntry selectedEntry = table.getEntry(title);
+                selectedEntry.setValue(value);
+            }
+            else {
+                Robot.logger.log(Level.DEBUG, "Can't update a null value to shuffleboard :who:");
+            }
         }
     }
 
@@ -70,8 +72,11 @@ public class UserInput implements ISubsystem {
         controllers = new ArrayList<>();
         controllers.add(new Controller(0));
         controllers.add(new Controller(1));
+        inst = NetworkTableInstance.getDefault();
         table = inst.getTable("datatable");
         Shuffleboard.getTab("tab").add(new LogButton());
+        chooser = new SendableChooser<>();
+        tableEntries = new HashMap<String, Integer>();
     }
 
     @Override
