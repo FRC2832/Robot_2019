@@ -1,4 +1,6 @@
-package org.livoniawarriors.Robot2019;
+package org.livoniawarriors.Robot2019.modules;
+
+import org.livoniawarriors.Robot2019.IControlModule;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Encoder;
@@ -92,10 +94,6 @@ public class TestAutonModule implements IControlModule {
 	@Override
 	public void start() {
 
-		Trajectory left_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".right");
-		Trajectory right_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".left"); 
-		m_left_follower = new EncoderFollower(left_trajectory);
-		m_right_follower = new EncoderFollower(right_trajectory);
 	}
 	@Override
 	public void update() {
