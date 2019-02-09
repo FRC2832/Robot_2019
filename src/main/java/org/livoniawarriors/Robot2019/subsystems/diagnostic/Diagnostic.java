@@ -22,6 +22,11 @@ public class Diagnostic implements ISubsystem {
     }
 
     @Override
+    public void diagnose() {
+
+    }
+
+    @Override
     public void csv(ICsvLogger csv) {
 
     }

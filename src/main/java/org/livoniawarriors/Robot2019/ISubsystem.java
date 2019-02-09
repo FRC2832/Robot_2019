@@ -8,4 +8,6 @@ public interface ISubsystem {
     void dispose() throws Exception;
 
     void csv(ICsvLogger csv);
+
+    void diagnose();
 }

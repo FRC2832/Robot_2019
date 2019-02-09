@@ -21,6 +21,11 @@ public class FlameThrower implements ISubsystem {
     }
 
     @Override
+    public void diagnose() {
+
+    }
+
+    @Override
     public void csv(ICsvLogger csv) {
         csv.log("Flame", "Red");
     }
