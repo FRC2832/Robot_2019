@@ -5,9 +5,11 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.SendableBase;
+import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,22 +20,45 @@ public class UserInput implements ISubsystem {
     public static float DEADZONE = 0.1f;
 
     private List<Controller> controllers;
-    public NetworkTable table;
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    HashMap<String, ShuffleboardTab> NetworkTable = new HashMap<>();
+    public NetworkTable table = inst.getTable("table");
     SendableChooser chooser = new SendableChooser<>();
+    public ShuffleboardTab tab = Shuffleboard.getTab("tab");
 
-    public void createValue(ShuffleboardTab selectedTab, String title, Integer handle, Object value) {
-        NetworkTableEntry currentEntry = new NetworkTableEntry(inst, handle);
-        currentEntry.setValue(value);
-        currentEntry = table.getEntry(title);
-        currentEntry = selectedTab.add(title, value).getEntry();
-        NetworkTable.put(title, selectedTab);
+    public void createValue(String selectedTab, String title, Integer handle, Object value) {
+        if (null != selectedTab && null != title && null != handle && null != value){
+            ShuffleboardTab currentTab = Shuffleboard.getTab(selectedTab);
+            NetworkTableEntry currentEntry = new NetworkTableEntry(inst, handle);
+            currentEntry.setValue(value);
+            currentEntry = table.getEntry(title);
+            currentEntry = currentTab.add(title, value).getEntry();
+        }
+        else {
+            Robot.logger.log(Level.DEBUG, "Null value added to shuffleboard. ID10T error.");
+        }
     }
 
     public void updateValue(String title, Object value) {
-        NetworkTableEntry selectedEntry = table.getEntry(title);
-        selectedEntry.setValue(value);
+        if (null != title && null != value) {
+            NetworkTableEntry selectedEntry = table.getEntry(title);
+            selectedEntry.setValue(value);
+        }
+        else {
+            Robot.logger.log(Level.DEBUG, "Can't update a null value to shuffleboard :who:");
+        }
+    }
+
+    public void addOption(String name, Object option, Boolean defaultOption) {
+        if (defaultOption) {
+            chooser.addDefault(name, option);
+        }
+        else {
+            chooser.addOption(name, option);
+        }
+    }
+
+    public Object getSelected() {
+        return chooser.getSelected();
     }
 
     public Controller getController(int player) {

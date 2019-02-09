@@ -6,28 +6,30 @@ import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.subsystems.DriveTrain;
 import java.io.IOException;
+import java.util.Random;
+
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import com.ctre.phoenix.sensors.PigeonIMU;
+import org.apache.logging.log4j.Level;
 
 public class PeripheralSubsystem implements ISubsystem {
 
     private Lidar lidar;
     private Ultrasonic proxSensor;
-    private PigeonIMU pigeon = new PigeonIMU(DriveTrain.DRIVE_MOTER_FR);
+    private PigeonIMU pigeon;
     private double[] yawPitchRoll = new double[0];
-    public ShuffleboardTab tab;
     private Double currentYaw;
 
     @Override
     public void init() {
         lidar = new Lidar();
-        proxSensor = new Ultrasonic(-1,-1); //TODO: change output port and input port
+        proxSensor = new Ultrasonic(0,1); //TODO: change output port and input port
         proxSensor.setEnabled(false);
         proxSensor.setAutomaticMode(false);
-        //Robot.userInput.createValue(tab, "yaw", 69, currentYaw);
+        pigeon = new PigeonIMU(DriveTrain.DRIVE_MOTER_FR);
     }
 
     @Override
@@ -60,9 +62,15 @@ public class PeripheralSubsystem implements ISubsystem {
         return proxSensor.getRangeMM();
     }
 
-    public double getYaw() {
+    public Double getYaw() {
         //returns the yaw; copy method and change array element to get pitch or roll
         pigeon.getYawPitchRoll(yawPitchRoll);
-        return yawPitchRoll[0];
+        if (yawPitchRoll.length != 0) {
+            return yawPitchRoll[0];
+        }
+        else {
+            Robot.logger.log(Level.DEBUG, "No Pigeon, seems like a layer 8 error.");
+            return 0d;
+        }
     }
 }
