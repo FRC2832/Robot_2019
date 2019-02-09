@@ -1,12 +1,14 @@
 package org.livoniawarriors.Robot2019.modules;
 
 import org.livoniawarriors.Robot2019.IControlModule;
+import org.livoniawarriors.Robot2019.Robot;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.PathfinderFRC;
@@ -65,8 +67,8 @@ public class TestAutonModule implements IControlModule {
 	}
 
 	public void robotinit() {
-		m_left_motor = new Spark(k_left_channel);
-		m_right_motor = new Spark(k_right_channel);
+		m_left_motor = new Talon(k_left_channel);
+		m_right_motor = new Talon(k_right_channel);
 		m_left_encoder = new Encoder(k_left_encoder_port_a, k_left_encoder_port_b);
 		m_right_encoder = new Encoder(k_right_encoder_port_a, k_right_encoder_port_b);
 		m_gyro = new AnalogGyro(k_gyro_port);
@@ -99,13 +101,14 @@ public class TestAutonModule implements IControlModule {
 	public void update() {
 	}
 	private void followPath() {
+		//double desired_heading;
 		if (m_left_follower.isFinished() || m_right_follower.isFinished()) {
 			m_follower_notifier.stop();
 		} else {
 			double left_speed = m_left_follower.calculate(m_left_encoder.get());
 			double right_speed = m_right_follower.calculate(m_right_encoder.get());
 			double heading = m_gyro.getAngle();
-			double desired_heading = Pathfinder.r2d(m_left_follower.getHeading());
+			//desired_heading = Pathfinder.r2d(m_left_follower.getHeading());
 			double heading_difference = Pathfinder.boundHalfDegrees(desired_heading - heading);
 			double turn =  0.8 * (-1.0/80.0) * heading_difference;
 			m_left_motor.set(left_speed + turn);
@@ -114,7 +117,7 @@ public class TestAutonModule implements IControlModule {
 				new Waypoint(68.76, 118.4, Pathfinder.d2r(60)),
 				new Waypoint(144.218, 134.435, 0),
 				new Waypoint(210.243, 151.413, Pathfinder.d2r(-60)),
-				new Waypoint(70.647, 151.413, 0)
+				//new Waypoint(70.647, 151.413, 0)
 
 			};
 			Trajectory.Config config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH, 0.05, 1.7, 2.0, 60.0);
@@ -142,7 +145,7 @@ public class TestAutonModule implements IControlModule {
 			double l = left.calculate(encoder_position_left);
 			double r = right.calculate(encoder_position_right);
 			
-			double gyro_heading = /*... your gyro code here ...*/    // Assuming the gyro is giving a value in degrees
+			double gyro_heading = Robot.peripheralSubsystem.getYaw();    // Assuming the gyro is giving a value in degrees
 			double desired_heading = Pathfinder.r2d(left.getHeading());  // Should also be in degrees
 			
 			double angleDifference = Pathfinder.boundHalfDegrees(desired_heading - gyro_heading);
