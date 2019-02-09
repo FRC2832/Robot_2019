@@ -24,7 +24,7 @@ public class GamePlay implements ISubsystem {
 	}
 	
 	public double getElevatorHeight() {
-		return elevator.getElevatorHeight;
+		return elevator.getElevatorHeight();
 	}
 
 	@Override
