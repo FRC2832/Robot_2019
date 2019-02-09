@@ -73,8 +73,8 @@ public class TestAutonModule implements IControlModule {
 	}
 
 	public void autonomousInit() {
-	  Trajectory left_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".left");
-	  Trajectory right_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".right");
+	  Trajectory left_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".right");
+	  Trajectory right_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".left");
   
 	  m_left_follower = new EncoderFollower(left_trajectory);
 	  m_right_follower = new EncoderFollower(right_trajectory);
