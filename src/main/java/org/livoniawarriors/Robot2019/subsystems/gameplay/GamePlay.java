@@ -6,7 +6,7 @@ import org.livoniawarriors.Robot2019.subsystems.diagnostic.IDiagnosable;
 
 public class GamePlay implements ISubsystem, IDiagnosable {
 
-	private Elevator elevator;
+	protected static Elevator elevator;
 	private GamePieceManipulatorJake gamePieceManipulatorJake;
 	private Climber climber;
 
