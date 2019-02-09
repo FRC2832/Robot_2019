@@ -20,8 +20,7 @@ public class PeripheralSubsystem implements ISubsystem {
     private Lidar lidar;
     private Ultrasonic proxSensor;
     private PigeonIMU pigeon;
-    private double[] yawPitchRoll = new double[0];
-    private Double currentYaw;
+    private double[] yawPitchRoll = new double[3];
 
     @Override
     public void init() {
@@ -35,7 +34,6 @@ public class PeripheralSubsystem implements ISubsystem {
     @Override
     public void update(boolean enabled) {
         lidar.update();
-        currentYaw = getYaw();
     }
 
     @Override
@@ -66,15 +64,11 @@ public class PeripheralSubsystem implements ISubsystem {
         return proxSensor.getRangeMM();
     }
 
-    public Double getYaw() {
+    public double getYaw() {
         //returns the yaw; copy method and change array element to get pitch or roll
         pigeon.getYawPitchRoll(yawPitchRoll);
-        if (yawPitchRoll.length != 0) {
-            return yawPitchRoll[0];
-        }
-        else {
-            Robot.logger.log(Level.DEBUG, "No Pigeon, seems like a layer 8 error.");
-            return 0d;
-        }
+        return yawPitchRoll[0];
     }
+        
+    
 }

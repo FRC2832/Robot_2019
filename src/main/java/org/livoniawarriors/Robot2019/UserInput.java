@@ -22,11 +22,11 @@ public class UserInput implements ISubsystem {
     private List<Controller> controllers;
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     public NetworkTable table = inst.getTable("table");
-    SendableChooser chooser = new SendableChooser<>();
-    public ShuffleboardTab tab = Shuffleboard.getTab("tab");
+    SendableChooser<String> chooser = new SendableChooser<>();
+    
 
-    public void createValue(String selectedTab, String title, Integer handle, Object value) {
-        if (null != selectedTab && null != title && null != handle && null != value){
+    public void createValue(String selectedTab, String title, int handle, Object value) {
+        if (null != selectedTab && null != title && null != value){
             ShuffleboardTab currentTab = Shuffleboard.getTab(selectedTab);
             NetworkTableEntry currentEntry = new NetworkTableEntry(inst, handle);
             currentEntry.setValue(value);
@@ -48,9 +48,9 @@ public class UserInput implements ISubsystem {
         }
     }
 
-    public void addOption(String name, Object option, Boolean defaultOption) {
+    public void addOption(String name, String option, boolean defaultOption) {
         if (defaultOption) {
-            chooser.addDefault(name, option);
+            chooser.setDefaultOption(name, option);
         }
         else {
             chooser.addOption(name, option);
