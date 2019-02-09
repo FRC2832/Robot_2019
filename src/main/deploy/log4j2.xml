@@ -30,7 +30,7 @@
             <appender-ref ref="csvLogger" level="CSV"/>
         </Logger>
         <Root level="debug" additivity="false">
-            <appender-ref ref="console"/>
+            <appender-ref ref="console" level = "debug"/>
         </Root>
     </Loggers>
 </Configuration>

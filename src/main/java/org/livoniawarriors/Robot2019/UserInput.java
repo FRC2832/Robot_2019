@@ -2,15 +2,66 @@ package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.SendableBase;
+import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 
 public class UserInput implements ISubsystem {
 
     public static float DEADZONE = 0.1f;
 
     private List<Controller> controllers;
+    private NetworkTableInstance inst;
+    private NetworkTable table;
+    private SendableChooser<String> chooser;
+    private HashMap<String, Integer> tableEntries;
+    
+    public void createValue(String selectedTab, String title, int handle, Object value) {
+        if (tableEntries.containsKey(title)){
+            if (null != selectedTab && null != title && null != value){
+                ShuffleboardTab currentTab = Shuffleboard.getTab(selectedTab);
+                NetworkTableEntry currentEntry = new NetworkTableEntry(inst, handle);
+                currentEntry.setValue(value);
+                currentEntry = table.getEntry(title);
+                currentEntry = currentTab.add(title, value).getEntry();
+                tableEntries.put(title, handle);
+            }
+            else {
+                Robot.logger.log(Level.DEBUG, "Null value added to shuffleboard. ID10T error.");
+            }
+        }
+        else {
+            if (null != title && null != value) {
+                NetworkTableEntry selectedEntry = table.getEntry(title);
+                selectedEntry.setValue(value);
+            }
+            else {
+                Robot.logger.log(Level.DEBUG, "Can't update a null value to shuffleboard :who:");
+            }
+        }
+    }
+
+    public void addOption(String name, String option, boolean defaultOption) {
+        if (defaultOption) {
+            chooser.setDefaultOption(name, option);
+        }
+        else {
+            chooser.addOption(name, option);
+        }
+    }
+
+    public Object getSelected() {
+        return chooser.getSelected();
+    }
 
     public Controller getController(int player) {
         return controllers.get(player);
@@ -21,6 +72,11 @@ public class UserInput implements ISubsystem {
         controllers = new ArrayList<>();
         controllers.add(new Controller(0));
         controllers.add(new Controller(1));
+        inst = NetworkTableInstance.getDefault();
+        table = inst.getTable("datatable");
+        Shuffleboard.getTab("tab").add(new LogButton());
+        chooser = new SendableChooser<>();
+        tableEntries = new HashMap<String, Integer>();
     }
 
     @Override
@@ -30,6 +86,11 @@ public class UserInput implements ISubsystem {
 
     @Override
     public void dispose() {
+
+    }
+
+    @Override
+    public void diagnose() {
 
     }
 

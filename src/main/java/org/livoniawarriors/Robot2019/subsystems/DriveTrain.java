@@ -22,6 +22,11 @@ public class DriveTrain implements ISubsystem {
     }
 
     @Override
+    public void diagnose() {
+
+    }
+
+    @Override
     public void init() {
         WPI_TalonSRX talonFL = new WPI_TalonSRX(DRIVE_MOTER_FL);
         WPI_TalonSRX talonFR = new WPI_TalonSRX(DRIVE_MOTER_FR);

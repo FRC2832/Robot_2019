@@ -8,7 +8,6 @@ import org.livoniawarriors.Robot2019.modules.TestAutonModule;
 import org.livoniawarriors.Robot2019.modules.TestTeleopModule;
 import org.livoniawarriors.Robot2019.subsystems.*;
 import org.livoniawarriors.Robot2019.subsystems.diagnostic.Diagnostic;
-import org.livoniawarriors.Robot2019.subsystems.diagnostic.IDiagnosable;
 import org.livoniawarriors.Robot2019.subsystems.flamethrower.FlameThrower;
 import org.livoniawarriors.Robot2019.subsystems.gameplay.*;
 import org.livoniawarriors.Robot2019.subsystems.peripherals.PeripheralSubsystem;
@@ -43,17 +42,15 @@ public class Robot extends TimedRobot {
     private final Level CSV = Level.getLevel("CSV");
     private final ICsvLogger csvBufferWriter;
     private final Map<String, Object> csvBuffer;
-    private final Notifier csvNotifier;
-    private final static double CSV_UPDATE_PERIOD = 0.04;
-
-    private int timer;
+    private final Notifier csvNotifier, diagnosticNotifier;
+    private final double CSV_UPDATE_PERIOD = 0.04;
+    private final double DIAGNOSTIC_PERIOD = 4;
 
     // Get the robot
     public static Robot getInstance() {
         return instance;
     }
 
-    // "Making the baby is the fun part." - Robots
     Robot() {
         instance = this;
         csvBuffer = new HashMap<>();
@@ -62,6 +59,7 @@ public class Robot extends TimedRobot {
         csvLogger = LogManager.getLogger("CsvLogger");
         csvBufferWriter = csvBuffer::put;
         csvNotifier = new Notifier(this::logCSV);
+        diagnosticNotifier = new Notifier(this::diagnose);
         logger.error("Hi");
     }
 
@@ -146,7 +144,22 @@ public class Robot extends TimedRobot {
      */
     private void logCSV() {
         subsystems.forEach(s -> s.csv(csvBufferWriter));
-        csvLogger.info("", csvBuffer.values().toArray());
+        csvLogger.log(Level.getLevel("CSV"), "", csvBuffer.values().toArray());
+    }
+
+    /**
+     * Called periodically to diagnose subsystems
+     */
+    private void diagnose() {
+        if(DriverStation.getInstance().isFMSAttached())
+            return;
+        for (var subsystem: subsystems) {
+            try {
+                subsystem.diagnose();
+            } catch (Throwable t) {
+                Robot.logger.error("Failed to diagnose " + subsystem.getClass().getSimpleName(), t);
+            }
+        }
     }
 
     @Override
@@ -174,27 +187,21 @@ public class Robot extends TimedRobot {
 
         // Start csv logging
         csvNotifier.startPeriodic(CSV_UPDATE_PERIOD);
+
+        // Start diagnosing
+        diagnosticNotifier.startPeriodic(DIAGNOSTIC_PERIOD);
+        diagnose();
     }
 
     @Override
     public void robotPeriodic() {
-        timer++;
         subsystems.forEach(subsystem -> {
             try {
                 subsystem.update(isEnabled());
             } catch (Throwable t) {
-                logger.error(activeModule.getClass().getSimpleName(), t);
+                logger.error(subsystem.getClass().getSimpleName(), t);
             }
         });
-        if(!DriverStation.getInstance().isFMSAttached()) {
-            if(timer % 200 == 0) {
-                subsystems.forEach(subsystem->{
-                    if(subsystem instanceof IDiagnosable) {
-                        ((IDiagnosable)subsystem).diagnose();
-                    }
-                });
-            }
-        }
     }
 
     @Override
@@ -235,7 +242,7 @@ public class Robot extends TimedRobot {
             try {
                 defaultModule.start();
             } catch (Throwable t) {
-                logger.error(activeModule.getClass().getSimpleName(), t);
+                logger.error(defaultModule.getClass().getSimpleName(), t);
             }
         }
     }
