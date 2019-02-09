@@ -22,6 +22,10 @@ public class GamePlay implements ISubsystem {
 		gamePieceManipulatorJake.update(enabled);
 		climber.update(enabled);
 	}
+	
+	public double getElevatorHeight() {
+		return elevator.getElevatorHeight();
+	}
 
 	@Override
 	public void dispose() throws Exception {
