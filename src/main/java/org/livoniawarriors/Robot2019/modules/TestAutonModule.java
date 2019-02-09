@@ -78,7 +78,7 @@ public class TestAutonModule implements IControlModule {
   
 	  m_left_follower = new EncoderFollower(left_trajectory);
 	  m_right_follower = new EncoderFollower(right_trajectory);
-  
+	
 	  m_left_follower.configureEncoder(m_left_encoder.get(), k_ticks_per_rev, k_wheel_diameter);
 	  // You must tune the PID values on the following line!
 	  m_left_follower.configurePIDVA(1.0, 0.0, 0.0, 1 / k_max_velocity, 0);
@@ -118,7 +118,39 @@ public class TestAutonModule implements IControlModule {
 
 			};
 			Trajectory.Config config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH, 0.05, 1.7, 2.0, 60.0);
-			Trajectory trajectory = Pathfinder.generate(points, config);
+			Trajectory trajectory = Pathfinder.generate(points, config);// Generate the trajectory
+			for (int i = 0; i < trajectory.length(); i++) {
+				Trajectory.Segment seg = trajectory.get(i);
+				
+				System.out.printf("%f,%f,%f,%f,%f,%f,%f,%f\n", 
+					seg.dt, seg.x, seg.y, seg.position, seg.velocity, 
+						seg.acceleration, seg.jerk, seg.heading);
+			}
+			// The distance between the left and right sides of the wheelbase is 0.6m
+			double wheelbase_width = 0.6;
+
+			// Create the Modifier Object
+			TankModifier modifier = new TankModifier(trajectory);
+
+			// Generate the Left and Right trajectories using the original trajectory
+			// as the centre
+			modifier.modify(wheelbase_width);
+
+			Trajectory left  = modifier.getLeftTrajectory();       // Get the Left Side
+			Trajectory right = modifier.getRightTrajectory();      // Get the Right Side
+			double output = left.calculate(encoder_position);
+			double l = left.calculate(encoder_position_left);
+			double r = right.calculate(encoder_position_right);
+			
+			double gyro_heading = /*... your gyro code here ...*/    // Assuming the gyro is giving a value in degrees
+			double desired_heading = Pathfinder.r2d(left.getHeading());  // Should also be in degrees
+			
+			double angleDifference = Pathfinder.boundHalfDegrees(desired_heading - gyro_heading);
+			double turn = 0.8 * (-1.0/80.0) * angleDifference;
+			
+			setLeftMotors(l + turn);
+			setRightMotors(r - turn);
+			
 		}
 	}
 
