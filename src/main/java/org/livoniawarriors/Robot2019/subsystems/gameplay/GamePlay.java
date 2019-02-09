@@ -23,8 +23,8 @@ public class GamePlay implements ISubsystem {
 		climber.update(enabled);
 	}
 	
-	public Elevator getElevator() {
-		return elevator;
+	public double getElevator() {
+		return elevator.getElevatorHeight;
 	}
 
 	@Override
