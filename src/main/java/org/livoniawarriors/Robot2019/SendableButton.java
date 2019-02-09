@@ -4,10 +4,9 @@ import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import org.apache.logging.log4j.Level;
 
-public class LogPutton implements Sendable {
+public abstract class SendableButton implements Sendable {
 
-    private boolean running;
-    private Thread thread;
+    protected boolean running;
 
     private boolean isRunning() {
         return running;
@@ -20,7 +19,7 @@ public class LogPutton implements Sendable {
 
     @Override
     public String getName() {
-        return "";
+        return "Button";
     }
 
     @Override
@@ -38,26 +37,23 @@ public class LogPutton implements Sendable {
 
     }
 
+    protected abstract void onEnable();
+
+    protected abstract void onDisable();
+
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("Command");
         builder.addStringProperty(".name", this::getName, this::setName);
         builder.addBooleanProperty("running", this::isRunning, value -> {
             if (value) {
-                if(!running) {
-                    running = true;
-                    thread = new Thread(() -> {
-                        // Copy files here
-                        Robot.logger.log(Level.INFO, "Pulling logs...");
-                        running = false;
-                    });
-                }
+                if(!running)
+                    onEnable();
+                running = true;
             } else {
+                if(running)
+                    onDisable();
                 running = false;
-                if(thread != null) {
-                    thread.interrupt();
-                    thread = null;
-                }
             }
         });
         builder.addBooleanProperty(".isParented", () -> false, (parented) -> {});

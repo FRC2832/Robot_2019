@@ -22,7 +22,7 @@ public class UserInput implements ISubsystem {
         controllers = new ArrayList<>();
         controllers.add(new Controller(0));
         controllers.add(new Controller(1));
-        Shuffleboard.getTab("tab").add(new LogPutton());
+        Shuffleboard.getTab("tab").add(new LogButton());
     }
 
     @Override

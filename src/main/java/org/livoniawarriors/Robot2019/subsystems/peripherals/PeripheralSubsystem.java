@@ -19,7 +19,7 @@ public class PeripheralSubsystem implements ISubsystem {
     @Override
     public void init() {
         lidar = new Lidar();
-        proxSensor = new Ultrasonic(-1,-1); //TODO: change output port and input port
+        proxSensor = new Ultrasonic(0,1); //TODO: change output port and input port
         proxSensor.setEnabled(false);
         proxSensor.setAutomaticMode(false);
     }

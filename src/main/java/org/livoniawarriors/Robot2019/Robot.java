@@ -145,7 +145,7 @@ public class Robot extends TimedRobot {
      */
     private void logCSV() {
         subsystems.forEach(s -> s.csv(csvBufferWriter));
-        csvLogger.info("", csvBuffer.values().toArray());
+        csvLogger.info("csv", csvBuffer.values().toArray());
     }
 
     /**
@@ -154,7 +154,13 @@ public class Robot extends TimedRobot {
     private void diagnose() {
         if(DriverStation.getInstance().isFMSAttached())
             return;
-        subsystems.forEach(ISubsystem::diagnose);
+        for (var subsystem: subsystems) {
+            try {
+                subsystem.diagnose();
+            } catch (Throwable t) {
+                Robot.logger.error("Failed to diagnose " + subsystem.getClass().getSimpleName(), t);
+            }
+        }
     }
 
     @Override
