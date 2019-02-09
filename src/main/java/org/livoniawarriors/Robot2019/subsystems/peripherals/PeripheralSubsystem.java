@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Random;
 
 import edu.wpi.first.wpilibj.Ultrasonic;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -22,6 +23,11 @@ public class PeripheralSubsystem implements ISubsystem {
     private PigeonIMU pigeon;
     private double[] yawPitchRoll = new double[3];
 
+    private static final int PRESSURE_SENSOR_PORT = 1;
+    private AnalogInput pressureSensor;
+
+    private REVDigitBoard digitBoard;
+
     @Override
     public void init() {
         lidar = new Lidar();
@@ -29,11 +35,14 @@ public class PeripheralSubsystem implements ISubsystem {
         proxSensor.setEnabled(false);
         proxSensor.setAutomaticMode(false);
         pigeon = new PigeonIMU(DriveTrain.DRIVE_MOTER_FR);
+        pressureSensor = new AnalogInput(PRESSURE_SENSOR_PORT);
+        digitBoard = new REVDigitBoard();
     }
 
     @Override
     public void update(boolean enabled) {
         lidar.update();
+        digitBoard.display(Double.toString(getPressure()));
     }
 
     @Override
@@ -71,4 +80,8 @@ public class PeripheralSubsystem implements ISubsystem {
     }
         
     
+
+    public double getPressure() {
+        return 250d * pressureSensor.getVoltage() / 5d - 25d;
+    }
 }
