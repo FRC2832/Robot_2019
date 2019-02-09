@@ -1,14 +1,10 @@
-package org.livoniawarriors.Robot2019.modules;
-
-import org.livoniawarriors.Robot2019.IControlModule;
-import org.livoniawarriors.Robot2019.Robot;
+package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedController;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.PathfinderFRC;
@@ -67,20 +63,20 @@ public class TestAutonModule implements IControlModule {
 	}
 
 	public void robotinit() {
-		m_left_motor = new Talon(k_left_channel);
-		m_right_motor = new Talon(k_right_channel);
+		m_left_motor = new Spark(k_left_channel);
+		m_right_motor = new Spark(k_right_channel);
 		m_left_encoder = new Encoder(k_left_encoder_port_a, k_left_encoder_port_b);
 		m_right_encoder = new Encoder(k_right_encoder_port_a, k_right_encoder_port_b);
 		m_gyro = new AnalogGyro(k_gyro_port);
 	}
 
 	public void autonomousInit() {
-	  Trajectory left_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".right");
-	  Trajectory right_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".left");
+	  Trajectory left_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".left");
+	  Trajectory right_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".right");
   
 	  m_left_follower = new EncoderFollower(left_trajectory);
 	  m_right_follower = new EncoderFollower(right_trajectory);
-	
+  
 	  m_left_follower.configureEncoder(m_left_encoder.get(), k_ticks_per_rev, k_wheel_diameter);
 	  // You must tune the PID values on the following line!
 	  m_left_follower.configurePIDVA(1.0, 0.0, 0.0, 1 / k_max_velocity, 0);
@@ -96,19 +92,22 @@ public class TestAutonModule implements IControlModule {
 	@Override
 	public void start() {
 
+		Trajectory left_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".right");
+		Trajectory right_trajectory = PathfinderFRC.getTrajectory(k_path_name + ".left"); 
+		m_left_follower = new EncoderFollower(left_trajectory);
+		m_right_follower = new EncoderFollower(right_trajectory);
 	}
 	@Override
 	public void update() {
 	}
 	private void followPath() {
-		//double desired_heading;
 		if (m_left_follower.isFinished() || m_right_follower.isFinished()) {
 			m_follower_notifier.stop();
 		} else {
 			double left_speed = m_left_follower.calculate(m_left_encoder.get());
 			double right_speed = m_right_follower.calculate(m_right_encoder.get());
 			double heading = m_gyro.getAngle();
-			//desired_heading = Pathfinder.r2d(m_left_follower.getHeading());
+			double desired_heading = Pathfinder.r2d(m_left_follower.getHeading());
 			double heading_difference = Pathfinder.boundHalfDegrees(desired_heading - heading);
 			double turn =  0.8 * (-1.0/80.0) * heading_difference;
 			m_left_motor.set(left_speed + turn);
@@ -117,43 +116,11 @@ public class TestAutonModule implements IControlModule {
 				new Waypoint(68.76, 118.4, Pathfinder.d2r(60)),
 				new Waypoint(144.218, 134.435, 0),
 				new Waypoint(210.243, 151.413, Pathfinder.d2r(-60)),
-				//new Waypoint(70.647, 151.413, 0)
+				new Waypoint(70.647, 151.413, 0)
 
 			};
 			Trajectory.Config config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH, 0.05, 1.7, 2.0, 60.0);
-			Trajectory trajectory = Pathfinder.generate(points, config);// Generate the trajectory
-			for (int i = 0; i < trajectory.length(); i++) {
-				Trajectory.Segment seg = trajectory.get(i);
-				
-				System.out.printf("%f,%f,%f,%f,%f,%f,%f,%f\n", 
-					seg.dt, seg.x, seg.y, seg.position, seg.velocity, 
-						seg.acceleration, seg.jerk, seg.heading);
-			}
-			// The distance between the left and right sides of the wheelbase is 0.6m
-			double wheelbase_width = 0.6;
-
-			// Create the Modifier Object
-			TankModifier modifier = new TankModifier(trajectory);
-
-			// Generate the Left and Right trajectories using the original trajectory
-			// as the centre
-			modifier.modify(wheelbase_width);
-
-			Trajectory left  = modifier.getLeftTrajectory();       // Get the Left Side
-			Trajectory right = modifier.getRightTrajectory();      // Get the Right Side
-			double output = left.calculate(encoder_position);
-			double l = left.calculate(encoder_position_left);
-			double r = right.calculate(encoder_position_right);
-			
-			double gyro_heading = Robot.peripheralSubsystem.getYaw();    // Assuming the gyro is giving a value in degrees
-			double desired_heading = Pathfinder.r2d(left.getHeading());  // Should also be in degrees
-			
-			double angleDifference = Pathfinder.boundHalfDegrees(desired_heading - gyro_heading);
-			double turn = 0.8 * (-1.0/80.0) * angleDifference;
-			
-			setLeftMotors(l + turn);
-			setRightMotors(r - turn);
-			
+			Trajectory trajectory = Pathfinder.generate(points, config);
 		}
 	}
 
