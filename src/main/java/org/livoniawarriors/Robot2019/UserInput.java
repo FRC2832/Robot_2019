@@ -2,6 +2,7 @@ package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ public class UserInput implements ISubsystem {
         controllers = new ArrayList<>();
         controllers.add(new Controller(0));
         controllers.add(new Controller(1));
+        Shuffleboard.getTab("tab").add(new LogButton());
     }
 
     @Override
@@ -30,6 +32,16 @@ public class UserInput implements ISubsystem {
 
     @Override
     public void dispose() {
+
+    }
+
+    @Override
+    public void diagnose() {
+
+    }
+
+    @Override
+    public void csv(ICsvLogger csv) {
 
     }
 
@@ -94,9 +106,9 @@ public class UserInput implements ISubsystem {
 
         @Override
         public double getRawAxis(int axis) {
-            if(super.getRawAxis(axis) < DEADZONE)
+            if(Math.abs(super.getRawAxis(axis)) < DEADZONE)
                 return 0;
-            return super.getRawAxis(axis) - DEADZONE;
+            return (Math.abs(super.getRawAxis(axis)) - DEADZONE) * Math.signum(super.getRawAxis(axis));
         }
 
         /**
@@ -152,7 +164,7 @@ public class UserInput implements ISubsystem {
         A(1),
         B(2),
         X(3),
-        k(4),
+        Y(4),
         BACK(7),
         START(8);
 

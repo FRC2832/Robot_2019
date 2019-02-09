@@ -6,4 +6,8 @@ public interface ISubsystem {
     void update(boolean enabled);
 
     void dispose() throws Exception;
+
+    void csv(ICsvLogger csv);
+
+    void diagnose();
 }

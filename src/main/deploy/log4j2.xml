@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn" packages="org.livoniawarriors.Robot2019">
+    <CustomLevels>
+        <CustomLevel name="CSV" intLevel="550" />
+    </CustomLevels>
+    <Properties>
+        <Property name="basePath">/home/lvuser/logging</Property>
+    </Properties>
+
+    <Appenders>
+        <File name="logLogger"
+              fileName="${sys:logFolder:-/home/lvuser/logging}/logs/log-${date:yyyy-MM-dd-HH-mm-ss-SSS}.log">
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %p %m%n</Pattern>
+            </PatternLayout>
+        </File>
+        <File name="csvLogger"
+              fileName="${sys:logFolder:-/home/lvuser/logging}/csv/csv-${date:yyyy-MM-dd-HH-mm-ss-SSS}.csv">
+            <TimestampedCsvParameterLayout delimiter=","/>
+        </File>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="LogLogger" level="debug" additivity="true">
+            <appender-ref ref="logLogger" level="debug"/>
+        </Logger>
+        <Logger name="CsvLogger" level="CSV" additivity="true">
+            <appender-ref ref="csvLogger" level="CSV"/>
+        </Logger>
+        <Root level="debug" additivity="false">
+            <appender-ref ref="console" level = "debug"/>
+        </Root>
+    </Loggers>
+</Configuration>
