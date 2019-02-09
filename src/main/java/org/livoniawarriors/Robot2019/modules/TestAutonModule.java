@@ -1,5 +1,7 @@
 package org.livoniawarriors.Robot2019;
 
+import org.livoniawarriors.Robot2019.IControlModule;
+
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Notifier;
@@ -14,7 +16,32 @@ import jaci.pathfinder.modifiers.TankModifier;
 import jaci.pathfinder.Waypoint;
 
 public class TestAutonModule implements IControlModule {
-	private static final int k_ticks_per_rev = 1024;
+
+	@Override
+	public void init() {
+
+	}
+
+	@Override
+	public void start() {
+
+	}
+
+	@Override
+	public void update() {
+
+	}
+
+	@Override
+	public void stop() {
+
+	}
+
+	@Override
+	public boolean isFinished() {
+		return false;
+	}
+/*	private static final int k_ticks_per_rev = 1024;
 	private static final double k_wheel_diameter = 4.0 / 12.0;
 	private static final double k_max_velocity = 4.0;
   
@@ -57,7 +84,7 @@ public class TestAutonModule implements IControlModule {
 
 	k_path_name - name of this path*/
 
-	
+	/*
 	public void init(){
 
 	}
@@ -127,7 +154,7 @@ public class TestAutonModule implements IControlModule {
 	/**
 	* This function is called periodically during autonomous.
 	*/
-
+	/*
 	public void autonomousPeriodic() {
 		
 	}
@@ -143,5 +170,6 @@ public class TestAutonModule implements IControlModule {
 		m_follower_notifier.stop();
 		m_left_motor.set(0);
 		m_right_motor.set(0);
-	}
+	} 
+	*/
 }
