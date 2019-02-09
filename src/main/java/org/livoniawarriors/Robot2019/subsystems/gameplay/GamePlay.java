@@ -8,17 +8,20 @@ public class GamePlay implements ISubsystem, IDiagnosable {
 
 	private Elevator elevator;
 	private GamePieceManipulatorJake gamePieceManipulatorJake;
+	private Climber climber;
 
 	@Override
 	public void init() {
 		elevator = new Elevator();
 		gamePieceManipulatorJake = new GamePieceManipulatorJake();
+		climber = new Climber();
 	}
 
 	@Override
 	public void update(boolean enabled) {
 		elevator.update(enabled);
 		gamePieceManipulatorJake.update(enabled);
+		climber.update(enabled);
 	}
 
 	@Override
@@ -34,5 +37,6 @@ public class GamePlay implements ISubsystem, IDiagnosable {
 	@Override
 	public void diagnose() {
 		elevator.diagnose();
+		climber.diagnose();
 	}
 }
