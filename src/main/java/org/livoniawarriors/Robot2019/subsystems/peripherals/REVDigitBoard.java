@@ -26,7 +26,7 @@ public class REVDigitBoard {
 	AnalogInput pot;
 	
 	byte[][] charreg;
-	Map charmap;
+	Map<Character, Integer> charmap;
 	
 	REVDigitBoard() {
 		i2c = new I2C(Port.kMXP, 0x70);
