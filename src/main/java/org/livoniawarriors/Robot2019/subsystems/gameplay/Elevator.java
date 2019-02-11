@@ -33,10 +33,10 @@ public class Elevator implements PIDSource, PIDOutput {
     private static final double TOLERANCE = 1; // +- how many inches is acceptable
     private static final double MAX_MOTOR_SPEED = 0.7;
 
-    private static final double movingP = 0.9;
+    private static final double movingP = 10.0;
     private static final double movingI = 0.0;
     private static final double movingD = 0.5;
-    private static final double movingF = 0.007;
+    private static final double movingF = 0.7;
 
     private static final double maintainerP = 1.0;
     private static final double maintainerI = 0.0;
@@ -48,7 +48,7 @@ public class Elevator implements PIDSource, PIDOutput {
 
     private UserInput.Controller controller;
 
-    private boolean manual = false;
+    private boolean manual = true;
     private boolean movingPID;
     private ElevatorHeights currentSetHeight;
 
@@ -66,6 +66,8 @@ public class Elevator implements PIDSource, PIDOutput {
         controller = Robot.userInput.getController(0);
 
         currentSetHeight = ElevatorHeights.LowHatch;
+
+        setElevatorHeight(ElevatorHeights.LowHatch);
     }
 
     /**
@@ -145,7 +147,7 @@ public class Elevator implements PIDSource, PIDOutput {
             }
         }
 
-        //System.out.println("Current Elevator Height: " + getElevatorHeight());
+        System.out.println("Current Elevator Height: " + getElevatorHeight());
 
     }
 
@@ -153,7 +155,6 @@ public class Elevator implements PIDSource, PIDOutput {
     public void pidWrite(double output) {
         if (!manual) {
             elevatorMotor.set(output);
-            System.out.println("Motor being powered with " + output);
         }
     }
 
@@ -178,7 +179,7 @@ public class Elevator implements PIDSource, PIDOutput {
     public enum ElevatorHeights {
 
         LowHatch(0), LowPort(8.5),
-        MidHatch(10), MidPort(36.5), //MidHatch orriginally 28
+        MidHatch(28), MidPort(36.5),
         TopHatch(56), TopPort(64.5), 
         ShipPort(17);
 
