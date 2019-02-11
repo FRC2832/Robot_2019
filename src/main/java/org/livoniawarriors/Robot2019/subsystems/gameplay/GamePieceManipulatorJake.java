@@ -46,6 +46,8 @@ public class GamePieceManipulatorJake {
         tilter = new DoubleSolenoid(TILTER_DOWN, TILTER_UP);
         leftIntakeMotor = new WPI_TalonSRX(LEFT_INTAKE);
         rightIntakeMotor = new WPI_TalonSRX(RIGHT_INTAKE);
+        rightIntakeMotor.follow(leftIntakeMotor);
+        rightIntakeMotor.setInverted(true);
 
         ballSensor = new AnalogInput(ANALOG_INPUT_CHANNEL);
     
@@ -58,20 +60,16 @@ public class GamePieceManipulatorJake {
         if (isEnabled) {
             if (intakeDown) {
 
-                if (controller.getY(Hand.kLeft) != 0) {
-                    if (controller.getY(Hand.kLeft) > 0) {
-                        leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
-                    } else if (!hasBall()) {
+                if (controller.getTriggerAxis(Hand.kLeft) != 0) {
+                    if (!hasBall()) {
                         leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
                     }
                 } else {
                     leftIntakeMotor.set(0);
                 }
 
-                if (controller.getY(Hand.kRight) != 0) {
-                    if (controller.getY(Hand.kRight) > 0) {
-                        rightIntakeMotor.set(controller.getTriggerAxis(Hand.kRight));
-                    } else if (!hasBall()) {
+                if (controller.getTriggerAxis(Hand.kRight) != 0) {
+                    if (hasBall()) {
                         rightIntakeMotor.set(controller.getTriggerAxis(Hand.kRight));
                     }
                 } else {
@@ -89,8 +87,7 @@ public class GamePieceManipulatorJake {
             }
         }
 
-        System.out.println(hasBall() ? "I have a ball!!" : "I don't have a ball");
-
+        //System.out.println(hasBall() ? "I have a ball!!" : "I don't have a ball");
     }
 
     public boolean hasBall() {
