@@ -13,6 +13,7 @@ import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -29,8 +30,12 @@ public class GamePieceManipulatorJake {
     private final static int FLOWER_IN = 2;
     private final static int FLOWER_OUT = 3;
 
+    private final static int ANALOG_INPUT_CHANNEL = 0;
+
     private DoubleSolenoid flower, tilter;
     private WPI_TalonSRX leftIntakeMotor, rightIntakeMotor;
+
+    private AnalogInput ballSensor;
 
     private UserInput.Controller controller;
 
@@ -41,6 +46,8 @@ public class GamePieceManipulatorJake {
         tilter = new DoubleSolenoid(TILTER_DOWN, TILTER_UP);
         leftIntakeMotor = new WPI_TalonSRX(LEFT_INTAKE);
         rightIntakeMotor = new WPI_TalonSRX(RIGHT_INTAKE);
+
+        ballSensor = new AnalogInput(ANALOG_INPUT_CHANNEL);
     
         controller = Robot.userInput.getController(1);
         
@@ -50,16 +57,27 @@ public class GamePieceManipulatorJake {
     public void update(boolean isEnabled) {
         if (isEnabled) {
             if (intakeDown) {
-                if (controller.getTriggerAxis(Hand.kLeft) != 0) {
-                    leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
+
+                if (controller.getY(Hand.kLeft) != 0) {
+                    if (controller.getY(Hand.kLeft) > 0) {
+                        leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
+                    } else if (!hasBall()) {
+                        leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
+                    }
                 } else {
                     leftIntakeMotor.set(0);
                 }
-                if (controller.getTriggerAxis(Hand.kRight) != 0) {
-                    rightIntakeMotor.set(controller.getTriggerAxis(Hand.kRight));
+
+                if (controller.getY(Hand.kRight) != 0) {
+                    if (controller.getY(Hand.kRight) > 0) {
+                        rightIntakeMotor.set(controller.getTriggerAxis(Hand.kRight));
+                    } else if (!hasBall()) {
+                        rightIntakeMotor.set(controller.getTriggerAxis(Hand.kRight));
+                    }
                 } else {
                     rightIntakeMotor.set(0);
                 }
+
             }
 
             if (controller.getButtonPressed(Button.Y)) {
@@ -70,6 +88,13 @@ public class GamePieceManipulatorJake {
                 moveFlower();
             }
         }
+
+        System.out.println(hasBall() ? "I have a ball!!" : "I don't have a ball");
+
+    }
+
+    public boolean hasBall() {
+        return ballSensor.getVoltage() < 1.5;
     }
 
     private void moveFlower() {
