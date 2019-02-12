@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 /**
  * Add your docs here.
  */
-public class GamePieceManipulatorJake {
+public class GamePieceManipulator {
 
     private final static int RIGHT_INTAKE = 14;
     private final static int LEFT_INTAKE = 15;
@@ -29,10 +29,12 @@ public class GamePieceManipulatorJake {
     private final static int TILTER_DOWN = 5;
     private final static int FLOWER_IN = 2;
     private final static int FLOWER_OUT = 3;
+    private final static int ACCORDION_IN = 6;
+    private final static int ACCORDION_OUT = 7;
 
     private final static int ANALOG_INPUT_CHANNEL = 0;
 
-    private DoubleSolenoid flower, tilter;
+    private DoubleSolenoid flower, tilter, accordion;
     private WPI_TalonSRX leftIntakeMotor, rightIntakeMotor;
 
     private AnalogInput ballSensor;
@@ -41,9 +43,10 @@ public class GamePieceManipulatorJake {
 
     boolean intakeDown;
 
-    public GamePieceManipulatorJake() {
+    public GamePieceManipulator() {
         flower = new DoubleSolenoid(FLOWER_IN, FLOWER_OUT);
         tilter = new DoubleSolenoid(TILTER_DOWN, TILTER_UP);
+        accordion = new DoubleSolenoid(ACCORDION_IN, ACCORDION_OUT);
         leftIntakeMotor = new WPI_TalonSRX(LEFT_INTAKE);
         rightIntakeMotor = new WPI_TalonSRX(RIGHT_INTAKE);
         rightIntakeMotor.follow(leftIntakeMotor);
@@ -60,20 +63,18 @@ public class GamePieceManipulatorJake {
         if (isEnabled) {
             if (intakeDown) {
 
-                if (controller.getTriggerAxis(Hand.kLeft) != 0) {
-                    if (!hasBall()) {
-                        leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
-                    }
+                //Intake
+                if (controller.getTriggerAxis(Hand.kLeft) != 0 && !hasBall()) {    
+                    leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
                 } else {
                     leftIntakeMotor.set(0);
                 }
 
-                if (controller.getTriggerAxis(Hand.kRight) != 0) {
-                    if (hasBall()) {
-                        rightIntakeMotor.set(controller.getTriggerAxis(Hand.kRight));
-                    }
+                //Expel
+                if (controller.getTriggerAxis(Hand.kRight) != 0 && hasBall()) {
+                    leftIntakeMotor.set(-1 * controller.getTriggerAxis(Hand.kRight));
                 } else {
-                    rightIntakeMotor.set(0);
+                    leftIntakeMotor.set(0);
                 }
 
             }
@@ -84,6 +85,8 @@ public class GamePieceManipulatorJake {
                 moveIntakeDown();
             } else if (controller.getButtonPressed(Button.A)) {
                 moveFlower();
+            } else if (controller.getButtonPressed(Button.X)) {
+                moveAccordion();
             }
         }
 
@@ -95,10 +98,16 @@ public class GamePieceManipulatorJake {
     }
 
     private void moveFlower() {
+        if (accordion.get() == Value.kReverse) {
+            flower.set(flower.get() == Value.kReverse ? Value.kReverse : Value.kForward);
+        }
+    }
+
+    private void moveAccordion() {
         if (!intakeDown) {
-            flower.set(flower.get() == Value.kReverse ? Value.kForward : Value.kReverse);
+            accordion.set(accordion.get() == Value.kReverse ? Value.kForward : Value.kReverse);
         } else {
-            moveIntakeDown();
+            moveIntakeUp();
             new Thread() {
                 @Override
                 public void run() {
@@ -107,17 +116,18 @@ public class GamePieceManipulatorJake {
                     } catch(InterruptedException e) {
                         Robot.logger.error("Thread failed to sleep ", e);
                     }
-                    flower.set(flower.get() == Value.kReverse ? Value.kForward : Value.kReverse);
+                    accordion.set(accordion.get() == Value.kReverse ? Value.kForward : Value.kReverse);
                 }
             }.start();
         }
     }
 
     private void moveIntakeUp() {
-        if (flower.get() == Value.kReverse) {
+        if (flower.get() == Value.kReverse && accordion.get() == Value.kForward) {
             tilter.set(Value.kReverse); 
         } else {
             flower.set(Value.kReverse);
+            accordion.set(Value.kForward);
             new Thread() {
                 @Override
                 public void run() {
@@ -134,11 +144,11 @@ public class GamePieceManipulatorJake {
     }
 
     private void moveIntakeDown() {
-        if (flower.get() == Value.kReverse) {
+        if (flower.get() == Value.kReverse && accordion.get() == Value.kForward) {
             tilter.set(Value.kForward);
-            
         } else {
             flower.set(Value.kReverse);
+            accordion.set(Value.kForward);
             new Thread() {
                 @Override
                 public void run() {
