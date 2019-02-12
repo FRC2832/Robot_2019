@@ -9,7 +9,7 @@ public class UnderConsoleLights {
 
     //TODO: add appropriate number of drives
 
-    public void init() {
+    public UnderConsoleLights() {
         for(int i = 0; i < NUM_DRIVES; i++) { 
             lightDrives.add(new LightDrive());
         }
@@ -17,10 +17,10 @@ public class UnderConsoleLights {
 
     private void changeColor(Color color) {
         for(LightDrive ld : lightDrives) {
-            ld.setColor(1, color, 0.8f);
-            ld.setColor(2, color, 0.8f);
-            ld.setColor(3, color, 0.8f);
-            ld.setColor(4, color, 0.8f);
+            ld.setColor(1, color);
+            ld.setColor(2, color);
+            ld.setColor(3, color);
+            ld.setColor(4, color);
             ld.update();
         }
     }

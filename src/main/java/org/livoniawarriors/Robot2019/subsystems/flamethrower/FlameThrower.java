@@ -4,10 +4,12 @@ import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.ISubsystem;
 
 public class FlameThrower implements ISubsystem {
+    private UnderConsoleLights lightsConsole;
 
     @Override
     public void init() {
-
+        lightsConsole = new UnderConsoleLights();
+        lightsConsole.greenLights();
     }
 
     @Override

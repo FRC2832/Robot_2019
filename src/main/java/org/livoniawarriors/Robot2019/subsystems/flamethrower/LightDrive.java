@@ -12,10 +12,14 @@ public class LightDrive {
     private ByteBuffer recieveID;
     private ByteBuffer timestampBuffer;
 
-    private final int CAN_ID = 33882112; //given by lib.
+    private int CAN_ID; //given by lib.
+    private static int NUM_DRIVES = 0;
     private final int MSG_ID_MASK = 536870911; //given by lib.
 
     public LightDrive() {
+        CAN_ID = 33882112 + (NUM_DRIVES);
+        NUM_DRIVES++;
+        System.out.println(CAN_ID + " " + NUM_DRIVES);
         sendBuffer = ByteBuffer.allocate(16);
         recieveID = ByteBuffer.allocateDirect(4);
         recieveID.order(ByteOrder.LITTLE_ENDIAN);
@@ -27,6 +31,7 @@ public class LightDrive {
     public void update() {
         //attempts to send message
         byte[] tempSend = new byte[8];
+
         try {
             //sends first 8 bytes
             sendBuffer.get(tempSend, 0, 8);
@@ -36,36 +41,36 @@ public class LightDrive {
             CANJNI.FRCNetCommCANSessionMuxSendMessage(CAN_ID + 1, tempSend, 100);
         }
         catch(UncleanStatusException e) {
-            System.err.println(e.getMessage());
+            System.out.println(e.getMessage());
         }
-
+        
         //attempts to recieve message
-        recieveID.rewind();
         recieveID.putInt(CAN_ID + 4);
+        recieveID.rewind();
         try {
             recieveArray = CANJNI.FRCNetCommCANSessionMuxReceiveMessage(recieveID.asIntBuffer(), 
                 MSG_ID_MASK, timestampBuffer);
         }
         catch (CANMessageNotFoundException e) {
-            System.err.println(e.getMessage());
+            System.out.println(e.getMessage());
         }
     }
 
     public void setColor(int channel, Color color) {
-        if(channel > 1 && channel < 4) {
-            channel = (channel - 1) * 3;
-            sendBuffer.putShort(channel, color.getGreen());
-            sendBuffer.putShort(channel + 1, color.getRed());
-            sendBuffer.putShort(channel + 2, color.getBlue());
+        if(channel >= 1 && channel <= 4) {
+            channel = ((channel - 1) * 3);
+            sendBuffer.array()[channel] = (byte)color.getGreen();
+            sendBuffer.array()[channel + 1] = (byte)color.getRed();
+            sendBuffer.array()[channel + 2] = (byte)color.getBlue();
         }
     }
 
     public void setColor(int channel, Color color, double brightness) {
-        if((channel > 1 && channel < 4) && (brightness <= 1 && brightness > 0)) {
+        if((channel >= 1 && channel <= 4) && (brightness <= 1 && brightness > 0)) {
             channel = (channel - 1) * 3;
-            sendBuffer.putShort(channel, (short)(color.getGreen() * brightness));
-            sendBuffer.putShort(channel + 1, (short)(color.getRed() * brightness));
-            sendBuffer.putShort(channel + 2, (short)(color.getBlue() * brightness));
+            sendBuffer.array()[channel] = (byte)(color.getGreen()*brightness);
+            sendBuffer.array()[channel + 1] = (byte)(color.getRed()*brightness);
+            sendBuffer.array()[channel + 2] = (byte)(color.getBlue()*brightness);
         }
     }
 }
