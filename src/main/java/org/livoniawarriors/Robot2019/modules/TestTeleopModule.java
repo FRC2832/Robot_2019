@@ -20,7 +20,7 @@ public class TestTeleopModule implements IControlModule {
 
     @Override
     public void update() {
-        Robot.driveTrain.tankDrive(controller.getY(GenericHID.Hand.kLeft), controller.getY(GenericHID.Hand.kRight));
+        //Robot.driveTrain.tankDrive(controller.getY(GenericHID.Hand.kLeft), controller.getY(GenericHID.Hand.kRight));
     }
 
     @Override

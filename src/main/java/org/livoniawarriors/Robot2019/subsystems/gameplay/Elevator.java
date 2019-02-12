@@ -67,7 +67,7 @@ public class Elevator implements PIDSource, PIDOutput {
 
         currentSetHeight = ElevatorHeights.LowHatch;
 
-        setElevatorHeight(ElevatorHeights.LowHatch);
+        setElevatorHeight(ElevatorHeights.MidHatch);
     }
 
     /**
@@ -85,7 +85,9 @@ public class Elevator implements PIDSource, PIDOutput {
     private void setToMovingPID() {
         pidController.setPID(movingP, movingI, movingD, movingF);
         pidController.reset();
-        pidController.enable();
+        System.out.println("PIDController is " +(pidController.isEnabled() ? "Enabled" : "Disabled"));
+        //pidController.enable();
+        System.out.println("PIDController is " +(pidController.isEnabled() ? "Enabled" : "Disabled"));
         movingPID = true;
     }
 
@@ -147,7 +149,7 @@ public class Elevator implements PIDSource, PIDOutput {
             }
         }
 
-        System.out.println("Current Elevator Height: " + getElevatorHeight());
+        //System.out.println("Current Elevator Height: " + getElevatorHeight());
 
     }
 
@@ -155,12 +157,14 @@ public class Elevator implements PIDSource, PIDOutput {
     public void pidWrite(double output) {
         if (!manual) {
             elevatorMotor.set(output);
+            System.out.println("Current motor output: " + output);
         }
     }
 
     @Override
     public void setPIDSourceType(PIDSourceType pidSource) {
         sourceType = pidSource;
+        System.out.println("SET THE SOURCE TYPE");
     }
 
     @Override
