@@ -2,11 +2,15 @@ package org.livoniawarriors.Robot2019.modules;
 
 import org.livoniawarriors.Robot2019.IControlModule;
 import org.livoniawarriors.Robot2019.auton.Auton;
+import org.livoniawarriors.Robot2019.auton.AutonPaths;
 
 public class TestAutonModule implements IControlModule {
 
+	private static AutonPaths paths;
+
 	@Override
 	public void init() {
+		paths = new AutonPaths();
 
 	}
 
@@ -17,7 +21,7 @@ public class TestAutonModule implements IControlModule {
 
 	@Override
 	public void update() {
-		Auton.followPath(Auton.followerL, Auton.followerR);
+		Auton.followPath(paths.testFollowerL, paths.testFollowerR);
 	}
 
 	@Override
