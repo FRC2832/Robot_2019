@@ -22,7 +22,7 @@ public class UserInput implements ISubsystem {
     private List<Controller> controllers;
     private NetworkTableInstance inst;
     private NetworkTable table;
-    private SendableChooser<String> chooser;
+    private SendableChooser<String> autonChooser;
     private HashMap<String, Integer> tableEntries;
     
     public void createValue(String selectedTab, String title, int handle, Object value) {
@@ -49,8 +49,13 @@ public class UserInput implements ISubsystem {
             }
         }
     }
-
-    public void addOption(String name, String option, boolean defaultOption) {
+    /** Add an option to a Sendable Chooser
+     * @param chooser The sendable chooser
+     * @param name The name that appears on the dashboard
+     * @param option What is returned if the option is selected
+     * @param defaultOption Whether or not it is the default option
+    */
+    public void addOption(SendableChooser<String> chooser, String name, String option, boolean defaultOption) {
         if (defaultOption) {
             chooser.setDefaultOption(name, option);
         }
@@ -58,8 +63,12 @@ public class UserInput implements ISubsystem {
             chooser.addOption(name, option);
         }
     }
-
-    public Object getSelected() {
+    /**
+     * Get option from sendable chooser
+     * @param chooser The sendable chooser
+     * @return The option selected on the chooser
+     */
+    public String getSelected(SendableChooser<String> chooser) {
         return chooser.getSelected();
     }
 
@@ -75,7 +84,7 @@ public class UserInput implements ISubsystem {
         inst = NetworkTableInstance.getDefault();
         table = inst.getTable("datatable");
         Shuffleboard.getTab("tab").add(new LogButton());
-        chooser = new SendableChooser<>();
+        autonChooser = new SendableChooser<>();
         tableEntries = new HashMap<String, Integer>();
     }
 

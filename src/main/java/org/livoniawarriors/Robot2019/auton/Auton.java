@@ -18,8 +18,14 @@ public class Auton {
 	static Encoder encoderBL = new Encoder(4, 5); //what these values
 	static Encoder encoderBR = new Encoder(6, 7); //are supposed to be
 	
+
+	/** Follows a path based on the followers you give it.
+	 *  Followers can be retrieved from AutonPaths.java
+	 *  @param followerL the left-side follower
+	 * 	@param followerR the right-side follower
+	 */
     public static void followPath(EncoderFollower followerL, EncoderFollower followerR) {
-		
+
 		int leftPos = encoderFL.getRaw();
 		int rightPos = encoderFR.getRaw();
 		double heading = Robot.peripheralSubsystem.getYaw();
@@ -28,7 +34,7 @@ public class Auton {
 		double headingDiff = Pathfinder.boundHalfDegrees(newHeading - heading);
 
 		//TODO: Figure this out
-		double turnVal = headingDiff * 0.2;
+		double turnVal = headingDiff * 0.8 * (-1.0/80.0); //Math from examples
 
 		double valueL = followerL.calculate(leftPos);
 		double valueR = followerR.calculate(rightPos);

@@ -28,5 +28,6 @@ public class AutonPaths {
 	Trajectory testModRight = mod.getRightTrajectory();
 	public EncoderFollower testFollowerL = new EncoderFollower(testModLeft);
 	public EncoderFollower testFollowerR = new EncoderFollower(testModRight);
+	
 
 }
