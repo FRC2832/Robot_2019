@@ -7,20 +7,32 @@ public class GamePlay implements ISubsystem {
 
 	private Elevator elevator;
 	//private GamePieceManipulatorJake gamePieceManipulatorJake;
-	//private Climber climber;
+    //private Climber climber;
+    
+    private ElevatorTest elevatorTest;
+
+    private boolean testElevator = true;
 
 	@Override
 	public void init() {
-		elevator = new Elevator();
+        if (!testElevator) {
+            elevator = new Elevator();
+        }
 		//gamePieceManipulatorJake = new GamePieceManipulatorJake();
-		//climber = new Climber();
+        //climber = new Climber();
+        
 	}
 
 	@Override
-	public void update(boolean enabled) {
-		elevator.update(enabled);
+	public void update(boolean enabled) {	
 		//gamePieceManipulatorJake.update(enabled);
-		//climber.update(enabled);
+        //climber.update(enabled);
+        if (testElevator && enabled && elevatorTest == null) {
+            elevatorTest = new ElevatorTest();
+        }
+        if (!testElevator) {
+            elevator.update(enabled);
+        }
 	}
 	
 	public double getElevatorHeight() {
