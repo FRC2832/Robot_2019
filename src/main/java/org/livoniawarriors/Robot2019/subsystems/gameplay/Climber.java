@@ -7,6 +7,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput.Button;
+import org.livoniawarriors.Robot2019.UserInput.Controllers;
+import org.livoniawarriors.Robot2019.UserInput.Joystick;
 
 public class Climber {
 
@@ -44,8 +46,9 @@ public class Climber {
 		}
 		//As much security as a nuclear launch; ABSOLUTELY NO accidental climber triggers
 		//Maybe have a SmartDashboard button to "arm" the climber?
-		if(Robot.userInput.getController(0).getButton(Button.BUMPER_R)
-			&& Robot.userInput.getController(1).getButton(Button.BUMPER_R)) {
+		//TODO: Set flightstick buttons
+		if(Robot.userInput.getController(Controllers.XBOX).getButton(Button.BUMPER_R)
+			&& Robot.userInput.getController(Controllers.L_FLIGHTSTICK).getButton(Button.BUMPER_R)) {
 			if(Robot.gamePlay.getElevatorHeight() < 0.1) {
 				launchClimber();
 			} else {

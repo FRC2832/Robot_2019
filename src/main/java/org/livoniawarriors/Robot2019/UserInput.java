@@ -2,6 +2,7 @@ package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.drive.Vector2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -63,8 +64,8 @@ public class UserInput implements ISubsystem {
         return chooser.getSelected();
     }
 
-    public Controller getController(int player) {
-        return controllers.get(player);
+    public Controller getController(Controllers controller) {
+        return controllers.get(controller.value);
     }
 
     @Override
@@ -72,6 +73,7 @@ public class UserInput implements ISubsystem {
         controllers = new ArrayList<>();
         controllers.add(new Controller(0));
         controllers.add(new Controller(1));
+        controllers.add(new Controller(2));
         inst = NetworkTableInstance.getDefault();
         table = inst.getTable("datatable");
         Shuffleboard.getTab("tab").add(new LogButton());
@@ -171,13 +173,9 @@ public class UserInput implements ISubsystem {
          * @param hand Side of controller whose value should be returned.
          * @return The X axis value of the controller.
          */
-        @Override
-        public double getX(Hand hand) {
-            if (hand.equals(Hand.kLeft)) {
-                return getRawAxis(0);
-            } else {
-                return getRawAxis(4);
-            }
+        
+        public double getJoystickX(Joystick joystick) {
+            return getRawAxis((int)joystick.value.x);
         }
 
         /**
@@ -186,15 +184,25 @@ public class UserInput implements ISubsystem {
          * @param hand Side of controller whose value should be returned.
          * @return The Y axis value of the controller.
          */
-        @Override
-        public double getY(Hand hand) {
-            if (hand.equals(Hand.kLeft)) {
-                return getRawAxis(1);
-            } else {
-                return getRawAxis(5);
-            }
+        public double getJoystickY(Joystick joystick) {
+            return getRawAxis((int)joystick.value.y);
         }
 
+        /**
+         * Don't use me!
+         */
+        @Override
+        public double getX(Hand hand){
+            return 0;
+        }
+
+        /**
+         * Don't use me!
+         */
+        @Override
+        public double getY(Hand hand){
+            return 0;
+        }
         /**
          * Get the trigger axis value of the controller.
          *
@@ -224,6 +232,23 @@ public class UserInput implements ISubsystem {
 
         private final int value;
         Button(int value) {
+            this.value = value;
+        }
+    }
+    public enum Joystick {
+        LEFT(new Vector2d(0,1)), RIGHT(new Vector2d(4,5)), FLIGHTSTICK(new Vector2d(0,1));
+
+        private final Vector2d value;
+        Joystick(Vector2d value) {
+            this.value = value;
+        }
+    }
+
+    public enum Controllers {
+        XBOX(0), L_FLIGHTSTICK(1), R_FLIGHTSTICK(2);
+
+        private final int value;
+        Controllers(int value) {
             this.value = value;
         }
     }
