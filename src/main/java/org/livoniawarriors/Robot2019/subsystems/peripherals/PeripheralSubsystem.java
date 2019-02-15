@@ -13,7 +13,7 @@ public class PeripheralSubsystem implements ISubsystem {
 
     private Lidar lidar;
     private Ultrasonic proxSensor;
-    private PigeonIMU pigeon = new PigeonIMU(DriveTrain.DRIVE_MOTER_FR);
+    private PigeonIMU pigeon = new PigeonIMU(24);
     private double[] yawPitchRoll = new double[0];
 
     @Override
@@ -41,14 +41,6 @@ public class PeripheralSubsystem implements ISubsystem {
     @Override
     public void diagnose() {
 
-    }
-
-    public void resetEncoder(Encoder e){
-        e.reset();
-    }
-
-    public double encoderDist(Encoder e, double radius){
-        return e.getRaw() * 2*Math.PI*radius;
     }
 
     public double proxSensorDistance(){
