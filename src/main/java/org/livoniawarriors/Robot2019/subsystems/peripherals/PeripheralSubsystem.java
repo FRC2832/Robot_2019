@@ -6,7 +6,6 @@ import org.livoniawarriors.Robot2019.subsystems.DriveTrain;
 import java.io.IOException;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import com.ctre.phoenix.sensors.PigeonIMU;
 
@@ -30,12 +29,14 @@ public class PeripheralSubsystem implements ISubsystem {
         proxSensor.setAutomaticMode(false);
         pressureSensor = new AnalogInput(PRESSURE_SENSOR_PORT);
         digitBoard = new REVDigitBoard();
+
     }
 
     @Override
     public void update(boolean enabled) {
         lidar.update();
-        digitBoard.display(Double.toString(getPressure()));
+        digitBoard.display(Integer.toString((int)getPressure()));
+
     }
 
     @Override
