@@ -93,18 +93,24 @@ public class DriveTrain implements ISubsystem {
 
     }
 
+    /**
+     *
+     * @param left side power
+     * @param right side power
+     */
     public void tankDrive(double left, double right) {
         tankDrive(left, right, true);
     }
 
     /**
      * Disables trajectory
-     * @param left
-     * @param right
-     * @param squaredInputs
+     * @param left side power
+     * @param right side power
+     * @param squaredInputs or not square inputs
      */
     public void tankDrive(double left, double right, boolean squaredInputs) {
         drive.tankDrive(left, right, squaredInputs);
+        auto = false;
     }
 
     public boolean isTrajectoryDone() {

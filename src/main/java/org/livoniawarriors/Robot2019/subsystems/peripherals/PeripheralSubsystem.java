@@ -24,6 +24,8 @@ public class PeripheralSubsystem implements ISubsystem {
     private double[] yawPitchRoll = new double[3];
 
     private static final int PRESSURE_SENSOR_PORT = 1;
+    private static final int PIGEON_PORT = 24;
+
     private AnalogInput pressureSensor;
 
     private REVDigitBoard digitBoard;
@@ -34,7 +36,7 @@ public class PeripheralSubsystem implements ISubsystem {
         proxSensor = new Ultrasonic(0,1); //TODO: change output port and input port
         proxSensor.setEnabled(false);
         proxSensor.setAutomaticMode(false);
-        pigeon = new PigeonIMU(DriveTrain.DRIVE_MOTER_FR);
+        pigeon = new PigeonIMU(PIGEON_PORT);
         pressureSensor = new AnalogInput(PRESSURE_SENSOR_PORT);
         digitBoard = new REVDigitBoard();
     }
@@ -69,5 +71,9 @@ public class PeripheralSubsystem implements ISubsystem {
         //returns the yaw; copy method and change array element to get pitch or roll
         pigeon.getYawPitchRoll(yawPitchRoll);
         return yawPitchRoll[0];
+    }
+
+    public double getPressure() {
+        return 250d * pressureSensor.getVoltage() / 5d - 25d;
     }
 }
