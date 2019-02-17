@@ -8,10 +8,10 @@ import org.livoniawarriors.Robot2019.ISubsystem;
 
 public class DriveTrain implements ISubsystem {
 
-    public final static int DRIVE_MOTER_FL = 10;
-    public final static int DRIVE_MOTER_FR = 24;
-    public final static int DRIVE_MOTER_BL = 11;
-    public final static int DRIVE_MOTER_BR = 25;
+    public final static int DRIVE_MOTER_FL = 25;
+    public final static int DRIVE_MOTER_FR = 10;
+    public final static int DRIVE_MOTER_BL = 24;
+    public final static int DRIVE_MOTER_BR = 11;
 
     private DifferentialDrive drive;
     private PowerDistributionPanel pdp;
@@ -28,14 +28,14 @@ public class DriveTrain implements ISubsystem {
 
     @Override
     public void init() {
-        WPI_TalonSRX talonFL = new WPI_TalonSRX(DRIVE_MOTER_FL);
-        WPI_TalonSRX talonFR = new WPI_TalonSRX(DRIVE_MOTER_FR);
-        WPI_TalonSRX talonBL = new WPI_TalonSRX(DRIVE_MOTER_BL);
-        WPI_TalonSRX talonBR = new WPI_TalonSRX(DRIVE_MOTER_BR);
-        talonBL.follow(talonFL);
+        WPI_TalonSRX talonFrontLeft = new WPI_TalonSRX(DRIVE_MOTER_FL);
+        WPI_TalonSRX talonFrontRight = new WPI_TalonSRX(DRIVE_MOTER_FR);
+        WPI_TalonSRX talonBackLeft = new WPI_TalonSRX(DRIVE_MOTER_BL);
+        WPI_TalonSRX talonBackRight = new WPI_TalonSRX(DRIVE_MOTER_BR);
+        talonBackLeft.follow(talonFrontLeft);
         //talonBL.setInverted(true);
-        talonBR.follow(talonFR);
-        drive = new DifferentialDrive(talonFL, talonFR);
+        talonBackRight.follow(talonFrontRight);
+        drive = new DifferentialDrive(talonFrontLeft, talonFrontRight);
         pdp = new PowerDistributionPanel();
     }
 
@@ -44,7 +44,7 @@ public class DriveTrain implements ISubsystem {
     }
 
     public void tankDrive(double left, double right, boolean squaredInputs) {
-        drive.tankDrive(left, right, squaredInputs);
+        drive.tankDrive(-left, -right, squaredInputs);
     }
 
     @Override

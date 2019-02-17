@@ -7,11 +7,11 @@ public class GamePlay implements ISubsystem {
 
 	private Elevator elevator;
 	//private GamePieceManipulatorJake gamePieceManipulatorJake;
-    //private Climber climber;
+    private Climber climber;
     
     private ElevatorTest elevatorTest;
 
-    private boolean testElevator = true;
+    private boolean testElevator = false;
 
 	@Override
 	public void init() {
@@ -19,14 +19,14 @@ public class GamePlay implements ISubsystem {
             elevator = new Elevator();
         }
 		//gamePieceManipulatorJake = new GamePieceManipulatorJake();
-        //climber = new Climber();
+        climber = new Climber();
         
 	}
 
 	@Override
 	public void update(boolean enabled) {	
 		//gamePieceManipulatorJake.update(enabled);
-        //climber.update(enabled);
+        climber.update(enabled);
         if (testElevator && enabled && elevatorTest == null) {
             elevatorTest = new ElevatorTest();
         }

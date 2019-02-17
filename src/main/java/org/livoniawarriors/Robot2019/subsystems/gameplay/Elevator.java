@@ -58,16 +58,19 @@ public class Elevator implements PIDSource, PIDOutput {
 
         pidController = new PIDController(movingP, movingI, movingD, movingF, this, this, 0.01);
 
+        setPIDSourceType(PIDSourceType.kDisplacement);
+
         pidController.setAbsoluteTolerance(TOLERANCE);
-        pidController.setOutputRange(-MAX_MOTOR_SPEED, MAX_MOTOR_SPEED);
-        pidController.setInputRange(Double.MIN_VALUE, Double.MAX_VALUE);
+        pidController.setOutputRange(-MAX_MOTOR_SPEED / 4, MAX_MOTOR_SPEED);
+        pidController.setInputRange(-Double.MAX_VALUE, Double.MAX_VALUE);
         pidController.setContinuous(true);
+
 
         controller = Robot.userInput.getController(0);
 
         currentSetHeight = ElevatorHeights.LowHatch;
 
-        setElevatorHeight(ElevatorHeights.MidHatch);
+        setElevatorHeight(ElevatorHeights.LowHatch);
     }
 
     /**
@@ -77,6 +80,7 @@ public class Elevator implements PIDSource, PIDOutput {
      *               needs to go to
      */
     public void setElevatorHeight(ElevatorHeights height) {
+        pidController.disable();
         pidController.setSetpoint(height.getHeight());
         currentSetHeight = height;
         setToMovingPID();
@@ -85,13 +89,14 @@ public class Elevator implements PIDSource, PIDOutput {
     private void setToMovingPID() {
         pidController.setPID(movingP, movingI, movingD, movingF);
         pidController.reset();
-        System.out.println("PIDController is " +(pidController.isEnabled() ? "Enabled" : "Disabled"));
-        //pidController.enable();
-        System.out.println("PIDController is " +(pidController.isEnabled() ? "Enabled" : "Disabled"));
+        //System.out.println("PIDController is " + (pidController.isEnabled() ? "Enabled" : "Disabled"));
+        pidController.enable();
+        //System.out.println("PIDController is " + (pidController.isEnabled() ? "Enabled" : "Disabled"));
         movingPID = true;
     }
 
     private void setToMaintiningPID() {
+        pidController.disable();
         pidController.setPID(maintainerP, maintainerI, maintainerD, maintainerF);
         pidController.reset();
         pidController.enable();
@@ -111,38 +116,36 @@ public class Elevator implements PIDSource, PIDOutput {
     }
 
     public void update(boolean isEnabled) {
-        if (!manual) {
-            if (isEnabled) {
-                if (!pidController.isEnabled()) {
-                    pidController.enable();
-                }
-                if (pidController.onTarget()) {
-                    setToMaintiningPID();
-                }
-
-                if (controller.getButtonPressed(Button.A)) {
-                    setElevatorHeight(ElevatorHeights.LowHatch);
-                    System.out.println("Setting elevator to Low Hatch");
-                } else if (controller.getButtonPressed(Button.X)) {
-                    setElevatorHeight(ElevatorHeights.MidHatch);
-                    System.out.println("Setting elevator to Mid Hatch");
-                } else if (controller.getButtonPressed(Button.Y)) {
-                    setElevatorHeight(ElevatorHeights.TopHatch);
-                    System.out.println("Setting elevator to Top Hatch");
-                }
-
-            } else {
-                if (pidController.isEnabled()) {
+        if (!isEnabled) {
+            if (pidController.isEnabled()) {
                     pidController.disable();
                 }
                 elevatorMotor.set(0.0);
-            }
+            return;
+        }
 
+        if (!manual) {
+            if (!pidController.isEnabled()) {
+                pidController.enable();
+            }
+            if (pidController.onTarget()) {
+                setToMaintiningPID();
+            }
+            if (controller.getButtonPressed(Button.A)) {
+                setElevatorHeight(ElevatorHeights.LowHatch);
+                System.out.println("Setting elevator to Low Hatch");
+            } else if (controller.getButtonPressed(Button.X)) {
+                setElevatorHeight(ElevatorHeights.MidHatch);
+                System.out.println("Setting elevator to Mid Hatch");
+            } else if (controller.getButtonPressed(Button.Y)) {
+                setElevatorHeight(ElevatorHeights.TopHatch);
+                System.out.println("Setting elevator to Top Hatch");
+            }
         } else {
             if (controller.getTriggerAxis(Hand.kRight) != 0) {
-                elevatorMotor.set(controller.getTriggerAxis(Hand.kRight) * MAX_MOTOR_SPEED);
+                elevatorMotor.set(controller.getTriggerAxis(Hand.kRight) * 1);
             } else if (controller.getTriggerAxis(Hand.kLeft) != 0) {
-                elevatorMotor.set(-1 * controller.getTriggerAxis(Hand.kLeft) * MAX_MOTOR_SPEED);
+                elevatorMotor.set(-1 * controller.getTriggerAxis(Hand.kLeft) * 1);
                 System.out.println("Moving motor up " + controller.getTriggerAxis(Hand.kLeft));
             } else {
                 elevatorMotor.set(0);
@@ -164,7 +167,6 @@ public class Elevator implements PIDSource, PIDOutput {
     @Override
     public void setPIDSourceType(PIDSourceType pidSource) {
         sourceType = pidSource;
-        System.out.println("SET THE SOURCE TYPE");
     }
 
     @Override

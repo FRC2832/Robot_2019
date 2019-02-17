@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
 
 /**
- * Add your docs here.
+ * The goal of this thing: To make the elevator move by PID
  */
 public class ElevatorTest implements PIDOutput, PIDSource {
 
@@ -30,9 +30,11 @@ public class ElevatorTest implements PIDOutput, PIDSource {
 
         controller = new PIDController(0.9, 0.01, 0.5, 0.0007, this, this, 0.01);
 
+        setPIDSourceType(PIDSourceType.kDisplacement);
+
         controller.setAbsoluteTolerance(1);
         controller.setOutputRange(-0.7, 0.7);
-        controller.setInputRange(Double.MIN_VALUE, Double.MAX_VALUE);
+        controller.setInputRange(-Double.MAX_VALUE, Double.MAX_VALUE);
         controller.setContinuous(true);
 
         controller.setSetpoint(10);
