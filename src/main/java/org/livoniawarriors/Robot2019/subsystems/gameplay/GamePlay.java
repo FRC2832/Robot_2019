@@ -6,33 +6,23 @@ import org.livoniawarriors.Robot2019.ISubsystem;
 public class GamePlay implements ISubsystem {
 
 	private Elevator elevator;
-	//private GamePieceManipulatorJake gamePieceManipulatorJake;
+	private GamePieceManipulator gamePieceManipulator;
     private Climber climber;
-    
-    private ElevatorTest elevatorTest;
-
-    private boolean testElevator = false;
 
 	@Override
 	public void init() {
-        if (!testElevator) {
-            elevator = new Elevator();
-        }
-		//gamePieceManipulatorJake = new GamePieceManipulatorJake();
+        
+        elevator = new Elevator();
+		gamePieceManipulator = new GamePieceManipulator();
         climber = new Climber();
         
 	}
 
 	@Override
 	public void update(boolean enabled) {	
-		//gamePieceManipulatorJake.update(enabled);
+		gamePieceManipulator.update(enabled);
         climber.update(enabled);
-        if (testElevator && enabled && elevatorTest == null) {
-            elevatorTest = new ElevatorTest();
-        }
-        if (!testElevator) {
-            elevator.update(enabled);
-        }
+        elevator.update(enabled);
 	}
 	
 	public double getElevatorHeight() {
