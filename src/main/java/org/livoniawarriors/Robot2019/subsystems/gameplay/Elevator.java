@@ -13,130 +13,197 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import org.apache.logging.log4j.Level;
 import org.livoniawarriors.Robot2019.Robot;
+import org.livoniawarriors.Robot2019.UserInput;
+import org.livoniawarriors.Robot2019.UserInput.Button;
 
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 
 /**
  * Elevator not-subsystem that includes a PID controller to control the elevator
  */
 public class Elevator implements PIDSource, PIDOutput {
 
-	private final static int ELEVATOR_MOTOR = 5; //TODO: set to real number
-	CANSparkMax elevatorMotor; 
+    private final static int ELEVATOR_MOTOR = 22;
+    CANSparkMax elevatorMotor;
 
-	private static final double TOLERANCE = 1; // +- how many inches is acceptable
-	private static final double MAX_MOTOR_SPEED = 0.7;
-	private static final double P = 1.0;
-	private static final double I = 0.0;
-	private static final double D = 0.5;
+    private static final double TOLERANCE = 1; // +- how many inches is acceptable
+    private static final double MAX_MOTOR_SPEED = 0.7;
 
-	private PIDController pidController;
-	private PIDSourceType sourceType;
+    private static final double movingP = 10.0;
+    private static final double movingI = 0.0;
+    private static final double movingD = 0.5;
+    private static final double movingF = 0.7;
 
+    private static final double maintainerP = 1.0;
+    private static final double maintainerI = 0.0;
+    private static final double maintainerD = 0.5;
+    private static final double maintainerF = 0.2;
 
-	public Elevator() {
-		elevatorMotor = new CANSparkMax(ELEVATOR_MOTOR, MotorType.kBrushless);
-		elevatorMotor.setIdleMode(IdleMode.kBrake);
+    private PIDController pidController;
+    private PIDSourceType sourceType;
 
-		pidController = new PIDController(P, I, D, this, this, 0.01);
+    private UserInput.Controller controller;
 
-		pidController.setAbsoluteTolerance(TOLERANCE);
-		pidController.setOutputRange(-MAX_MOTOR_SPEED, MAX_MOTOR_SPEED);
-		pidController.setInputRange(Double.MIN_VALUE, Double.MAX_VALUE);
-		pidController.setSetpoint(ElevatorHeights.LowHatch.getHeight());
-		pidController.setContinuous(true);
+    private boolean manual = true;
+    private boolean movingPID;
+    private ElevatorHeights currentSetHeight;
 
-	}
+    public Elevator() {
+        elevatorMotor = new CANSparkMax(ELEVATOR_MOTOR, MotorType.kBrushless);
+        elevatorMotor.setIdleMode(IdleMode.kBrake);
 
-	/**
-	 * Moves the elevator to the desired height
-	 * @param height use the ElevatorHeights enum to specify the height the elevator needs to go to
-	 */
-	public void setElevatorHeight(ElevatorHeights height) {
-		pidController.setSetpoint(height.getHeight());
+        pidController = new PIDController(movingP, movingI, movingD, movingF, this, this, 0.01);
 
-	}
+        pidController.setAbsoluteTolerance(TOLERANCE);
+        pidController.setOutputRange(-MAX_MOTOR_SPEED, MAX_MOTOR_SPEED);
+        pidController.setInputRange(Double.MIN_VALUE, Double.MAX_VALUE);
+        pidController.setContinuous(true);
 
-	/**
-	 * @return the height of the elevator in inches
-	 */
-	public double getElevatorHeight() {
-		return elevatorMotor.getEncoder().getPosition() * (2 * Math.PI) / 7;
-		//Pulley has a 1 inch radius and 2 pi circumfrence
-		//The gearbox has a ratio of 7:1
-		//Therefore to go from encoders to elevator height we multiply by 2pi and divide by 7
-	}
+        controller = Robot.userInput.getController(0);
 
-	public void update(boolean isEnabled) {
-		if (isEnabled) {
-			if (pidController.isEnabled()) {
-				pidController.enable();
-			}   
-		} else {
-			if (!pidController.isEnabled()) {
-				pidController.disable();
-			}
-			elevatorMotor.set(0.0);
-		}
-	}
+        currentSetHeight = ElevatorHeights.LowHatch;
 
-	@Override
-	public void pidWrite(double output) {
-		elevatorMotor.set(output);
-	}
+        setElevatorHeight(ElevatorHeights.LowHatch);
+    }
 
-	@Override
-	public void setPIDSourceType(PIDSourceType pidSource) {
-		sourceType = pidSource;
-	}
+    /**
+     * Moves the elevator to the desired height
+     * 
+     * @param height use the ElevatorHeights enum to specify the height the elevator
+     *               needs to go to
+     */
+    public void setElevatorHeight(ElevatorHeights height) {
+        pidController.setSetpoint(height.getHeight());
+        currentSetHeight = height;
+        setToMovingPID();
+    }
 
-	@Override
-	public PIDSourceType getPIDSourceType() {
-		return sourceType;
-	}
+    private void setToMovingPID() {
+        pidController.setPID(movingP, movingI, movingD, movingF);
+        pidController.reset();
+        pidController.enable();
+        movingPID = true;
+    }
 
-	@Override
-	public double pidGet() {
-		return getElevatorHeight();
-	}
-	
-	
-	/**
-	 * An enum containing the heights of where the elevator needs to go, in inches
-	 */
-	public enum ElevatorHeights {
-		
-		LowHatch(0), LowPort(8.5),
-		MidHatch(28), MidPort(36.5),
-		TopHatch(56), TopPort(64.5),
-		ShipPort(17);
+    private void setToMaintiningPID() {
+        pidController.setPID(maintainerP, maintainerI, maintainerD, maintainerF);
+        pidController.reset();
+        pidController.enable();
+        movingPID = false;
+    }
 
-		private final double height;
+    /**
+     * @return the height of the elevator in inches TODO: update with new mechanical
+     *         information
+     */
+    public double getElevatorHeight() {
+        return elevatorMotor.getEncoder().getPosition() * (2 * Math.PI) / 21;
+        // Pulley has a 1 inch radius and 2 pi circumfrence
+        // The gearbox has a ratio of 21:1
+        // Therefore to go from encoders to elevator height we multiply by 2pi and
+        // divide by 21
+    }
 
-		ElevatorHeights(double height) {
-			this.height = height;
-		}
+    public void update(boolean isEnabled) {
+        if (!manual) {
+            if (isEnabled) {
+                if (!pidController.isEnabled()) {
+                    pidController.enable();
+                }
+                if (pidController.onTarget()) {
+                    setToMaintiningPID();
+                }
 
-		public double getHeight() {
-			return height;
-		}
+                if (controller.getButtonPressed(Button.A)) {
+                    setElevatorHeight(ElevatorHeights.LowHatch);
+                    System.out.println("Setting elevator to Low Hatch");
+                } else if (controller.getButtonPressed(Button.X)) {
+                    setElevatorHeight(ElevatorHeights.MidHatch);
+                    System.out.println("Setting elevator to Mid Hatch");
+                } else if (controller.getButtonPressed(Button.Y)) {
+                    setElevatorHeight(ElevatorHeights.TopHatch);
+                    System.out.println("Setting elevator to Top Hatch");
+                }
 
-	}
+            } else {
+                if (pidController.isEnabled()) {
+                    pidController.disable();
+                }
+                elevatorMotor.set(0.0);
+            }
 
-	void diagnose() {
-		double testElevHeight = getElevatorHeight();
-		if(testElevHeight >= 0 && testElevHeight <= 100) {
-			System.out.println("Method getElevatorHeight() is reported as a success with the value of " + testElevHeight);
-			Robot.logger.log(Level.DEBUG, 
-			  String.format("Method getElevatorHeight() returned value {0} and did not detect failure", testElevHeight));
-		} else {
-			System.out.println("Method getElevatorHeight() is reported as a failure with the value of " + testElevHeight);
-			Robot.logger.log(Level.DEBUG, 
-			  String.format("Method getElevatorHeight() returned value {0} and DETECTED FAILURE!!!", testElevHeight));
-		}
-		
-	}
+        } else {
+            if (controller.getTriggerAxis(Hand.kRight) != 0) {
+                elevatorMotor.set(controller.getTriggerAxis(Hand.kRight) * MAX_MOTOR_SPEED);
+            } else if (controller.getTriggerAxis(Hand.kLeft) != 0) {
+                elevatorMotor.set(-1 * controller.getTriggerAxis(Hand.kLeft) * MAX_MOTOR_SPEED);
+                System.out.println("Moving motor up " + controller.getTriggerAxis(Hand.kLeft));
+            } else {
+                elevatorMotor.set(0);
+            }
+        }
+
+        System.out.println("Current Elevator Height: " + getElevatorHeight());
+
+    }
+
+    @Override
+    public void pidWrite(double output) {
+        if (!manual) {
+            elevatorMotor.set(output);
+        }
+    }
+
+    @Override
+    public void setPIDSourceType(PIDSourceType pidSource) {
+        sourceType = pidSource;
+    }
+
+    @Override
+    public PIDSourceType getPIDSourceType() {
+        return sourceType;
+    }
+
+    @Override
+    public double pidGet() {
+        return getElevatorHeight();
+    }
+
+    /**
+     * An enum containing the heights of where the elevator needs to go, in inches
+     */
+    public enum ElevatorHeights {
+
+        LowHatch(0), LowPort(8.5),
+        MidHatch(28), MidPort(36.5),
+        TopHatch(56), TopPort(64.5), 
+        ShipPort(17);
+
+        private final double height;
+
+        ElevatorHeights(double height) {
+            this.height = height;
+        }
+
+        public double getHeight() {
+            return height;
+        }
+
+    }
+
+    public void diagnose() {
+        double testElevHeight = getElevatorHeight();
+        if (testElevHeight >= 0 && testElevHeight <= 100) {
+            System.out.println("Method getElevatorHeight() is reported as a success with the value of " + testElevHeight);
+            Robot.logger.log(Level.ERROR, String.format("Method getElevatorHeight() returned value {0} and did not detect failure", testElevHeight));
+        } else {
+            System.out.println("Method getElevatorHeight() is reported as a failure with the value of " + testElevHeight);
+            Robot.logger.log(Level.ERROR, String.format("Method getElevatorHeight() returned value {0} and DETECTED FAILURE!!!", testElevHeight));
+        }
+
+    }
 }
