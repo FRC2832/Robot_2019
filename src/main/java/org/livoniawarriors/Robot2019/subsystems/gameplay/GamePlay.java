@@ -11,11 +11,9 @@ public class GamePlay implements ISubsystem {
 
 	@Override
 	public void init() {
-        
         elevator = new Elevator();
 		gamePieceManipulator = new GamePieceManipulator();
         climber = new Climber();
-        
 	}
 
 	@Override
@@ -41,6 +39,6 @@ public class GamePlay implements ISubsystem {
 
 	@Override
 	public void diagnose() {
-		//elevator.diagnose();
+		elevator.diagnose();
 	}
 }
