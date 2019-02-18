@@ -1,5 +1,6 @@
 package org.livoniawarriors.Robot2019;
 
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -45,6 +46,8 @@ public class Robot extends TimedRobot {
     private final Notifier csvNotifier, diagnosticNotifier;
     private final double CSV_UPDATE_PERIOD = 0.04;
     private final double DIAGNOSTIC_PERIOD = 4;
+
+    private UsbCamera camera;
 
     // Get the robot
     public static Robot getInstance() {
@@ -170,6 +173,9 @@ public class Robot extends TimedRobot {
 
         // Register stuff
         register();
+
+        camera = CameraServer.getInstance().startAutomaticCapture();
+        camera.setResolution(680, 480);
 
         // Set default to first registered if it isn't set
         if(defaultModule == null)
