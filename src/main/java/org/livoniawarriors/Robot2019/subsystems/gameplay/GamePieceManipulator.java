@@ -14,6 +14,7 @@ import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
 import org.livoniawarriors.Robot2019.UserInput.Controllers;
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -21,7 +22,7 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 /**
  * Add your docs here.
  */
-public class GamePieceManipulatorJake {
+public class GamePieceManipulator {
 
     private final static int RIGHT_INTAKE = 14;
     private final static int LEFT_INTAKE = 15;
@@ -29,19 +30,30 @@ public class GamePieceManipulatorJake {
     private final static int TILTER_DOWN = 5;
     private final static int FLOWER_IN = 2;
     private final static int FLOWER_OUT = 3;
+    private final static int ACCORDION_IN = 6;
+    private final static int ACCORDION_OUT = 7;
 
-    private DoubleSolenoid flower, tilter;
+    private final static int ANALOG_INPUT_CHANNEL = 0;
+
+    private DoubleSolenoid flower, tilter, accordion;
     private WPI_TalonSRX leftIntakeMotor, rightIntakeMotor;
+
+    private AnalogInput ballSensor;
 
     private UserInput.Controller controller;
 
     boolean intakeDown;
 
-    public GamePieceManipulatorJake() {
+    public GamePieceManipulator() {
         flower = new DoubleSolenoid(FLOWER_IN, FLOWER_OUT);
         tilter = new DoubleSolenoid(TILTER_DOWN, TILTER_UP);
+        accordion = new DoubleSolenoid(ACCORDION_IN, ACCORDION_OUT);
         leftIntakeMotor = new WPI_TalonSRX(LEFT_INTAKE);
         rightIntakeMotor = new WPI_TalonSRX(RIGHT_INTAKE);
+        rightIntakeMotor.follow(leftIntakeMotor);
+        rightIntakeMotor.setInverted(true);
+
+        ballSensor = new AnalogInput(ANALOG_INPUT_CHANNEL);
     
         controller = Robot.userInput.getController(Controllers.XBOX);
         
@@ -51,16 +63,21 @@ public class GamePieceManipulatorJake {
     public void update(boolean isEnabled) {
         if (isEnabled) {
             if (intakeDown) {
-                if (controller.getTriggerAxis(Hand.kLeft) != 0) {
+
+                //Intake
+                if (controller.getTriggerAxis(Hand.kLeft) != 0 && !hasBall()) {    
                     leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
                 } else {
                     leftIntakeMotor.set(0);
                 }
-                if (controller.getTriggerAxis(Hand.kRight) != 0) {
-                    rightIntakeMotor.set(controller.getTriggerAxis(Hand.kRight));
+
+                //Expel
+                if (controller.getTriggerAxis(Hand.kRight) != 0 && hasBall()) {
+                    leftIntakeMotor.set(-1 * controller.getTriggerAxis(Hand.kRight));
                 } else {
-                    rightIntakeMotor.set(0);
+                    leftIntakeMotor.set(0);
                 }
+
             }
 
             if (controller.getButtonPressed(Button.Y)) {
@@ -69,15 +86,29 @@ public class GamePieceManipulatorJake {
                 moveIntakeDown();
             } else if (controller.getButtonPressed(Button.A)) {
                 moveFlower();
+            } else if (controller.getButtonPressed(Button.X)) {
+                moveAccordion();
             }
         }
+
+        //System.out.println(hasBall() ? "I have a ball!!" : "I don't have a ball");
+    }
+
+    public boolean hasBall() {
+        return ballSensor.getVoltage() < 1.5;
     }
 
     private void moveFlower() {
+        if (accordion.get() == Value.kReverse) {
+            flower.set(flower.get() == Value.kReverse ? Value.kReverse : Value.kForward);
+        }
+    }
+
+    private void moveAccordion() {
         if (!intakeDown) {
-            flower.set(flower.get() == Value.kReverse ? Value.kForward : Value.kReverse);
+            accordion.set(accordion.get() == Value.kReverse ? Value.kForward : Value.kReverse);
         } else {
-            moveIntakeDown();
+            moveIntakeUp();
             new Thread() {
                 @Override
                 public void run() {
@@ -86,17 +117,18 @@ public class GamePieceManipulatorJake {
                     } catch(InterruptedException e) {
                         Robot.logger.error("Thread failed to sleep ", e);
                     }
-                    flower.set(flower.get() == Value.kReverse ? Value.kForward : Value.kReverse);
+                    accordion.set(accordion.get() == Value.kReverse ? Value.kForward : Value.kReverse);
                 }
             }.start();
         }
     }
 
     private void moveIntakeUp() {
-        if (flower.get() == Value.kReverse) {
+        if (flower.get() == Value.kReverse && accordion.get() == Value.kForward) {
             tilter.set(Value.kReverse); 
         } else {
             flower.set(Value.kReverse);
+            accordion.set(Value.kForward);
             new Thread() {
                 @Override
                 public void run() {
@@ -113,11 +145,11 @@ public class GamePieceManipulatorJake {
     }
 
     private void moveIntakeDown() {
-        if (flower.get() == Value.kReverse) {
+        if (flower.get() == Value.kReverse && accordion.get() == Value.kForward) {
             tilter.set(Value.kForward);
-            
         } else {
             flower.set(Value.kReverse);
+            accordion.set(Value.kForward);
             new Thread() {
                 @Override
                 public void run() {
