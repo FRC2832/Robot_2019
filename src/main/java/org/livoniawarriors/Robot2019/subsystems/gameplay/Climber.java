@@ -24,7 +24,7 @@ public class Climber {
 		climbEncoder = climbMotor.getEncoder();
 	}
 	public void init() {
-		climbMotorSpeed = 0.2; //TODO: set to value retrieved from dashboard
+		climbMotorSpeed = 0.7; //TODO: set to value retrieved from dashboard
 	}
 
 	public void launchClimber() {
@@ -47,7 +47,8 @@ public class Climber {
 		if(Robot.userInput.getController(0).getButton(Button.BUMPER_R)
 			&& Robot.userInput.getController(1).getButton(Button.BUMPER_R)) {
 			if(Robot.gamePlay.getElevatorHeight() < 0.1) {
-				launchClimber();
+                launchClimber();
+                System.out.println("Launching Climber");
 			} else {
 				System.out.println("CLIMBER will NOT run: elevator is up!");
 			}
