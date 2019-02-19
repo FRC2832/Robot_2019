@@ -143,6 +143,8 @@ public class Elevator implements PIDSource, PIDOutput {
             } else if (controller.getButtonPressed(Button.Y)) {
                 setElevatorHeight(ElevatorHeights.TopHatch);
                 System.out.println("Setting elevator to Top Hatch");
+            } else if (controller.getButtonPressed(Button.B)) {
+                manual = !manual;
             }
         } else {
 
@@ -169,7 +171,7 @@ public class Elevator implements PIDSource, PIDOutput {
     public void pidWrite(double output) {
         if (!manual) {
             elevatorMotor.set(output);
-            System.out.println("Current motor output: " + output);
+            //System.out.println("Current motor output: " + output);
         }
     }
 
