@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.SendableBase;
 import org.apache.logging.log4j.Level;
+import org.livoniawarriors.Robot2019.ControlMapping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -172,13 +173,18 @@ public class UserInput implements ISubsystem {
         }
 
         public double getJoystickY(Joystick joystick) {
+            if(getButtonPressed(ControlMapping.clutch)) {
+                return getRawAxis((int)joystick.value.y) *.5;
+
+            }
+
             return getRawAxis((int)joystick.value.y);
         }
 
         /**
          * Don't use me!
          */
-        @Override
+        @Deprecated
         public double getX(Hand hand){
             return 0;
         }
@@ -186,7 +192,7 @@ public class UserInput implements ISubsystem {
         /**
          * Don't use me!
          */
-        @Override
+        @Deprecated
         public double getY(Hand hand){
             return 0;
         }
@@ -215,15 +221,47 @@ public class UserInput implements ISubsystem {
         X(3),
         Y(4),
         BACK(7),
-        START(8);
+        START(8),
+        TRIGGER(1),
+        THUMB(2),
+        THREE(3),
+        FOUR(4),
+        FIVE(5),
+        SIX(6),
+        SEVEN(7),
+        EIGHT(8),
+        NINE(9),
+        TEN(10),
+        ELEVEN(11),
+        TWELVE_ONLYRIGHT(12);
 
         private final int value;
         Button(int value) {
             this.value = value;
         }
     }
+
+    public enum FlightStickButton {
+        TRIGGER(1),
+        THUMB(2),
+        THREE(2),
+        FOUR(4),
+        FIVE(5),
+        SIX(6),
+        SEVEN(7),
+        EIGHT(8),
+        NINE(9),
+        TEN(10),
+        ELEVEN(11);
+
+        private final int value;
+        FlightStickButton(int value) {
+            this.value = value;
+        }
+    }
+
     public enum Joystick {
-        LEFT(new Vector2d(0,1)), RIGHT(new Vector2d(4,5)), FLIGHTSTICK(new Vector2d(0,1));
+        LEFT(new Vector2d(0,1)), RIGHT(new Vector2d(4,5)), FLIGHTSTICK(new Vector2d(0,1)), ROTATE_SLIDER(new Vector2d(2,3));
 
         private final Vector2d value;
         Joystick(Vector2d value) {
