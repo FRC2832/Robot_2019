@@ -33,8 +33,9 @@ public class DriveTrain implements ISubsystem {
         WPI_TalonSRX talonBackLeft = new WPI_TalonSRX(DRIVE_MOTER_BL);
         WPI_TalonSRX talonBackRight = new WPI_TalonSRX(DRIVE_MOTER_BR);
         talonBackLeft.follow(talonFrontLeft);
-        //talonBL.setInverted(true);
         talonBackRight.follow(talonFrontRight);
+        talonFrontLeft.setInverted(true);
+        talonFrontRight.setInverted(true);
         drive = new DifferentialDrive(talonFrontLeft, talonFrontRight);
         pdp = new PowerDistributionPanel();
     }
@@ -44,7 +45,7 @@ public class DriveTrain implements ISubsystem {
     }
 
     public void tankDrive(double left, double right, boolean squaredInputs) {
-        drive.tankDrive(-left, -right, squaredInputs);
+        drive.tankDrive(left, right, squaredInputs);
     }
 
     @Override
