@@ -15,6 +15,8 @@ import org.apache.logging.log4j.Level;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
+import org.livoniawarriors.Robot2019.UserInput.Controllers;
+import org.livoniawarriors.Robot2019.UserInput;
 
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
@@ -67,7 +69,7 @@ public class Elevator implements PIDSource, PIDOutput {
         pidController.setContinuous(true);
 
 
-        controller = Robot.userInput.getController(0);
+        controller = Robot.userInput.getController(Controllers.XBOX);
 
         currentSetHeight = ElevatorHeights.LowHatch;
 
