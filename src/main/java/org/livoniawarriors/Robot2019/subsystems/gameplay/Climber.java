@@ -48,7 +48,7 @@ public class Climber {
 		//Maybe have a SmartDashboard button to "arm" the climber?
 		//TODO: Set flightstick buttons
 		if(Robot.userInput.getController(Controllers.XBOX).getButton(Button.BUMPER_R)
-			&& Robot.userInput.getController(Controllers.L_FLIGHTSTICK).getButton(Button.BUMPER_R)) {
+			&& Robot.userInput.getController(Controllers.XBOX).getButton(Button.BUMPER_L)) {
 			if(Robot.gamePlay.getElevatorHeight() < 0.1) {
 				launchClimber();
 			} else {

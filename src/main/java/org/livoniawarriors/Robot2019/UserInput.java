@@ -167,23 +167,10 @@ public class UserInput implements ISubsystem {
             return (Math.abs(super.getRawAxis(axis)) - DEADZONE) * Math.signum(super.getRawAxis(axis));
         }
 
-        /**
-         * Get the X axis value of the controller.
-         *
-         * @param hand Side of controller whose value should be returned.
-         * @return The X axis value of the controller.
-         */
-        
         public double getJoystickX(Joystick joystick) {
             return getRawAxis((int)joystick.value.x);
         }
 
-        /**
-         * Get the Y axis value of the controller.
-         *
-         * @param hand Side of controller whose value should be returned.
-         * @return The Y axis value of the controller.
-         */
         public double getJoystickY(Joystick joystick) {
             return getRawAxis((int)joystick.value.y);
         }
