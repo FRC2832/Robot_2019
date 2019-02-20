@@ -85,10 +85,14 @@ public class GamePieceManipulator {
             leftIntakeMotor.set(0);
         }
 
+        //Variable Control
+        //Commented out methods are discrete solinoid control
         if (flower.get() == Value.kReverse) {
             if (controller.getButton(Button.Y)) {
+                //moveIntakeUp();
                 tilter.set(Value.kReverse);
             } else if (controller.getButton(Button.B)) {
+                //moveIntakeDown();
                 tilter.set(Value.kForward);
             } else {
                 tilter.set(Value.kOff);
