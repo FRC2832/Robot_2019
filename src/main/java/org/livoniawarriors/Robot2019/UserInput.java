@@ -19,7 +19,10 @@ import java.util.HashMap;
 
 public class UserInput implements ISubsystem {
 
-    public static float DEADZONE = 0.1f;
+    private static float DEADZONE = 0.1f;
+    public static int FLIPPER_AXIS = 3;
+    public static int R_TRIGGER = 3;
+    public static int L_TRIGGER = 2;
 
     private List<Controller> controllers;
     private NetworkTableInstance inst;
@@ -169,16 +172,11 @@ public class UserInput implements ISubsystem {
         }
 
         public double getJoystickX(Joystick joystick) {
-            return getRawAxis((int)joystick.value.x);
+            return getRawAxis((int)joystick.value.getX());
         }
 
         public double getJoystickY(Joystick joystick) {
-            if(getButtonPressed(ControlMapping.clutch)) {
-                return getRawAxis((int)joystick.value.y) *.5;
-
-            }
-
-            return getRawAxis((int)joystick.value.y);
+            return getRawAxis((int)joystick.value.getY());
         }
 
         /**
@@ -196,18 +194,9 @@ public class UserInput implements ISubsystem {
         public double getY(Hand hand){
             return 0;
         }
-        /**
-         * Get the trigger axis value of the controller.
-         *
-         * @param hand Side of controller whose value should be returned.
-         * @return The trigger axis value of the controller.
-         */
-        public double getTriggerAxis(Hand hand) {
-            if (hand.equals(Hand.kLeft)) {
-                return getRawAxis(2);
-            } else {
-                return getRawAxis(3);
-            }
+
+        public double getOtherAxis(Joystick joystick, int selector) {
+            return 0;
         }
     }
 
@@ -260,11 +249,33 @@ public class UserInput implements ISubsystem {
         }
     }
 
-    public enum Joystick {
-        LEFT(new Vector2d(0,1)), RIGHT(new Vector2d(4,5)), FLIGHTSTICK(new Vector2d(0,1)), ROTATE_SLIDER(new Vector2d(2,3));
+    /**
+     * Holds a joystick mapping
+     */
+    public static class JoystickMapping {
+        private int x, y;
+        
+        private JoystickMapping(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
 
-        private final Vector2d value;
-        Joystick(Vector2d value) {
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+    }
+
+    public enum Joystick {
+        LEFT(new JoystickMapping(0,1)), 
+        RIGHT(new JoystickMapping(4,5)), 
+        FLIGHTSTICK(new JoystickMapping(0,1));
+
+        private final JoystickMapping value;
+        Joystick(JoystickMapping value) {
             this.value = value;
         }
     }
