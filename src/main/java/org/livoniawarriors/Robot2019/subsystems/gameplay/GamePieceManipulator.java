@@ -27,14 +27,17 @@ public class GamePieceManipulator {
     private final static int LEFT_INTAKE = 15;
     private final static int TILTER_UP = 4;
     private final static int TILTER_DOWN = 5;
-    private final static int FLOWER_IN = 2;
-    private final static int FLOWER_OUT = 3;
-    private final static int ACCORDION_IN = 6;
-    private final static int ACCORDION_OUT = 7;
+    private final static int FLOWER_IN = 0;
+    private final static int FLOWER_OUT = 1;
+    private final static int LEFT_EXTENDER_IN = 2;
+    private final static int LEFT_EXTENDER_OUT = 3;
+    private final static int RIGHT_EXTENDER_IN = 6;
+    private final static int RIGHT_EXTENDER_OUT = 7;
+
 
     private final static int ANALOG_INPUT_CHANNEL = 0;
 
-    private DoubleSolenoid flower, tilter, accordion;
+    private DoubleSolenoid flower, tilter, leftExtender, rightExtender;
     private WPI_TalonSRX leftIntakeMotor, rightIntakeMotor;
 
     private AnalogInput ballSensor;
@@ -46,7 +49,8 @@ public class GamePieceManipulator {
     public GamePieceManipulator() {
         flower = new DoubleSolenoid(FLOWER_IN, FLOWER_OUT);
         tilter = new DoubleSolenoid(TILTER_DOWN, TILTER_UP);
-        accordion = new DoubleSolenoid(ACCORDION_IN, ACCORDION_OUT);
+        leftExtender = new DoubleSolenoid(LEFT_EXTENDER_IN, LEFT_EXTENDER_OUT);
+        rightExtender = new DoubleSolenoid(RIGHT_EXTENDER_IN, RIGHT_EXTENDER_OUT);
         leftIntakeMotor = new WPI_TalonSRX(LEFT_INTAKE);
         rightIntakeMotor = new WPI_TalonSRX(RIGHT_INTAKE);
         rightIntakeMotor.follow(leftIntakeMotor);
@@ -64,22 +68,18 @@ public class GamePieceManipulator {
             return;
         }
 
-        if (intakeDown) {
+        //Intake
+        if (controller.getTriggerAxis(Hand.kLeft) != 0 && !hasBall()) {    
+            leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
+        } else {
+            leftIntakeMotor.set(0);
+        }
 
-            //Intake
-            if (controller.getTriggerAxis(Hand.kLeft) != 0 && !hasBall()) {    
-                leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
-            } else {
-                leftIntakeMotor.set(0);
-            }
-
-            //Expel
-            if (controller.getTriggerAxis(Hand.kRight) != 0 && hasBall()) {
-                leftIntakeMotor.set(-1 * controller.getTriggerAxis(Hand.kRight));
-            } else {
-                leftIntakeMotor.set(0);
-            }
-
+        //Expel
+        if (controller.getTriggerAxis(Hand.kRight) != 0 && hasBall()) {
+            leftIntakeMotor.set(-1 * controller.getTriggerAxis(Hand.kRight));
+        } else {
+            leftIntakeMotor.set(0);
         }
 
         if (controller.getButton(Button.Y)) {
@@ -88,12 +88,9 @@ public class GamePieceManipulator {
             moveIntakeDown();
         } else if (controller.getButtonPressed(Button.A)) {
             moveFlower();
-        } else if (controller.getButtonPressed(Button.X)) {
-            moveAccordion();
-        }
+        } 
         
-
-        //System.out.println(hasBall() ? "I have a ball!!" : "I don't have a ball");
+        Robot.userInput.createValue("John", "Do I have a ball?", 2, hasBall());
     }
 
     public boolean hasBall() {
@@ -101,42 +98,43 @@ public class GamePieceManipulator {
     }
 
     private void moveFlower() {
-        if (accordion.get() == Value.kReverse) {
-            flower.set(flower.get() == Value.kReverse ? Value.kReverse : Value.kForward);
-        }
-    }
-
-    private void moveAccordion() {
-        if (!intakeDown) {
-            accordion.set(accordion.get() == Value.kReverse ? Value.kForward : Value.kReverse);
+        if (flower.get() == Value.kForward) {
+            flower.set(Value.kReverse);
+            pushHatch();
         } else {
-            moveIntakeUp();
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(500);
-                    } catch(InterruptedException e) {
-                        Robot.logger.error("Thread failed to sleep ", e);
-                    }
-                    accordion.set(accordion.get() == Value.kReverse ? Value.kForward : Value.kReverse);
-                }
-            }.start();
+            flower.set(Value.kForward);
         }
     }
 
     public void moveIntakeUp() {
-        if (flower.get() == Value.kReverse && accordion.get() == Value.kForward) {
+        if (flower.get() == Value.kReverse) {
             tilter.set(Value.kReverse);
             intakeDown = false;
         }
     }
 
     public void moveIntakeDown() {
-        if (flower.get() == Value.kReverse && accordion.get() == Value.kForward) {
+        if (flower.get() == Value.kReverse) {
             tilter.set(Value.kForward);
             intakeDown = true;
         }
+    }
+
+    public void pushHatch() {
+        leftExtender.set(Value.kForward);
+        rightExtender.set(Value.kForward);
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(200);
+                    leftExtender.set(Value.kReverse);
+                    rightExtender.set(Value.kReverse);
+                } catch (InterruptedException e) {
+                    Robot.logger.error("Thread failed to sleep", e);
+                }
+            }
+        }.start();
     }
 
 }
