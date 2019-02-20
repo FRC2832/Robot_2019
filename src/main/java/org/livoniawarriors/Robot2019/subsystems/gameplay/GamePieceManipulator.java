@@ -25,6 +25,7 @@ public class GamePieceManipulator {
 
     private final static int RIGHT_INTAKE = 14;
     private final static int LEFT_INTAKE = 15;
+
     private final static int TILTER_UP = 4;
     private final static int TILTER_DOWN = 5;
     private final static int FLOWER_IN = 0;
@@ -44,7 +45,9 @@ public class GamePieceManipulator {
 
     private UserInput.Controller controller;
 
-    boolean intakeDown;
+    private boolean intakeDown;
+
+    private Thread extenderThread;
 
     public GamePieceManipulator() {
         flower = new DoubleSolenoid(FLOWER_IN, FLOWER_OUT);
@@ -82,11 +85,19 @@ public class GamePieceManipulator {
             leftIntakeMotor.set(0);
         }
 
-        if (controller.getButton(Button.Y)) {
-            moveIntakeUp();
-        } else if (controller.getButton(Button.B)) {
-            moveIntakeDown();
-        } else if (controller.getButtonPressed(Button.A)) {
+        if (flower.get() == Value.kReverse) {
+            if (controller.getButton(Button.Y)) {
+                tilter.set(Value.kReverse);
+            } else if (controller.getButton(Button.B)) {
+                tilter.set(Value.kForward);
+            } else {
+                tilter.set(Value.kOff);
+            }
+        } else {
+            tilter.set(Value.kReverse);
+        }
+        
+        if (controller.getButtonPressed(Button.A)) {
             moveFlower();
         } 
         
@@ -123,18 +134,24 @@ public class GamePieceManipulator {
     public void pushHatch() {
         leftExtender.set(Value.kForward);
         rightExtender.set(Value.kForward);
-        new Thread() {
+
+        if (extenderThread != null) {
+            extenderThread.interrupt();
+        }
+        extenderThread = new Thread() {
             @Override
             public void run() {
                 try {
                     Thread.sleep(200);
                     leftExtender.set(Value.kReverse);
                     rightExtender.set(Value.kReverse);
+                    extenderThread = null;
                 } catch (InterruptedException e) {
-                    Robot.logger.error("Thread failed to sleep", e);
+                    Robot.logger.error("Extender Thread interrupted", e);
                 }
             }
-        }.start();
+        };
+        extenderThread.start();
     }
 
 }
