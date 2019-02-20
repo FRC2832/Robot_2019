@@ -5,13 +5,14 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import org.apache.logging.log4j.Level;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput.Button;
 
 public class Climber {
 
 	private static final int CLIMB_MOTOR = 13;
-	private final double STOP_TURN_VALUE = 9000; //TODO: Needs to be determined
+	private final double STOP_TURN_VALUE = 370; //*Should* be right, mathematically speaking
 	private CANSparkMax climbMotor; //NEO motor to control climber
 	private CANEncoder climbEncoder;
 
@@ -24,7 +25,7 @@ public class Climber {
 		climbEncoder = climbMotor.getEncoder();
 	}
 	public void init() {
-		climbMotorSpeed = 0.2; //TODO: set to value retrieved from dashboard
+		climbMotorSpeed = 0.8;
 	}
 
 	public void launchClimber() {
@@ -48,8 +49,10 @@ public class Climber {
 			&& Robot.userInput.getController(1).getButton(Button.BUMPER_R)) {
 			if(Robot.gamePlay.getElevatorHeight() < 0.1) {
 				launchClimber();
+				System.out.println("Climber launch initiated; self-destructing");
 			} else {
 				System.out.println("CLIMBER will NOT run: elevator is up!");
+				Robot.logger.log(Level.DEBUG, "Attempted climber run with elevator up");
 			}
 		}
 		
