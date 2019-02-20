@@ -1,5 +1,6 @@
 package org.livoniawarriors.Robot2019.subsystems.peripherals;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.ISubsystem;
 import org.livoniawarriors.Robot2019.Robot;
@@ -25,7 +26,7 @@ public class PeripheralSubsystem implements ISubsystem {
 
     private static final int PRESSURE_SENSOR_PORT = 1;
     private static final int PIGEON_PORT = 24;
-
+    private JeVois jeVois;
     private AnalogInput pressureSensor;
 
     private REVDigitBoard digitBoard;
@@ -39,12 +40,31 @@ public class PeripheralSubsystem implements ISubsystem {
         pigeon = new PigeonIMU(PIGEON_PORT);
         pressureSensor = new AnalogInput(PRESSURE_SENSOR_PORT);
         digitBoard = new REVDigitBoard();
+        jeVois = new JeVois();
+        CameraServer.getInstance().startAutomaticCapture();
     }
 
     @Override
     public void update(boolean enabled) {
         lidar.update();
-        digitBoard.display(Double.toString(getPressure()));
+        //digitBoard.display(Double.toString(getPressure()));
+        System.out.println("==============+++==============");
+        System.out.print("Vision Online: ");
+        System.out.println(jeVois.isVisionOnline());
+        System.out.print("Target Visible: ");
+        System.out.println(jeVois.isTgtVisible());
+        System.out.print("Target Angle: ");
+        System.out.println(jeVois.getTgtAngle_Deg());
+        System.out.print("Target Range:");
+        System.out.println(jeVois.getTgtRange_in());
+        System.out.print("Serial Packet RX Rate: ");
+        System.out.println(jeVois.getPacketRxRate_PPS());
+        System.out.print("JeVois Framerate: ");
+        System.out.println(jeVois.getJeVoisFramerate_FPS());
+        System.out.print("JeVois CPU Load: ");
+        System.out.println(jeVois.getJeVoisCpuLoad_pct());
+        System.out.println("===============================\n\n\n");
+
     }
 
     @Override

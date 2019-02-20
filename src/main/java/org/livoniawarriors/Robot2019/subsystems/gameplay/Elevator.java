@@ -147,7 +147,7 @@ public class Elevator implements PIDSource, PIDOutput {
             }
         }
 
-        System.out.println("Current Elevator Height: " + getElevatorHeight());
+        //System.out.println("Current Elevator Height: " + getElevatorHeight());
 
     }
 
