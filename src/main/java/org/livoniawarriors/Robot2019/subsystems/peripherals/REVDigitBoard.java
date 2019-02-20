@@ -41,11 +41,12 @@ public class REVDigitBoard {
 	 	blink[0] = (byte)0x81;
 	 	bright[0] = (byte)0xEF;
 
+		 
 		i2c.writeBulk(osc);
 		Timer.delay(.01);
 		i2c.writeBulk(bright);
 		Timer.delay(.01);
-		//i2c.writeBulk(blink);
+		i2c.writeBulk(blink);
 		Timer.delay(.01);
 		
 		charreg = new byte[37][2]; //charreg is short for character registry
@@ -143,22 +144,6 @@ public class REVDigitBoard {
 		this._display(charz);
 	}
 	
-	void display(double batt) { // optimized for battery voltage, needs a double like 12.34
-		int[] charz = {36,36,36,36};
-		// idk how to decimal point
-		int ten = (int)(batt/10);
-		int one = (int)(batt%10);
-		int tenth = (int)((batt*10)%10);
-		int hundredth = (int)((batt*100)%10);
-		
-		if (ten != 0) charz[0] = ten;
-		charz[1] = one;
-		charz[2] = tenth;
-		charz[3] = hundredth;
-		
-		this._display(charz);
-	}
-	
 	 void clear() {
 		 int[] charz = {36,36,36,36}; // whyy java
 		 this._display(charz);
@@ -188,7 +173,7 @@ public class REVDigitBoard {
  		byte1[8] = charreg[charz[0]][0];
  		byte1[9] = charreg[charz[0]][1];
  		//send the array to the board
- 		i2c.writeBulk(byte1);
+		i2c.writeBulk(byte1);
  		Timer.delay(0.01);
 	}
 	
