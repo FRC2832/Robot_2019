@@ -5,11 +5,12 @@ import edu.wpi.first.hal.can.CANMessageNotFoundException;
 import edu.wpi.first.hal.util.UncleanStatusException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import org.livoniawarriors.Robot2019.Robot;
 
 public class LightDrive {
     private ByteBuffer sendBuffer;
-    private byte[] recieveArray;
-    private ByteBuffer recieveID;
+    private byte[] receiveArray;
+    private ByteBuffer receiveID;
     private ByteBuffer timestampBuffer;
 
     private int CAN_ID; //given by lib.
@@ -19,40 +20,43 @@ public class LightDrive {
     public LightDrive() {
         CAN_ID = 33882112 + (NUM_DRIVES);
         NUM_DRIVES++;
-        System.out.println(CAN_ID + " " + NUM_DRIVES);
         sendBuffer = ByteBuffer.allocate(16);
-        recieveID = ByteBuffer.allocateDirect(4);
-        recieveID.order(ByteOrder.LITTLE_ENDIAN);
+        receiveID = ByteBuffer.allocateDirect(4);
+        receiveID.order(ByteOrder.LITTLE_ENDIAN);
         timestampBuffer = ByteBuffer.allocateDirect(4);
         timestampBuffer.order(ByteOrder.LITTLE_ENDIAN);
         //buffer values are written in order from least to most significant figures
-    }
+        }
 
     public void update() {
         //attempts to send message
-        byte[] tempSend = new byte[8];
+        byte[] tempSend1 = new byte[8];
+        byte[]tempSend2 = new byte[8];
 
         try {
             //sends first 8 bytes
-            sendBuffer.get(tempSend, 0, 8);
-            CANJNI.FRCNetCommCANSessionMuxSendMessage(CAN_ID, tempSend, 100); //library used 100ms
+            sendBuffer.get(tempSend1, 0, 6);
+
+            CANJNI.FRCNetCommCANSessionMuxSendMessage(CAN_ID, tempSend1, 100); //library used 100ms
             //sends second 8 bytes
-            sendBuffer.get(tempSend, 0, 8);
-            CANJNI.FRCNetCommCANSessionMuxSendMessage(CAN_ID + 1, tempSend, 100);
+            sendBuffer.get(tempSend2, 0, 6);
+
+            CANJNI.FRCNetCommCANSessionMuxSendMessage(CAN_ID + 1, tempSend2, 100);
         }
         catch(UncleanStatusException e) {
-            System.out.println(e.getMessage());
+            Robot.logger.error("Couldn't send LightDrive message", e);
         }
+        sendBuffer.rewind();
         
         //attempts to recieve message
-        recieveID.putInt(CAN_ID + 4);
-        recieveID.rewind();
+        receiveID.putInt(CAN_ID + 4);
+        receiveID.rewind();
         try {
-            recieveArray = CANJNI.FRCNetCommCANSessionMuxReceiveMessage(recieveID.asIntBuffer(), 
+            receiveArray = CANJNI.FRCNetCommCANSessionMuxReceiveMessage(receiveID.asIntBuffer(), 
                 MSG_ID_MASK, timestampBuffer);
         }
         catch (CANMessageNotFoundException e) {
-            System.out.println(e.getMessage());
+            Robot.logger.error("Couldn't receive LightDrive message", e);
         }
     }
 
