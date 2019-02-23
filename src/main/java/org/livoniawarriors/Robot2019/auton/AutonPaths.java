@@ -9,6 +9,8 @@ import jaci.pathfinder.modifiers.TankModifier;
 
 public class AutonPaths {
 
+	private static final double WHEEL_BASE = 0.632333;
+
 	//A simple test path, in a straight line
 	Waypoint testPoints[] = new Waypoint[] {
 		new Waypoint(1.699,  3.85, 0),
@@ -28,6 +30,14 @@ public class AutonPaths {
 	Trajectory testModRight = mod.getRightTrajectory();
 	public EncoderFollower testFollowerL = new EncoderFollower(testModLeft);
 	public EncoderFollower testFollowerR = new EncoderFollower(testModRight);
+
+	/*public Trajectory generateModifier(Waypoint points) {
+		//Standard config, should be good for all paths
+		Trajectory.Config config = new Trajectory.Config(FitMethod.HERMITE_CUBIC, 1000, 15, 1, 1, 1);
+		
+		Trajectory value;
+		return value;
+	}*/
 	
 
 }
