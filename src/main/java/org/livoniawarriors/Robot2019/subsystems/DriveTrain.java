@@ -32,10 +32,15 @@ public class DriveTrain implements ISubsystem {
         WPI_TalonSRX talonFrontRight = new WPI_TalonSRX(DRIVE_MOTER_FR);
         WPI_TalonSRX talonBackLeft = new WPI_TalonSRX(DRIVE_MOTER_BL);
         WPI_TalonSRX talonBackRight = new WPI_TalonSRX(DRIVE_MOTER_BR);
+        
         talonBackLeft.follow(talonFrontLeft);
         talonBackRight.follow(talonFrontRight);
+        
         talonFrontLeft.setInverted(true);
         talonFrontRight.setInverted(true);
+        talonBackLeft.setInverted(true);
+        talonBackRight.setInverted(true);
+        
         drive = new DifferentialDrive(talonFrontLeft, talonFrontRight);
         pdp = new PowerDistributionPanel();
     }
