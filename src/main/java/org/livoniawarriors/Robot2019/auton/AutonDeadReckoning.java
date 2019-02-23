@@ -1,47 +1,62 @@
 package org.livoniawarriors.Robot2019.auton;
 
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Notifier;
+import org.livoniawarriors.Robot2019.ICsvLogger;
+import org.livoniawarriors.Robot2019.ISubsystem;
+import org.livoniawarriors.Robot2019.Robot;
+import org.livoniawarriors.Robot2019.auton.DeadReckoning;
 
-public class AutonDeadReckoning {
+public class AutonDeadReckoning implements ISubsystem {
 
-	private static final int ENCODER_FRONT_LEFT = 0;
-	private static final int ENCODER_FRONT_RIGHT = 0;
-	private static final int ENCODER_BACK_RIGHT = 0;
-	private static final int ENCODER_BACK_LEFT = 0;
+	String selected;
+	DeadReckoning deadReckoning;
+	long startTime;
+	long position;
 
-	private final double ENCODER_CONVERSION = 1;
-
-	Encoder encoderFL;
-	Encoder encoderFR;
-	Encoder encoderBL;
-	Encoder encoderBR;
-
-	//private final Notifier timer;
-
+	@Override
 	public void init() {
-	//    timer = new Notifier(this::timer);
-		encoderFL = new Encoder(0, 1);
-		encoderFR = new Encoder(2, 3);
-		encoderBL = new Encoder(4, 5);
-		encoderBR = new Encoder(6, 7);
+		deadReckoning = new DeadReckoning();
+		startTime = System.nanoTime();
+	}
+
+	@Override
+	public void update(boolean enabled) {
+		if(!enabled) {
+			return;
+		}
+		selected = "test"; //TODO: Set to retrieve selected auton option from dashboard
+		/* Write out some paths */
+		if(selected == "test") {
+			long desiredPosition = 0; //TODO: remove variable, determine desired position after we figure out what units this is in
+			position = deadReckoning.calculatePosition(startTime);
+			Robot.driveTrain.tankDrive(0.4, 0.4); //TODO: figure out ideal speed
+			//Stop driving when position 1 is reached
+			if(position >= desiredPosition) { //TODO: replace with actual desired position
+				Robot.driveTrain.tankDrive(0, 0);
+				//Put turn code here, then drive some more
+				//Test again for next position
+				//Turn & drive again until next position, repeat until final position reached
+				
+			}
+			
+		} //Repeat for every path we want as an option
 
 	}
 
-	private void driveTime(double time) {
+	@Override
+	public void dispose() throws Exception {
 
 	}
 
-	private void readEncoder(Encoder encoder) {
-		
+	@Override
+	public void csv(ICsvLogger csv) {
+
 	}
 
-	private void deadReckoning() {
-		double pos = 0;
+	@Override
+	public void diagnose() {
+
 	}
 
-	private void timer() {
-		
-	}
 
+	
 }

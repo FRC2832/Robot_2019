@@ -78,6 +78,12 @@ public class PeripheralSubsystem implements ISubsystem {
         pigeon.getYawPitchRoll(yawPitchRoll);
         return yawPitchRoll[0];
     }
+
+    public short getAcc() {
+        short xyz[] = new short[3];
+        pigeon.getBiasedAccelerometer(xyz);
+        return(xyz[0]); //Return forward direction
+    }
         
     
 
