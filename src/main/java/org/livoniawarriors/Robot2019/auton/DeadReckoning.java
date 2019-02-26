@@ -5,30 +5,26 @@ import org.livoniawarriors.Robot2019.Robot;
 public class DeadReckoning {
 	
 	/**
-	 * Calculate velocity in units per nanosecond //TODO: figure out units from acceleration
+	 * Calculate velocity in inches per second
 	 * @param startTime The time to measure from (via System.nanoTime)
 	 * @return velocity
 	 */
-	public long calculateVelocity(long startTime) {
-		short accel = Robot.peripheralSubsystem.getAcc();
-		long time = System.nanoTime() - startTime;
+	private double calculateVelocity(long startTime) {
+		double accel = Robot.peripheralSubsystem.getAcc();
+		double time = (System.nanoTime() - startTime) / 1000000000d;
 		return accel * time;
 	}
 
 	/**
-	 * Calculate position in units //TODO: figure out units, and maybe convert to something useful
+	 * Calculate position in inches
 	 * @param startTime Time to measure from
 	 * @return position
 	 */
-	public long calculatePosition(long startTime) {
-		long velocity = calculateVelocity(startTime);
-		long time = System.nanoTime() - startTime;
+	public double calculatePosition(long startTime) {
+		double velocity = calculateVelocity(startTime);
+		double time = (System.nanoTime() - startTime) / 1000000000d;
 		return velocity * time;
 	}
 
-	public void deadReckon() {
-		long startPosition = calculatePosition(System.nanoTime());
-
-	}
 
 }

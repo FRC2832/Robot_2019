@@ -7,10 +7,10 @@ import org.livoniawarriors.Robot2019.auton.DeadReckoning;
 
 public class AutonDeadReckoning implements ISubsystem {
 
-	String selected;
-	DeadReckoning deadReckoning;
-	long startTime;
-	long position;
+	private String selected;
+	private DeadReckoning deadReckoning;
+	private long startTime;
+	private double position;
 
 	@Override
 	public void init() {
@@ -25,20 +25,15 @@ public class AutonDeadReckoning implements ISubsystem {
 		}
 		selected = "test"; //TODO: Set to retrieve selected auton option from dashboard
 		/* Write out some paths */
-		if(selected == "test") {
-			long desiredPosition = 0; //TODO: remove variable, determine desired position after we figure out what units this is in
+		if(selected.equals("test")) { //Drive straight 100 inches
 			position = deadReckoning.calculatePosition(startTime);
 			Robot.driveTrain.tankDrive(0.4, 0.4); //TODO: figure out ideal speed
 			//Stop driving when position 1 is reached
-			if(position >= desiredPosition) { //TODO: replace with actual desired position
+			if(position >= 100) { //Desired position in inches
 				Robot.driveTrain.tankDrive(0, 0);
-				//Put turn code here, then drive some more
-				//Test again for next position
-				//Turn & drive again until next position, repeat until final position reached
-				
 			}
 			
-		} //Repeat for every path we want as an option
+		}
 
 	}
 

@@ -18,76 +18,85 @@ import org.apache.logging.log4j.Level;
 
 public class PeripheralSubsystem implements ISubsystem {
 
-    private Lidar lidar;
-    private Ultrasonic proxSensor;
-    private PigeonIMU pigeon;
-    private double[] yawPitchRoll = new double[3];
+	private Lidar lidar;
+	private Ultrasonic proxSensor;
+	private PigeonIMU pigeon;
+	private double[] yawPitchRoll = new double[3];
 
-    private static final int PRESSURE_SENSOR_PORT = 1;
-    private AnalogInput pressureSensor;
+	private static final int PRESSURE_SENSOR_PORT = 1;
+	private AnalogInput pressureSensor;
 
-    private REVDigitBoard digitBoard;
+	private REVDigitBoard digitBoard;
 
-    @Override
-    public void init() {
-        lidar = new Lidar();
-        proxSensor = new Ultrasonic(0,1); //TODO: change output port and input port
-        proxSensor.setEnabled(false);
-        proxSensor.setAutomaticMode(false);
-        pigeon = new PigeonIMU(DriveTrain.DRIVE_MOTER_FR);
-        pressureSensor = new AnalogInput(PRESSURE_SENSOR_PORT);
-        digitBoard = new REVDigitBoard();
-    }
+	@Override
+	public void init() {
+		lidar = new Lidar();
+		proxSensor = new Ultrasonic(0,1); //TODO: change output port and input port
+		proxSensor.setEnabled(false);
+		proxSensor.setAutomaticMode(false);
+		pigeon = new PigeonIMU(DriveTrain.DRIVE_MOTER_BL);
+		pressureSensor = new AnalogInput(PRESSURE_SENSOR_PORT);
+		digitBoard = new REVDigitBoard();
+	}
 
-    @Override
-    public void update(boolean enabled) {
-        lidar.update();
-        digitBoard.display(Double.toString(getPressure()));
-    }
+	@Override
+	public void update(boolean enabled) {
+		lidar.update();
+		digitBoard.display(Double.toString(getPressure()));
+	}
 
-    @Override
-    public void dispose() throws IOException {
-        lidar.dispose();
-    }
-    @Override
-    public void csv(ICsvLogger csv) {
+	@Override
+	public void dispose() throws IOException {
+		lidar.dispose();
+	}
+	@Override
+	public void csv(ICsvLogger csv) {
 
-    }
+	}
 
-    @Override
-    public void diagnose() {
+	@Override
+	public void diagnose() {
 
-    }
+	}
 
-    public void resetEncoder(Encoder e){
-        e.reset();
-    }
+	public void resetEncoder(Encoder e){
+		e.reset();
+	}
 
-    public double encoderDist(Encoder e, double radius){
-        return e.getRaw() * 2*Math.PI*radius;
-    }
+	public double encoderDist(Encoder e, double radius){
+		return e.getRaw() * 2*Math.PI*radius;
+	}
 
-    public double proxSensorDistance(){
-        proxSensor.setEnabled(true);
-        proxSensor.ping();
-        return proxSensor.getRangeMM();
-    }
+	public double proxSensorDistance(){
+		proxSensor.setEnabled(true);
+		proxSensor.ping();
+		return proxSensor.getRangeMM();
+	}
 
-    public double getYaw() {
-        //returns the yaw; copy method and change array element to get pitch or roll
-        pigeon.getYawPitchRoll(yawPitchRoll);
-        return yawPitchRoll[0];
-    }
+	public double getYaw() {
+		//returns the yaw; copy method and change array element to get pitch or roll
+		pigeon.getYawPitchRoll(yawPitchRoll);
+		return yawPitchRoll[0];
+	}
 
-    public short getAcc() {
-        short xyz[] = new short[3];
-        pigeon.getBiasedAccelerometer(xyz);
-        return(xyz[0]); //Return forward direction
-    }
-        
-    
+	/**
+	 * Get acceleration from Pigeon in inches per second squared
+	 * @return acceleration in in/s/s
+	 */
+	public double getAcc() {
+		short xyz[] = new short[3];
+		short rawAccel;
+		pigeon.getBiasedAccelerometer(xyz);
+		rawAccel = xyz[0];
+		double gees = rawAccel / 16384d; //Covert result to G's
+		double inpsps = gees * 386.08858; // Conver G's to in/s/s
+		return inpsps;
 
-    public double getPressure() {
-        return 250d * pressureSensor.getVoltage() / 5d - 25d;
-    }
+	}
+		
+	
+
+	public double getPressure() {
+		return 250d * pressureSensor.getVoltage() / 5d - 25d;
+	}
 }

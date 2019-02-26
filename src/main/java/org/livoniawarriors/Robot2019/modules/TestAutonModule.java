@@ -3,18 +3,23 @@ package org.livoniawarriors.Robot2019.modules;
 import org.livoniawarriors.Robot2019.IControlModule;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.auton.Auton;
+import org.livoniawarriors.Robot2019.auton.AutonDeadReckoning;
 import org.livoniawarriors.Robot2019.auton.AutonPaths;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 public class TestAutonModule implements IControlModule {
-
+/*
 	private static AutonPaths paths;
 	private SendableChooser<String> autonChooser;
+*/
+
+	AutonDeadReckoning deadReckoning;
 
 	@Override
 	public void init() {
-		paths = new AutonPaths();
+	/*	paths = new AutonPaths();
 		autonChooser = new SendableChooser<>();
 
 		//Configure PIDVA values for each follower
@@ -22,7 +27,8 @@ public class TestAutonModule implements IControlModule {
 		paths.testFollowerR.configurePIDVA(1, 0, 0, 1, 1); // PIDVA values need to be found
 
 		Robot.userInput.addOption(autonChooser, "TestPath", "testPath", true);
-
+		*/
+		deadReckoning = new AutonDeadReckoning();
 	}
 
 	@Override
@@ -32,10 +38,11 @@ public class TestAutonModule implements IControlModule {
 
 	@Override
 	public void update() {
-		//We may want to make this a switch when we have more available options
+	/*	//We may want to make this a switch when we have more available options
 		if(Robot.userInput.getSelected(autonChooser).equals("testPath")) {
 			Auton.followPath(paths.testFollowerL, paths.testFollowerR);
-		}
+		} */
+		deadReckoning.update(true);
 	}
 
 	@Override
@@ -45,7 +52,7 @@ public class TestAutonModule implements IControlModule {
 
 	@Override
 	public boolean isFinished() {
-		return false;
+		return !DriverStation.getInstance().isAutonomous();
 	}
 
 }
