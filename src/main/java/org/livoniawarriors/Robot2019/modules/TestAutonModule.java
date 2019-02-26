@@ -19,15 +19,7 @@ public class TestAutonModule implements IControlModule {
 
 	@Override
 	public void init() {
-	/*	paths = new AutonPaths();
-		autonChooser = new SendableChooser<>();
 
-		//Configure PIDVA values for each follower
-		paths.testFollowerL.configurePIDVA(1, 0, 0, 1, 1); // PIDVA values need to be found
-		paths.testFollowerR.configurePIDVA(1, 0, 0, 1, 1); // PIDVA values need to be found
-
-		Robot.userInput.addOption(autonChooser, "TestPath", "testPath", true);
-		*/
 		deadReckoning = new AutonDeadReckoning();
 	}
 
@@ -38,10 +30,7 @@ public class TestAutonModule implements IControlModule {
 
 	@Override
 	public void update() {
-	/*	//We may want to make this a switch when we have more available options
-		if(Robot.userInput.getSelected(autonChooser).equals("testPath")) {
-			Auton.followPath(paths.testFollowerL, paths.testFollowerR);
-		} */
+	
 		deadReckoning.update(true);
 	}
 

@@ -27,7 +27,7 @@ public class AutonDeadReckoning implements ISubsystem {
 		/* Write out some paths */
 		if(selected.equals("test")) { //Drive straight 100 inches
 			position = deadReckoning.calculatePosition(startTime);
-			Robot.driveTrain.tankDrive(0.4, 0.4); //TODO: figure out ideal speed
+			Robot.driveTrain.tankDrive(0.8, 0.8); //TODO: figure out ideal speed
 			//Stop driving when position 1 is reached
 			if(position >= 100) { //Desired position in inches
 				Robot.driveTrain.tankDrive(0, 0);
