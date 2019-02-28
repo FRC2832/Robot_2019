@@ -33,12 +33,12 @@ public class Elevator implements PIDSource, PIDOutput {
     private static final double TOLERANCE = 1; // +- how many inches is acceptable
     private static final double MAX_MOTOR_SPEED = 0.7;
 
-    private static final double movingP = 10.0;
+    private static final double movingP = 0.9;
     private static final double movingI = 0.0;
     private static final double movingD = 0.5;
     private static final double movingF = 0.7;
 
-    private static final double maintainerP = 1.0;
+    private static final double maintainerP = 0.5;
     private static final double maintainerI = 0.0;
     private static final double maintainerD = 0.5;
     private static final double maintainerF = 0.2;
@@ -48,19 +48,22 @@ public class Elevator implements PIDSource, PIDOutput {
 
     private UserInput.Controller controller;
 
-    private boolean manual = true;
+    private boolean manual = false;
     private boolean movingPID;
     private ElevatorHeights currentSetHeight;
 
     public Elevator() {
         elevatorMotor = new CANSparkMax(ELEVATOR_MOTOR, MotorType.kBrushless);
         elevatorMotor.setIdleMode(IdleMode.kBrake);
+        elevatorMotor.setOpenLoopRampRate(0.7);
 
         pidController = new PIDController(movingP, movingI, movingD, movingF, this, this, 0.01);
 
+        setPIDSourceType(PIDSourceType.kDisplacement);
+
         pidController.setAbsoluteTolerance(TOLERANCE);
-        pidController.setOutputRange(-MAX_MOTOR_SPEED, MAX_MOTOR_SPEED);
-        pidController.setInputRange(Double.MIN_VALUE, Double.MAX_VALUE);
+        pidController.setOutputRange(-MAX_MOTOR_SPEED / 4, MAX_MOTOR_SPEED);
+        pidController.setInputRange(-Double.MAX_VALUE, Double.MAX_VALUE);
         pidController.setContinuous(true);
 
         controller = Robot.userInput.getController(0);
@@ -77,6 +80,7 @@ public class Elevator implements PIDSource, PIDOutput {
      *               needs to go to
      */
     public void setElevatorHeight(ElevatorHeights height) {
+        pidController.disable();
         pidController.setSetpoint(height.getHeight());
         currentSetHeight = height;
         setToMovingPID();
@@ -85,11 +89,14 @@ public class Elevator implements PIDSource, PIDOutput {
     private void setToMovingPID() {
         pidController.setPID(movingP, movingI, movingD, movingF);
         pidController.reset();
+        //System.out.println("PIDController is " + (pidController.isEnabled() ? "Enabled" : "Disabled"));
         pidController.enable();
+        //System.out.println("PIDController is " + (pidController.isEnabled() ? "Enabled" : "Disabled"));
         movingPID = true;
     }
 
     private void setToMaintiningPID() {
+        pidController.disable();
         pidController.setPID(maintainerP, maintainerI, maintainerD, maintainerF);
         pidController.reset();
         pidController.enable();
@@ -101,53 +108,61 @@ public class Elevator implements PIDSource, PIDOutput {
      *         information
      */
     public double getElevatorHeight() {
-        return elevatorMotor.getEncoder().getPosition() * (2 * Math.PI) / 21;
+        return elevatorMotor.getEncoder().getPosition() * (2 * Math.PI) / 49;
         // Pulley has a 1 inch radius and 2 pi circumfrence
-        // The gearbox has a ratio of 21:1
+        // The gearbox has a ratio of 49:1
         // Therefore to go from encoders to elevator height we multiply by 2pi and
-        // divide by 21
+        // divide by 49
     }
 
     public void update(boolean isEnabled) {
-        if (!manual) {
-            if (isEnabled) {
-                if (!pidController.isEnabled()) {
-                    pidController.enable();
-                }
-                if (pidController.onTarget()) {
-                    setToMaintiningPID();
-                }
-
-                if (controller.getButtonPressed(Button.A)) {
-                    setElevatorHeight(ElevatorHeights.LowHatch);
-                    System.out.println("Setting elevator to Low Hatch");
-                } else if (controller.getButtonPressed(Button.X)) {
-                    setElevatorHeight(ElevatorHeights.MidHatch);
-                    System.out.println("Setting elevator to Mid Hatch");
-                } else if (controller.getButtonPressed(Button.Y)) {
-                    setElevatorHeight(ElevatorHeights.TopHatch);
-                    System.out.println("Setting elevator to Top Hatch");
-                }
-
-            } else {
-                if (pidController.isEnabled()) {
-                    pidController.disable();
-                }
-                elevatorMotor.set(0.0);
+        if (!isEnabled) {
+            if (pidController.isEnabled()) {
+                pidController.disable();
             }
+            elevatorMotor.set(0.0);
+            return;
+        }
 
+        if (!manual) {
+
+            //PID Mode
+            if (!pidController.isEnabled()) {
+                pidController.enable();
+            }
+            if (pidController.onTarget() && movingPID) {
+                setToMaintiningPID();
+            }
+            if (controller.getButtonPressed(Button.A)) {
+                setElevatorHeight(ElevatorHeights.LowHatch);
+                System.out.println("Setting elevator to Low Hatch");
+            } else if (controller.getButtonPressed(Button.X)) {
+                setElevatorHeight(ElevatorHeights.MidHatch);
+                System.out.println("Setting elevator to Mid Hatch");
+            } else if (controller.getButtonPressed(Button.Y)) {
+                setElevatorHeight(ElevatorHeights.TopHatch);
+                System.out.println("Setting elevator to Top Hatch");
+            } else if (controller.getButtonPressed(Button.B)) {
+                manual = !manual;
+            }
         } else {
+
+            //Manual Mode
             if (controller.getTriggerAxis(Hand.kRight) != 0) {
-                elevatorMotor.set(controller.getTriggerAxis(Hand.kRight) * MAX_MOTOR_SPEED);
+                elevatorMotor.set(controller.getTriggerAxis(Hand.kRight) * 1);
+                System.out.println("Moving motor up forwards");
             } else if (controller.getTriggerAxis(Hand.kLeft) != 0) {
-                elevatorMotor.set(-1 * controller.getTriggerAxis(Hand.kLeft) * MAX_MOTOR_SPEED);
-                System.out.println("Moving motor up " + controller.getTriggerAxis(Hand.kLeft));
+                elevatorMotor.set(-1 * controller.getTriggerAxis(Hand.kLeft) * 1);
+                System.out.println("Moving motor up backwards");
             } else {
                 elevatorMotor.set(0);
             }
         }
 
         //System.out.println("Current Elevator Height: " + getElevatorHeight());
+        Robot.userInput.createValue("John", "Elevator Height", 2, getElevatorHeight());
+        Robot.userInput.createValue("John", "Set Height", 2, currentSetHeight);
+        Robot.userInput.createValue("John", "PID", 2, movingPID);
 
     }
 

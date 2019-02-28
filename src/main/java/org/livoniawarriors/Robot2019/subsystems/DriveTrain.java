@@ -16,10 +16,7 @@ import org.livoniawarriors.Robot2019.Robot;
 
 public class DriveTrain implements ISubsystem {
 
-    private final static int DRIVE_MOTOR_FL = 10;
-    private final static int DRIVE_MOTOR_FR = 24;
-    private final static int DRIVE_MOTOR_BL = 11;
-    private final static int DRIVE_MOTOR_BR = 25;
+
 
     private final static int TICKS_PER_ROTATION = 200; //TODO: Fix
     private final static double WHEEL_DIAMETER = 100; //TODO: Fix
@@ -30,6 +27,10 @@ public class DriveTrain implements ISubsystem {
     private final static double D = 0;
     private final static double MAX_VELOCITY = 1;
     private final static double ACCELERATION_GAIN = 0;
+    public final static int DRIVE_MOTER_FL = 25;
+    public final static int DRIVE_MOTER_FR = 10;
+    public final static int DRIVE_MOTER_BL = 24;
+    public final static int DRIVE_MOTER_BR = 11;
 
     private DifferentialDrive drive;
     private EncoderFollower leftFollower;
@@ -71,24 +72,27 @@ public class DriveTrain implements ISubsystem {
 
     @Override
     public void init() {
-        WPI_TalonSRX talonFL = new WPI_TalonSRX(DRIVE_MOTOR_FL);
-        WPI_TalonSRX talonFR = new WPI_TalonSRX(DRIVE_MOTOR_FR);
-        WPI_TalonSRX talonBL = new WPI_TalonSRX(DRIVE_MOTOR_BL);
-        WPI_TalonSRX talonBR = new WPI_TalonSRX(DRIVE_MOTOR_BR);
-        talonBL.follow(talonFL);
-        //talonBL.setInverted(true);
-        talonBR.follow(talonFR);
-        drive = new DifferentialDrive(talonFL, talonFR);
+        WPI_TalonSRX talonFrontLeft = new WPI_TalonSRX(DRIVE_MOTER_FL);
+        WPI_TalonSRX talonFrontRight = new WPI_TalonSRX(DRIVE_MOTER_FR);
+        WPI_TalonSRX talonBackLeft = new WPI_TalonSRX(DRIVE_MOTER_BL);
+        WPI_TalonSRX talonBackRight = new WPI_TalonSRX(DRIVE_MOTER_BR);
+        talonBackLeft.follow(talonFrontLeft);
+        talonBackRight.follow(talonFrontRight);
+        talonFrontLeft.setInverted(true);
+        talonFrontRight.setInverted(true);
+        talonBackLeft.setInverted(true);
+        talonBackRight.setInverted(true);
+        drive = new DifferentialDrive(talonFrontLeft, talonFrontRight);
         leftFollower = new EncoderFollower();
         leftFollower.configureEncoder(0 /* change */, TICKS_PER_ROTATION, WHEEL_DIAMETER);
         leftFollower.configurePIDVA(P, I, D, 1/ MAX_VELOCITY, ACCELERATION_GAIN);
         leftFollower.setTrajectory(new Trajectory(0));
-        leftEncoder = talonBL.getSensorCollection();
+        leftEncoder = talonBackLeft.getSensorCollection();
         rightFollower = new EncoderFollower();
         rightFollower.configureEncoder(0 /* change */, TICKS_PER_ROTATION, WHEEL_DIAMETER);
         rightFollower.configurePIDVA(P, I, D, 1/ MAX_VELOCITY, ACCELERATION_GAIN);
         rightFollower.setTrajectory(new Trajectory(0));
-        rightEncoder = talonBR.getSensorCollection();
+        rightEncoder = talonBackRight.getSensorCollection();
         pathConfig = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH, 0.05, 1.7, 2.0, 60.0);
     }
 

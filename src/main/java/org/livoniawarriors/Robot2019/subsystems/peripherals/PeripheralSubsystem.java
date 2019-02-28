@@ -11,8 +11,10 @@ import java.util.Random;
 
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Notifier;
+
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import com.ctre.phoenix.sensors.PigeonIMU;
 import org.apache.logging.log4j.Level;
@@ -29,6 +31,11 @@ public class PeripheralSubsystem implements ISubsystem {
     private JeVois jeVois;
     private AnalogInput pressureSensor;
 
+    private Compressor compressor;
+
+    private Notifier notifier;
+    private final static double REV_ROBOTICS_DIGIT_MXP_DISPLAY_UPDATE_PERIOD = .25;
+
     private REVDigitBoard digitBoard;
 
     @Override
@@ -39,14 +46,19 @@ public class PeripheralSubsystem implements ISubsystem {
         proxSensor.setAutomaticMode(false);
         pigeon = new PigeonIMU(PIGEON_PORT);
         pressureSensor = new AnalogInput(PRESSURE_SENSOR_PORT);
+        compressor = new Compressor();
+        compressor.start();
         digitBoard = new REVDigitBoard();
         jeVois = new JeVois();
         CameraServer.getInstance().startAutomaticCapture();
+        notifier = new Notifier(() -> digitBoard.display(Integer.toString((int)getPressure())));
+        notifier.startPeriodic(REV_ROBOTICS_DIGIT_MXP_DISPLAY_UPDATE_PERIOD);
     }
 
     @Override
     public void update(boolean enabled) {
         lidar.update();
+
         //digitBoard.display(Double.toString(getPressure()));
         System.out.println("==============+++==============");
         System.out.print("Vision Online: ");
@@ -94,6 +106,6 @@ public class PeripheralSubsystem implements ISubsystem {
     }
 
     public double getPressure() {
-        return 250d * pressureSensor.getVoltage() / 5d - 25d;
+        return 250d * pressureSensor.getAverageVoltage() / 5d - 25d;
     }
 }
