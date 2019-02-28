@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 import jaci.pathfinder.Pathfinder;
+import jaci.pathfinder.PathfinderJNI;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
 import jaci.pathfinder.followers.EncoderFollower;
@@ -15,8 +16,6 @@ import org.livoniawarriors.Robot2019.ISubsystem;
 import org.livoniawarriors.Robot2019.Robot;
 
 public class DriveTrain implements ISubsystem {
-
-
 
     private final static int TICKS_PER_ROTATION = 200; //TODO: Fix
     private final static double WHEEL_DIAMETER = 100; //TODO: Fix

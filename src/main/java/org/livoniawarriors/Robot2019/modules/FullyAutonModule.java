@@ -30,7 +30,7 @@ public class FullyAutonModule implements IControlModule {
         switch (state) {
             case 0:
                 if(changed) {
-                    Trajectory trajectory = Robot.driveTrain.generateTrajectory(new Waypoint[]{new Waypoint(0, 0, 0), new Waypoint(0, 10, 0)});
+                    Trajectory trajectory = Robot.driveTrain.generateTrajectory(new Waypoint[]{new Waypoint(0, 0, 0), new Waypoint(0, 10, 0), new Waypoint(0, 20, 0)});
                     Robot.driveTrain.startTrajectory(trajectory);
                 }
                 if (Robot.driveTrain.isTrajectoryDone())
