@@ -1,6 +1,9 @@
 package org.livoniawarriors.Robot2019.subsystems.flamethrower;
 
 import java.util.ArrayList;
+
+import edu.wpi.first.wpilibj.DriverStation;
+
 import java.lang.Math;
 
 public class UnderConsoleLights {
@@ -9,23 +12,23 @@ public class UnderConsoleLights {
 
     //TODO: add appropriate number of drives
 
-    public void init() {
+    public UnderConsoleLights() {
         for(int i = 0; i < NUM_DRIVES; i++) { 
             lightDrives.add(new LightDrive());
         }
     }
 
-    private void changeColor(Color color) {
+    public void changeColor(Color color) {
         for(LightDrive ld : lightDrives) {
-            ld.setColor(1, color, 0.8f);
-            ld.setColor(2, color, 0.8f);
-            ld.setColor(3, color, 0.8f);
-            ld.setColor(4, color, 0.8f);
+            ld.setColor(1, color);
+            ld.setColor(2, color);
+            ld.setColor(3, color);
+            ld.setColor(4, color);
             ld.update();
         }
     }
 
-    private void changeColorVar(Color color, int varFact) {
+    public void changeColorVar(Color color, int varFact) {
         short tempRed = color.getRed();
         short tempGreen = color.getGreen();
         short tempBlue = color.getBlue();
@@ -37,6 +40,15 @@ public class UnderConsoleLights {
                     (tempBlue + (int)(Math.random() * varFact))), 0.8f);
             }
             ld.update();
+        }
+    }
+
+    public void allianceColor() {
+        if(DriverStation.getInstance().getAlliance().equals(DriverStation.Alliance.Blue)) {
+            blueLights();
+        }
+        else {
+            redLights();
         }
     }
 
@@ -58,5 +70,9 @@ public class UnderConsoleLights {
 
     public void lightsOff() {
         changeColor(Color.OFF);
+    }
+
+    public void yellowLights() {
+        changeColor(new Color(255,255,0));
     }
 }
