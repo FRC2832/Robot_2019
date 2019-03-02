@@ -12,19 +12,20 @@ import org.livoniawarriors.Robot2019.ControlMapping;
 public class TestTeleopModule implements IControlModule {
     private UserInput.Controller flightstickLeft;
     private UserInput.Controller flightstickRight;
-    private UserInput.Controller xbox;
+    private UserInput.Controller driverXbox;
     private double lStick;
     private double rStick;
     private double slider;
-    private boolean flightstickMode;
+    private boolean flightstickoMode;
 
 
     @Override
     public void init() {
         flightstickLeft = Robot.userInput.getController(Controllers.L_FLIGHTSTICK);
         flightstickRight = Robot.userInput.getController(Controllers.R_FLIGHTSTICK);
-        flightstickMode = false;
-        Robot.userInput.createValue("tab", "Controller Mode", 7, flightstickMode);
+        driverXbox = Robot.userInput.getController(Controllers.TEST_XBOX);
+        flightstickoMode = true;
+        Robot.userInput.createValue("tab", "Controller Mode", 7, flightstickoMode);
     }
 
     public void myTeleopInit() {
@@ -40,9 +41,6 @@ public class TestTeleopModule implements IControlModule {
     public void update() {
        updateControllers();
        Robot.driveTrain.tankDrive(lStick, rStick);
-       if (!flightstickMode) {
-        xbox = Robot.userInput.getController(Controllers.TEST_XBOX);
-       }
     }
 
     @Override
@@ -56,7 +54,7 @@ public class TestTeleopModule implements IControlModule {
     }
 
     public void updateControllers() {
-        if (flightstickMode) {
+        if (flightstickoMode) {
             lStick = flightstickLeft.getJoystickY(Joystick.FLIGHTSTICK);
             rStick = flightstickRight.getJoystickY(Joystick.FLIGHTSTICK);
             if (flightstickRight.getButtonPressed(Button.THUMB)){
@@ -74,7 +72,8 @@ public class TestTeleopModule implements IControlModule {
             }
         }
         else {
-
+            lStick = driverXbox.getJoystickY(Joystick.LEFT);
+            rStick = driverXbox.getJoystickX(Joystick.RIGHT);
         }
     }
 }
