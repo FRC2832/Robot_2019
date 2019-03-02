@@ -46,7 +46,8 @@ public class PeripheralSubsystem implements ISubsystem {
         compressor = new Compressor();
         compressor.start();
         digitBoard = new REVDigitBoard();
-        notifier = new Notifier(() -> digitBoard.display(Integer.toString((int)getPressure())));
+        if(!digitBoard.equals(null))
+            notifier = new Notifier(() -> digitBoard.display(Integer.toString((int)getPressure())));
         notifier.startPeriodic(REV_ROBOTICS_DIGIT_MXP_DISPLAY_UPDATE_PERIOD);
     }
 
