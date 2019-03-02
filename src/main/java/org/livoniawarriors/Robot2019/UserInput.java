@@ -28,41 +28,8 @@ public class UserInput implements ISubsystem {
     private NetworkTableInstance inst;
     private NetworkTable table;
     private SendableChooser<String> chooser;
-    private HashMap<String, Integer> tableEntries;
-    
-    public void createValue(String selectedTab, String title, int handle, Object value) {
-        if (tableEntries.containsKey(title)){
-            if (null != selectedTab && null != title && null != value){
-                ShuffleboardTab currentTab = Shuffleboard.getTab(selectedTab);
-                NetworkTableEntry currentEntry = new NetworkTableEntry(inst, handle);
-                currentEntry.setValue(value);
-                currentEntry = table.getEntry(title);
-                currentEntry = currentTab.add(title, value).getEntry();
-                tableEntries.put(title, handle);
-            }
-            else {
-                Robot.logger.log(Level.DEBUG, "Null value added to shuffleboard. ID10T error.");
-            }
-        }
-        else {
-            if (null != title && null != value) {
-                NetworkTableEntry selectedEntry = table.getEntry(title);
-                selectedEntry.setValue(value);
-            }
-            else {
-                Robot.logger.log(Level.DEBUG, "Can't update a null value to shuffleboard :who:");
-            }
-        }
-    }
+    private HashMap<String, Integer> tableEntries;    
 
-    public void addOption(String name, String option, boolean defaultOption) {
-        if (defaultOption) {
-            chooser.setDefaultOption(name, option);
-        }
-        else {
-            chooser.addOption(name, option);
-        }
-    }
 
     public Object getSelected() {
         return chooser.getSelected();
@@ -103,6 +70,40 @@ public class UserInput implements ISubsystem {
     @Override
     public void csv(ICsvLogger csv) {
 
+    }
+
+    public void createValue(String selectedTab, String title, int handle, Object value) {
+        if (tableEntries.containsKey(title)){
+            if (null != selectedTab && null != title && null != value){
+                ShuffleboardTab currentTab = Shuffleboard.getTab(selectedTab);
+                NetworkTableEntry currentEntry = new NetworkTableEntry(inst, handle);
+                currentEntry.setValue(value);
+                currentEntry = table.getEntry(title);
+                currentEntry = currentTab.add(title, value).getEntry();
+                tableEntries.put(title, handle);
+            }
+            else {
+                Robot.logger.log(Level.DEBUG, "Null value added to shuffleboard. ID10T error.");
+            }
+        }
+        else {
+            if (null != title && null != value) {
+                NetworkTableEntry selectedEntry = table.getEntry(title);
+                selectedEntry.setValue(value);
+            }
+            else {
+                Robot.logger.log(Level.DEBUG, "Can't update a null value to shuffleboard :who:");
+            }
+        }
+    }
+
+    public void addOption(String name, String option, boolean defaultOption) {
+        if (defaultOption) {
+            chooser.setDefaultOption(name, option);
+        }
+        else {
+            chooser.addOption(name, option);
+        }
     }
 
     public class Controller extends GenericHID {
@@ -172,7 +173,7 @@ public class UserInput implements ISubsystem {
         }
 
         public double getJoystickX(Joystick joystick) {
-            return getRawAxis((int)joystick.value.getX());
+                return getRawAxis((int)joystick.value.getX());
         }
 
         public double getJoystickY(Joystick joystick) {
@@ -195,8 +196,8 @@ public class UserInput implements ISubsystem {
             return 0;
         }
 
-        public double getOtherAxis(Joystick joystick, int selector) {
-            return 0;
+        public double getOtherAxis(int selector) {
+            return getRawAxis(selector);
         }
     }
 
@@ -281,7 +282,7 @@ public class UserInput implements ISubsystem {
     }
 
     public enum Controllers {
-        XBOX(0), L_FLIGHTSTICK(1), R_FLIGHTSTICK(2);
+        XBOX(0), L_FLIGHTSTICK(1), R_FLIGHTSTICK(2), TEST_XBOX(3);
 
         private final int value;
         Controllers(int value) {

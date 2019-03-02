@@ -16,13 +16,19 @@ public class TestTeleopModule implements IControlModule {
     private double lStick;
     private double rStick;
     private double slider;
+    private boolean flightstickMode;
 
 
     @Override
     public void init() {
         flightstickLeft = Robot.userInput.getController(Controllers.L_FLIGHTSTICK);
         flightstickRight = Robot.userInput.getController(Controllers.R_FLIGHTSTICK);
-        xbox = Robot.userInput.getController(Controllers.XBOX);
+        flightstickMode = false;
+        Robot.userInput.createValue("tab", "Controller Mode", 7, flightstickMode);
+    }
+
+    public void myTeleopInit() {
+
     }
 
     @Override
@@ -34,6 +40,9 @@ public class TestTeleopModule implements IControlModule {
     public void update() {
        updateControllers();
        Robot.driveTrain.tankDrive(lStick, rStick);
+       if (!flightstickMode) {
+        xbox = Robot.userInput.getController(Controllers.TEST_XBOX);
+       }
     }
 
     @Override
@@ -47,19 +56,25 @@ public class TestTeleopModule implements IControlModule {
     }
 
     public void updateControllers() {
-        lStick = flightstickLeft.getJoystickY(Joystick.FLIGHTSTICK);
-        rStick = flightstickRight.getJoystickY(Joystick.FLIGHTSTICK);
-        if (flightstickRight.getButtonPressed(Button.THUMB)){
-            
-            //slider = flightstickRight.getAxisType();
+        if (flightstickMode) {
+            lStick = flightstickLeft.getJoystickY(Joystick.FLIGHTSTICK);
+            rStick = flightstickRight.getJoystickY(Joystick.FLIGHTSTICK);
+            if (flightstickRight.getButtonPressed(Button.THUMB)){
+                slider = flightstickRight.getOtherAxis(Robot.userInput.FLIPPER_AXIS);
+                lStick = lStick * slider;
+                rStick = rStick * slider;
+            }
+            else {
+                if (flightstickLeft.getButtonPressed(Button.TRIGGER)) {
+                    lStick = lStick * .5;
+                }
+                if (flightstickRight.getButtonPressed(Button.TRIGGER)) {
+                    rStick = rStick * .5;
+                }
+            }
         }
         else {
-            if (flightstickLeft.getButtonPressed(Button.TRIGGER)) {
-                lStick = lStick * .5;
-            }
-            if (flightstickRight.getButtonPressed(Button.TRIGGER)) {
-                rStick = rStick * .5;
-            }
+
         }
     }
 }

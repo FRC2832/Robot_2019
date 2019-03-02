@@ -65,15 +65,15 @@ public class GamePieceManipulator {
             if (intakeDown) {
 
                 //Intake
-                if (controller.getTriggerAxis(Hand.kLeft) != 0 && !hasBall()) {    
-                    leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
+                if (controller.getOtherAxis(Robot.userInput.L_TRIGGER) != 0 && !hasBall()) {    
+                    leftIntakeMotor.set(controller.getOtherAxis(Robot.userInput.L_TRIGGER));
                 } else {
                     leftIntakeMotor.set(0);
                 }
 
                 //Expel
-                if (controller.getTriggerAxis(Hand.kRight) != 0 && hasBall()) {
-                    leftIntakeMotor.set(-1 * controller.getTriggerAxis(Hand.kRight));
+                if (controller.getOtherAxis(Robot.userInput.R_TRIGGER) != 0 && hasBall()) {
+                    leftIntakeMotor.set(-1 * controller.getOtherAxis(Robot.userInput.R_TRIGGER));
                 } else {
                     leftIntakeMotor.set(0);
                 }

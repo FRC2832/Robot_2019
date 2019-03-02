@@ -49,12 +49,12 @@ public class Climber {
 		//Maybe have a SmartDashboard button to "arm" the climber?
 		//TODO: Set flightstick buttons
 		if(Robot.userInput.getController(Controllers.XBOX).getButton(Button.BUMPER_R)
-			&& Robot.userInput.getController(Controllers.XBOX).getButton(Button.BUMPER_L)) {
+			&& Robot.userInput.getController(Controllers.XBOX).getButton(Button.BUMPER_L) && Robot.userInput.getController(Controllers.XBOX).getButton(Button.START)) {
 			if(Robot.gamePlay.getElevatorHeight() < 0.1) {
 				launchClimber();
 				System.out.println("Climber launch initiated; self-destructing");
 			} else {
-				System.out.println("CLIMBER will NOT run: elevator is up!");
+				System.out.println("I'm sorry Dave. I'm afraid I can't do that.");
 				Robot.logger.log(Level.DEBUG, "Attempted climber run with elevator up");
 			}
 		}
