@@ -5,25 +5,29 @@ import org.livoniawarriors.Robot2019.ISubsystem;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.auton.DeadReckoning;
 
-public class AutonDeadReckoning implements ISubsystem {
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+
+public class AutonDeadReckoning {
 
 	private String selected;
 	private DeadReckoning deadReckoning;
 	private long startTime;
 	private double position;
+	private SendableChooser<String> selectAuton;
 
-	@Override
 	public void init() {
 		deadReckoning = new DeadReckoning();
 		startTime = System.nanoTime();
+		selectAuton = new SendableChooser<String>();
+		Robot.userInput.addOption(selectAuton, "Straight Line", "test", true); //The only one we actually have
+		Robot.userInput.addOption(selectAuton, "Dummy value: DO NOT SELECT", "test1", false); //Reminding me how to make new ones
 	}
 
-	@Override
 	public void update(boolean enabled) {
 		if(!enabled) {
 			return;
 		}
-		selected = "test"; //TODO: Set to retrieve selected auton option from dashboard
+		selected = selectAuton.getSelected();
 		/* Write out some paths */
 		if(selected.equals("test")) { //Drive straight 100 inches
 			position = deadReckoning.calculatePosition(startTime);
@@ -33,25 +37,14 @@ public class AutonDeadReckoning implements ISubsystem {
 				Robot.driveTrain.tankDrive(0, 0);
 			}
 			
+		} else if(selected.equals("test1")) {
+			System.out.println("Dummy value selected; doing nothing");
+		/* None of the paths are selected somehow, so do nothing */
+		} else {
+			Robot.driveTrain.tankDrive(0, 0);
 		}
 
 	}
-
-	@Override
-	public void dispose() throws Exception {
-
-	}
-
-	@Override
-	public void csv(ICsvLogger csv) {
-
-	}
-
-	@Override
-	public void diagnose() {
-
-	}
-
 
 	
 }

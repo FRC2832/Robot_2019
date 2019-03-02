@@ -21,6 +21,7 @@ public class TestAutonModule implements IControlModule {
 	public void init() {
 
 		deadReckoning = new AutonDeadReckoning();
+		deadReckoning.init();
 	}
 
 	@Override
