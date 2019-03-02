@@ -14,6 +14,8 @@ import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
 
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -36,18 +38,21 @@ public class GamePieceManipulator {
     private final static int RIGHT_EXTENDER_OUT = 7;
 
 
-    private final static int ANALOG_INPUT_CHANNEL = 0;
+    private final static int DIGITAL_INPUT_CHANNEL = 0;
 
     private DoubleSolenoid flower, tilter, leftExtender, rightExtender;
     private WPI_TalonSRX leftIntakeMotor, rightIntakeMotor;
 
-    private AnalogInput ballSensor;
+    private DigitalInput ballSensor;
+    private DigitalOutput maybeBallSensor;
 
     private UserInput.Controller controller;
 
     private boolean intakeDown;
 
     private Thread extenderThread;
+
+    private boolean usingBallSensor = false;
 
     public GamePieceManipulator() {
         flower = new DoubleSolenoid(FLOWER_IN, FLOWER_OUT);
@@ -59,7 +64,8 @@ public class GamePieceManipulator {
         rightIntakeMotor.follow(leftIntakeMotor);
         rightIntakeMotor.setInverted(true);
 
-        ballSensor = new AnalogInput(ANALOG_INPUT_CHANNEL);
+        ballSensor = new DigitalInput(DIGITAL_INPUT_CHANNEL);
+        maybeBallSensor = new DigitalOutput(DIGITAL_INPUT_CHANNEL);
     
         controller = Robot.userInput.getController(1);
         
@@ -71,45 +77,64 @@ public class GamePieceManipulator {
             return;
         }
 
-        //Intake
-        if (controller.getTriggerAxis(Hand.kLeft) != 0 && !hasBall()) {    
-            leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
-        } else {
-            leftIntakeMotor.set(0);
-        }
+        //Code to move intake motors
+        //if using the proximity sensor, only let the intake motors move in if there isn't a ball
+        //and out if there is a ball
+        //if there isn't a proximity sensor, just move the motors based on controls
+        //only need to set the left motor because the right is set to follow it and is inverted
+        if (usingBallSensor) {
+            if (controller.getTriggerAxis(Hand.kLeft) != 0 && !hasBall()) {   
+                //Intake 
+                leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
 
-        //Expel
-        if (controller.getTriggerAxis(Hand.kRight) != 0 && hasBall()) {
-            leftIntakeMotor.set(-1 * controller.getTriggerAxis(Hand.kRight));
-        } else {
-            leftIntakeMotor.set(0);
-        }
-
-        //Variable Control
-        //Commented out methods are discrete solinoid control
-        if (flower.get() == Value.kReverse) {
-            if (controller.getButton(Button.Y)) {
-                //moveIntakeUp();
-                tilter.set(Value.kReverse);
-            } else if (controller.getButton(Button.B)) {
-                //moveIntakeDown();
-                tilter.set(Value.kForward);
+            } else if (controller.getTriggerAxis(Hand.kRight) != 0 && hasBall()) {
+                //Expel
+                leftIntakeMotor.set(-1 * controller.getTriggerAxis(Hand.kRight));
+            
             } else {
-                tilter.set(Value.kOff);
+                leftIntakeMotor.set(0);
             }
         } else {
-            tilter.set(Value.kReverse);
+            if (controller.getTriggerAxis(Hand.kLeft) != 0) {   
+                //Intake 
+                leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
+
+            } else if (controller.getTriggerAxis(Hand.kRight)!= 0) {
+                //Expel
+                leftIntakeMotor.set(-1 * controller.getTriggerAxis(Hand.kRight));
+            
+            } else {
+                leftIntakeMotor.set(0);
+            }
         }
+
+
+        //descrete Control
+        //Commented out is variable control
+        //if (flower.get() == Value.kReverse) {
+            if (controller.getButton(Button.Y)) {
+                moveIntakeUp();
+                //tilter.set(Value.kReverse);
+            } else if (controller.getButton(Button.B)) {
+                moveIntakeDown();
+                //tilter.set(Value.kForward);
+            } else {
+                //tilter.set(Value.kOff);
+            }
+        //} else {
+        //    tilter.set(Value.kReverse);
+        //}
         
-        if (controller.getButtonPressed(Button.A)) {
+        if (controller.getButtonPressed(Button.A) && tilter.get() == Value.kReverse) {
             moveFlower();
         } 
         
-        Robot.userInput.createValue("John", "Do I have a ball?", 2, hasBall());
+        Robot.userInput.createValue("John", "Do I have a ball?", 7, hasBall());
     }
 
     public boolean hasBall() {
-        return ballSensor.getVoltage() < 1.5;
+        return ballSensor.get();
+        //return false;
     }
 
     private void moveFlower() {
@@ -146,7 +171,7 @@ public class GamePieceManipulator {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(200); //Amount of time between pushing a retracting the extenders
                     leftExtender.set(Value.kReverse);
                     rightExtender.set(Value.kReverse);
                     extenderThread = null;
