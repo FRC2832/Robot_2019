@@ -7,6 +7,7 @@ import jaci.pathfinder.Trajectory.FitMethod;
 import jaci.pathfinder.followers.EncoderFollower;
 import jaci.pathfinder.modifiers.TankModifier;
 
+@Deprecated
 public class AutonPaths {
 
 	private static final double WHEEL_BASE = 0.632333;

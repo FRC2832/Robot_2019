@@ -11,6 +11,8 @@ import jaci.pathfinder.Trajectory.FitMethod;
 import jaci.pathfinder.followers.EncoderFollower;
 import jaci.pathfinder.modifiers.TankModifier;
 
+
+@Deprecated
 public class Auton {
 
 	static Encoder encoderFL = new Encoder(0, 1); //TODO: I don't have

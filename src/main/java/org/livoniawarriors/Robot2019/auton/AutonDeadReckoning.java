@@ -37,9 +37,11 @@ public class AutonDeadReckoning {
 				Robot.driveTrain.tankDrive(0, 0);
 			}
 			
+		/* I added this to remind me how to make chooser buttons */	
 		} else if(selected.equals("test1")) {
 			System.out.println("Dummy value selected; doing nothing");
-		/* None of the paths are selected somehow, so do nothing */
+
+		/* None of the paths are selected: something is probably wrong, so we do nothing */
 		} else {
 			Robot.driveTrain.tankDrive(0, 0);
 		}
