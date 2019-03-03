@@ -1,5 +1,8 @@
 package org.livoniawarriors.Robot2019.modules;
 
+import jaci.jniloader.JNILoader;
+import jaci.pathfinder.Pathfinder;
+import jaci.pathfinder.PathfinderFRC;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
 import org.livoniawarriors.Robot2019.IControlModule;
@@ -12,7 +15,13 @@ public class FullyAutonModule implements IControlModule {
 
     @Override
     public void init() {
-
+        try {
+            new JNILoader("pathfinder").load();
+            new JNILoader("pathfinderjni").load();
+            // System.loadLibrary("pathfinderjni");
+        } catch (Exception e) {
+            Robot.logger.error(e);
+        }
     }
 
     @Override
@@ -30,11 +39,15 @@ public class FullyAutonModule implements IControlModule {
         switch (state) {
             case 0:
                 if(changed) {
-                    Trajectory trajectory = Robot.driveTrain.generateTrajectory(new Waypoint[]{new Waypoint(0, 0, 0), new Waypoint(0, 10, 0), new Waypoint(0, 20, 0)});
+                    Trajectory trajectory = Robot.driveTrain.generateTrajectory(new Waypoint[] {
+                            new Waypoint(-4, -1, Pathfinder.d2r(0.1)),
+                            new Waypoint(-2, -2, 0),
+                            new Waypoint(0, 0, 0)
+                    });
                     Robot.driveTrain.startTrajectory(trajectory);
                 }
                 if (Robot.driveTrain.isTrajectoryDone())
-                    state++;
+                    incrementState();
                 break;
             case 1:
 
@@ -48,9 +61,13 @@ public class FullyAutonModule implements IControlModule {
         }
     }
 
+    private void incrementState() {
+        state++;
+        stateChanged = true;
+    }
+
     @Override
     public void update() {
-        Robot.logger.error("HIIIIIIIIIIIIIIIIII");
         updateState(stateChanged);
         stateChanged = false;
     }

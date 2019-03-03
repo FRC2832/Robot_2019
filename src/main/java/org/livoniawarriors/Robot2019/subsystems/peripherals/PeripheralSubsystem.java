@@ -57,8 +57,6 @@ public class PeripheralSubsystem implements ISubsystem {
 
     @Override
     public void update(boolean enabled) {
-        lidar.update();
-
         //digitBoard.display(Double.toString(getPressure()));
         System.out.println("==============+++==============");
         System.out.print("Vision Online: ");

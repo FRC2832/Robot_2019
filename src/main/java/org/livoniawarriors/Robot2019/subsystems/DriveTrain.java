@@ -83,15 +83,15 @@ public class DriveTrain implements ISubsystem {
         talonBackRight.setInverted(true);
         drive = new DifferentialDrive(talonFrontLeft, talonFrontRight);
         leftFollower = new EncoderFollower();
-        leftFollower.configureEncoder(0 /* change */, TICKS_PER_ROTATION, WHEEL_DIAMETER);
-        leftFollower.configurePIDVA(P, I, D, 1/ MAX_VELOCITY, ACCELERATION_GAIN);
-        leftFollower.setTrajectory(new Trajectory(0));
         leftEncoder = talonBackLeft.getSensorCollection();
+        leftFollower.configureEncoder(leftEncoder.getQuadraturePosition(), TICKS_PER_ROTATION, WHEEL_DIAMETER);
+        leftFollower.configurePIDVA(P, I, D, 1/ MAX_VELOCITY, ACCELERATION_GAIN);
         rightFollower = new EncoderFollower();
-        rightFollower.configureEncoder(0 /* change */, TICKS_PER_ROTATION, WHEEL_DIAMETER);
-        rightFollower.configurePIDVA(P, I, D, 1/ MAX_VELOCITY, ACCELERATION_GAIN);
-        rightFollower.setTrajectory(new Trajectory(0));
         rightEncoder = talonBackRight.getSensorCollection();
+        rightFollower.configureEncoder(rightEncoder.getQuadraturePosition(), TICKS_PER_ROTATION, WHEEL_DIAMETER);
+        rightFollower.configurePIDVA(P, I, D, 1/ MAX_VELOCITY, ACCELERATION_GAIN);
+        leftFollower.setTrajectory(new Trajectory(0));
+        rightFollower.setTrajectory(new Trajectory(0));
         pathConfig = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH, 0.05, 1.7, 2.0, 60.0);
     }
 
@@ -121,9 +121,12 @@ public class DriveTrain implements ISubsystem {
 
     @Override
     public void update(boolean enabled) {
+        Robot.userInput.createValue("Me", "encoderL", 2, leftEncoder.getQuadraturePosition());
+        Robot.userInput.createValue("Me", "encoderR", 2, rightEncoder.getQuadraturePosition());
 
-        if(enabled)
+        if(!enabled)
             return;
+
         if(auto && !isTrajectoryDone()) {
             double l = leftFollower.calculate(leftEncoder.getQuadraturePosition());
             double r = leftFollower.calculate(rightEncoder.getQuadraturePosition());
@@ -133,7 +136,9 @@ public class DriveTrain implements ISubsystem {
 
             double angleDifference = Pathfinder.boundHalfDegrees(desired_heading - gyro_heading);
             double turn = 0.8 * (-1.0 / 80.0) * angleDifference;
-            tankDrive(l + turn, r - turn);
+            Robot.logger.error("HIIIIIIIIIIIIII: " + l + turn);
+
+            drive.tankDrive(l + turn, r - turn);
         }
     }
 

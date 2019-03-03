@@ -77,7 +77,7 @@ public class Robot extends TimedRobot {
         registerControlModule(new FullyAutonModule());
         registerControlModule(new TestAutonModule());
         registerControlModule(new TestTeleopModule()); // This is the default one until manual setting default
-        setDefaultModule(FullyAutonModule.class);
+        setDefaultModule(TestTeleopModule.class);
     }
 
     /**
@@ -199,7 +199,11 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
         subsystems.forEach(subsystem -> {
             try {
+                var startTime = System.currentTimeMillis();
                 subsystem.update(isEnabled());
+                var length = System.currentTimeMillis() - startTime;
+                if(length > 2)
+                    Robot.logger.warn("Subsystem " + subsystem.getClass().getSimpleName() + " took too many millis: " + length);
             } catch (Throwable t) {
                 logger.error(subsystem.getClass().getSimpleName(), t);
             }
@@ -224,10 +228,12 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
+        teleopInit();
     }
 
     @Override
     public void autonomousPeriodic() {
+        teleopPeriodic();
     }
 
     @Override
@@ -261,7 +267,11 @@ public class Robot extends TimedRobot {
         }
 
         try {
+            var startTime = System.currentTimeMillis();
             activeModule.update();
+            var length = System.currentTimeMillis() - startTime;
+            if(length > 2)
+                Robot.logger.warn("");
         } catch (Throwable t) {
             logger.error(activeModule.getClass().getSimpleName(), t);
         }

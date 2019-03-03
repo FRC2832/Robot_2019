@@ -44,7 +44,7 @@ public class LightDrive {
             CANJNI.FRCNetCommCANSessionMuxSendMessage(CAN_ID + 1, tempSend2, 100);
         }
         catch(UncleanStatusException e) {
-            Robot.logger.error("Couldn't send LightDrive message", e);
+            Robot.logger.error("Couldn't send LightDrive message");
         }
         sendBuffer.rewind();
         
@@ -56,7 +56,7 @@ public class LightDrive {
                 MSG_ID_MASK, timestampBuffer);
         }
         catch (CANMessageNotFoundException e) {
-            Robot.logger.error("Couldn't receive LightDrive message", e);
+            //Robot.logger.error("Couldn't receive LightDrive message", e);
         }
     }
 
