@@ -2,6 +2,7 @@ package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.drive.Vector2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -10,6 +11,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.SendableBase;
 import org.apache.logging.log4j.Level;
+import org.livoniawarriors.Robot2019.ControlMapping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +19,10 @@ import java.util.HashMap;
 
 public class UserInput implements ISubsystem {
 
-    public static float DEADZONE = 0.1f;
+    private static float DEADZONE = 0.1f;
+    public static int FLIPPER_AXIS = 3;
+    public static int R_TRIGGER = 3;
+    public static int L_TRIGGER = 2;
 
     private List<Controller> controllers;
     private NetworkTableInstance inst;
@@ -72,8 +77,8 @@ public class UserInput implements ISubsystem {
         return chooser.getSelected();
     }
 
-    public Controller getController(int player) {
-        return controllers.get(player);
+    public Controller getController(Controllers controller) {
+        return controllers.get(controller.value);
     }
 
     @Override
@@ -81,6 +86,7 @@ public class UserInput implements ISubsystem {
         controllers = new ArrayList<>();
         controllers.add(new Controller(0));
         controllers.add(new Controller(1));
+        controllers.add(new Controller(2));
         inst = NetworkTableInstance.getDefault();
         table = inst.getTable("datatable");
         Shuffleboard.getTab("tab").add(new LogButton());
@@ -174,48 +180,32 @@ public class UserInput implements ISubsystem {
             return (Math.abs(super.getRawAxis(axis)) - DEADZONE) * Math.signum(super.getRawAxis(axis));
         }
 
-        /**
-         * Get the X axis value of the controller.
-         *
-         * @param hand Side of controller whose value should be returned.
-         * @return The X axis value of the controller.
-         */
-        @Override
-        public double getX(Hand hand) {
-            if (hand.equals(Hand.kLeft)) {
-                return getRawAxis(0);
-            } else {
-                return getRawAxis(4);
-            }
+        public double getJoystickX(Joystick joystick) {
+                return getRawAxis((int)joystick.value.getX());
+        }
+
+        public double getJoystickY(Joystick joystick) {
+            return getRawAxis((int)joystick.value.getY());
         }
 
         /**
-         * Get the Y axis value of the controller.
-         *
-         * @param hand Side of controller whose value should be returned.
-         * @return The Y axis value of the controller.
+         * Don't use me!
          */
-        @Override
-        public double getY(Hand hand) {
-            if (hand.equals(Hand.kLeft)) {
-                return getRawAxis(1);
-            } else {
-                return getRawAxis(5);
-            }
+        @Deprecated
+        public double getX(Hand hand){
+            return 0;
         }
 
         /**
-         * Get the trigger axis value of the controller.
-         *
-         * @param hand Side of controller whose value should be returned.
-         * @return The trigger axis value of the controller.
+         * Don't use me!
          */
-        public double getTriggerAxis(Hand hand) {
-            if (hand.equals(Hand.kLeft)) {
-                return getRawAxis(2);
-            } else {
-                return getRawAxis(3);
-            }
+        @Deprecated
+        public double getY(Hand hand){
+            return 0;
+        }
+
+        public double getOtherAxis(int selector) {
+            return getRawAxis(selector);
         }
     }
 
@@ -229,10 +219,81 @@ public class UserInput implements ISubsystem {
         X(3),
         Y(4),
         BACK(7),
-        START(8);
+        START(8),
+        TRIGGER(1),
+        THUMB(2),
+        THREE(3),
+        FOUR(4),
+        FIVE(5),
+        SIX(6),
+        SEVEN(7),
+        EIGHT(8),
+        NINE(9),
+        TEN(10),
+        ELEVEN(11),
+        TWELVE_ONLYRIGHT(12);
 
         private final int value;
         Button(int value) {
+            this.value = value;
+        }
+    }
+
+    public enum FlightStickButton {
+        TRIGGER(1),
+        THUMB(2),
+        THREE(2),
+        FOUR(4),
+        FIVE(5),
+        SIX(6),
+        SEVEN(7),
+        EIGHT(8),
+        NINE(9),
+        TEN(10),
+        ELEVEN(11);
+
+        private final int value;
+        FlightStickButton(int value) {
+            this.value = value;
+        }
+    }
+
+    /**
+     * Holds a joystick mapping
+     */
+    public static class JoystickMapping {
+        private int x, y;
+        
+        private JoystickMapping(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+    }
+
+    public enum Joystick {
+        LEFT(new JoystickMapping(0,1)), 
+        RIGHT(new JoystickMapping(4,5)), 
+        FLIGHTSTICK(new JoystickMapping(0,1));
+
+        private final JoystickMapping value;
+        Joystick(JoystickMapping value) {
+            this.value = value;
+        }
+    }
+
+    public enum Controllers {
+        XBOX(0), L_FLIGHTSTICK(1), R_FLIGHTSTICK(2), TEST_XBOX(3);
+
+        private final int value;
+        Controllers(int value) {
             this.value = value;
         }
     }

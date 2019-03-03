@@ -15,6 +15,8 @@ import org.apache.logging.log4j.Level;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
+import org.livoniawarriors.Robot2019.UserInput.Controllers;
+import org.livoniawarriors.Robot2019.UserInput;
 
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
@@ -67,7 +69,7 @@ public class Elevator implements PIDSource, PIDOutput {
         pidController.setContinuous(true);
 
 
-        controller = Robot.userInput.getController(0);
+        controller = Robot.userInput.getController(Controllers.XBOX);
 
         currentSetHeight = ElevatorHeights.LowHatch;
 
@@ -149,11 +151,11 @@ public class Elevator implements PIDSource, PIDOutput {
         } else {
 
             //Manual Mode
-            if (controller.getTriggerAxis(Hand.kRight) != 0) {
-                elevatorMotor.set(controller.getTriggerAxis(Hand.kRight) * 1);
+            if (controller.getOtherAxis(Robot.userInput.R_TRIGGER) != 0) {
+                elevatorMotor.set(controller.getOtherAxis(Robot.userInput.R_TRIGGER) * 1);
                 System.out.println("Moving motor up forwards");
-            } else if (controller.getTriggerAxis(Hand.kLeft) != 0) {
-                elevatorMotor.set(-1 * controller.getTriggerAxis(Hand.kLeft) * 1);
+            } else if (controller.getOtherAxis(Robot.userInput.L_TRIGGER) != 0) {
+                elevatorMotor.set(-1 * controller.getOtherAxis(Robot.userInput.L_TRIGGER) * 1);
                 System.out.println("Moving motor up backwards");
             } else {
                 elevatorMotor.set(0);
