@@ -6,6 +6,10 @@ import edu.wpi.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Timer;
+
+import java.io.*;
+import java.net.Socket;
+
 import org.apache.logging.log4j.Level;
 import org.livoniawarriors.Robot2019.Robot;
 
@@ -35,9 +39,13 @@ public class JeVois {
     private static final int STREAM_HEIGHT_PX = 288;
     private static final int STREAM_RATE_FPS = 15;
     
-    // Serial port used for getting target data from JeVois 
-    private SerialPort visionPort = null;
+    // Socket used for getting target data from JeVois 
+    private Socket visionClient = null;
     
+    //Input and output from the vision socket
+    private BufferedReader input;
+    private BufferedWriter output;
+
     // USBCam and server used for broadcasting a webstream of what is seen 
     private UsbCamera visionCam = null;
     private MjpegServer camServer = null;
@@ -88,10 +96,12 @@ public class JeVois {
         //Retry strategy to get this serial port open.
         //I have yet to see a single retry used assuming the camera is plugged in
         // but you never know.
-        while(visionPort == null && retry_counter++ < 10){
+        while(visionClient == null && retry_counter++ < 10){
             try {
-                Robot.logger.log(Level.INFO, "Creating JeVois SerialPort...");
-                visionPort = new SerialPort(BAUD_RATE,SerialPort.Port.kUSB);
+                Robot.logger.log(Level.INFO, "Creating JeVois Socket...");
+                visionClient = new Socket("frcvision.local", 1234);
+                input = new BufferedReader(new InputStreamReader(visionClient.getInputStream()));
+                output = new BufferedWriter(new OutputStreamWriter(visionClient.getOutputStream()));
                 Robot.logger.log(Level.INFO, "SUCCESS!!");
             } catch (Exception e) {
                 Robot.logger.log(Level.INFO, "FAILED!!");
@@ -103,8 +113,8 @@ public class JeVois {
 
         
         //Report an error if we didn't get to open the serial port
-        if(visionPort == null){
-            Robot.logger.error("Cannot open serial port to JeVois. Not starting vision system.");
+        if(visionClient == null){
+            Robot.logger.error("Cannot open socket to JeVois. Not starting vision system.");
             return;
         }
         
@@ -125,6 +135,18 @@ public class JeVois {
         packetListenerThread.start();
 
     } 
+
+    public String revieve() {
+        try {
+            String str;
+            if ((str = input.readLine()) != null) {
+                return str;
+            }
+        } catch (IOException e) {
+            Robot.logger.error("JeVois error");
+        }
+        return "";
+    }
 
     public void start(){
         if(broadcastUSBCam){
@@ -150,7 +172,7 @@ public class JeVois {
      * Send commands to the JeVois to configure it for image-processing friendly parameters
      */
     public void setCamVisionProcMode() {
-        if (visionPort != null){
+        if (visionClient != null){
             sendCmdAndCheck("setcam autoexp 1"); //Disable auto exposure
             sendCmdAndCheck("setcam absexp 75"); //Force exposure to a low value for vision processing
         }
@@ -160,7 +182,7 @@ public class JeVois {
      * Send parameters to the camera to configure it for a human-readable image
      */
     public void setCamHumanDriverMode() {
-        if (visionPort != null){
+        if (visionClient != null){
             sendCmdAndCheck("setcam autoexp 0"); //Enable AutoExposure
         }
     }
@@ -262,6 +284,19 @@ public class JeVois {
     //=======================================================
 
     
+    private void sendMessage(String message) {
+        if(visionClient != null) {
+            try {
+                output.write(message);
+                output.newLine();
+                output.flush();
+            } catch (IOException e) {
+                Robot.logger.error("Lidar", e);
+            }
+        }
+    }
+
+
     /**
      * This is the main perodic update function for the Listener. It is intended
      * to be run in a background task, as it will block until it gets packets. 
@@ -297,7 +332,7 @@ public class JeVois {
      */
     private int sendPing() {
         int retval = -1;
-        if (visionPort != null){
+        if (visionClient != null){
             retval = sendCmdAndCheck("ping");
         }
         return retval;
@@ -353,12 +388,12 @@ public class JeVois {
      * @param cmd String of the command to send (ex: "ping")
      * @return number of bytes written
      */
-    private int sendCmd(String cmd){
-        int bytes;
-        bytes = visionPort.writeString(cmd + "\n");
-        Robot.logger.log(Level.INFO, "wrote " +  bytes + "/" + (cmd.length()+1) + " bytes, cmd: " + cmd);
-        return bytes;
-    };
+    // private int sendCmd(String cmd){
+    //     int bytes;
+    //     bytes = visionClient.writeString(cmd + "\n");
+    //     Robot.logger.log(Level.INFO, "wrote " +  bytes + "/" + (cmd.length()+1) + " bytes, cmd: " + cmd);
+    //     return bytes;
+    // };
     
     /**
      * Sends a command over Robot.logger.log(Level.INFO,  to the JeVois, waits for a response, and checks that response
@@ -368,7 +403,7 @@ public class JeVois {
      */
     public int sendCmdAndCheck(String cmd){
         int retval = 0;
-        sendCmd(cmd);
+        sendMessage(cmd);
         retval = blockAndCheckForOK(1.0);
         if(retval == -1){
             Robot.logger.log(Level.INFO, cmd + " Produced an error");
@@ -388,19 +423,23 @@ public class JeVois {
      */
     private String getCmdResponseNonBlock() {
         String retval =  null;
-        if (visionPort != null){
-            if (visionPort.getBytesReceived() > 0) {
-                String rxString = visionPort.readString();
-                Robot.logger.log(Level.INFO, "Waited: " + loopCount + " loops, Rcv'd: " + rxString);
-                getBytesWork += rxString;
-                if(getBytesWork.contains("OK") || getBytesWork.contains("ERR")){
-                    retval = getBytesWork;
-                    getBytesWork = "";
-                    Robot.logger.log(Level.INFO, retval);
+        if (visionClient != null){
+            String rxString;
+            try {
+                if ((rxString = input.readLine()) != null) {
+                    Robot.logger.log(Level.INFO, "Waited: " + loopCount + " loops, Rcv'd: " + rxString);
+                    getBytesWork += rxString;
+                    if(getBytesWork.contains("OK") || getBytesWork.contains("ERR")){
+                        retval = getBytesWork;
+                        getBytesWork = "";
+                        Robot.logger.log(Level.INFO, retval);
+                    }
+                    loopCount = 0;
+                } else {
+                    ++loopCount;
                 }
-                loopCount = 0;
-            } else {
-                ++loopCount;
+            } catch (IOException e) {
+                Robot.logger.error("JeVois error");
             }
         }
         return retval;
@@ -417,23 +456,27 @@ public class JeVois {
     private int blockAndCheckForOK(double timeout_s){
         int retval = -2;
         double startTime = Timer.getFPGATimestamp();
-        String testStr = "";
-        if (visionPort != null){
-            while(Timer.getFPGATimestamp() - startTime < timeout_s){
-                if (visionPort.getBytesReceived() > 0) {
-                    testStr += visionPort.readString();
-                    if(testStr.contains("OK")){
-                        retval = 0;
-                        break;
-                    }else if(testStr.contains("ERR")){
-                        Robot.logger.error("JeVois reported error:\n" + testStr, false);
-                        retval = -1;
-                        break;
-                    }
+        String testStr;
+        if (visionClient != null){
+            try {
+                while (Timer.getFPGATimestamp() - startTime < timeout_s) {
+                    testStr = input.readLine();
+                    if (testStr != null) {
+                        if(testStr.contains("OK")){
+                            retval = 0;
+                            break;
+                        }else if(testStr.contains("ERR")){
+                            Robot.logger.error("JeVois reported error:\n" + testStr, false);
+                            retval = -1;
+                            break;
+                        }
 
-                } else {
-                    sleep(10);
+                    } else {
+                        sleep(10);
+                    }
                 }
+            } catch (IOException e) {
+                Robot.logger.error("JeVois error");
             }
         }
         return retval;
@@ -455,58 +498,62 @@ public class JeVois {
         int endIdx = -1;
         int startIdx = -1;
         
-        if (visionPort != null){
+        if (visionClient != null){
             while(Timer.getFPGATimestamp() - startTime < timeout_s){
                 // Keep trying to get bytes from the serial port until the timeout expires.
 
+                try {
+                    String str = input.readLine();
+                    if (str != null) {
+                        // If there are any bytes available, read them in and 
+                        //  append them to the buffer.
+                        packetBuffer = packetBuffer.append(str);
 
-                if (visionPort.getBytesReceived() > 0) {
-                    // If there are any bytes available, read them in and 
-                    //  append them to the buffer.
-                	packetBuffer = packetBuffer.append(visionPort.readString());
-
-                    // Attempt to detect if the buffer currently contains a complete packet
-                    if(packetBuffer.indexOf(PACKET_START_CHAR) != -1){
-                    	endIdx = packetBuffer.lastIndexOf(PACKET_END_CHAR);
-                        if(endIdx != -1){
-                            // Buffer also contains at least one start & end character.
-                            // But we don't know if they're in the right order yet.
-                            // Start by getting the most-recent packet end character's index
-                             
-                            
-                            // Look for the index of the start character for the packet
-                            //  described by endIdx. Note this line of code assumes the 
-                            //  start character for the packet must come _before_ the
-                            //  end character.
-                            startIdx = packetBuffer.lastIndexOf(PACKET_START_CHAR, endIdx);
-                            
-                            if(startIdx == -1){
-                                // If there was no start character before the end character,
-                                //  we can assume that we have something a bit wacky in our
-                                //  buffer. For example: ",abc}garbage{1,2".
-                                // Since we've started to receive a good packet, discard 
-                                //  everything prior to the start character.
-                                startIdx = packetBuffer.lastIndexOf(PACKET_START_CHAR);
-                                packetBuffer.delete(0, startIdx);
+                        // Attempt to detect if the buffer currently contains a complete packet
+                        if(packetBuffer.indexOf(PACKET_START_CHAR) != -1){
+                            endIdx = packetBuffer.lastIndexOf(PACKET_END_CHAR);
+                            if(endIdx != -1){
+                                // Buffer also contains at least one start & end character.
+                                // But we don't know if they're in the right order yet.
+                                // Start by getting the most-recent packet end character's index
+                                
+                                
+                                // Look for the index of the start character for the packet
+                                //  described by endIdx. Note this line of code assumes the 
+                                //  start character for the packet must come _before_ the
+                                //  end character.
+                                startIdx = packetBuffer.lastIndexOf(PACKET_START_CHAR, endIdx);
+                                
+                                if(startIdx == -1){
+                                    // If there was no start character before the end character,
+                                    //  we can assume that we have something a bit wacky in our
+                                    //  buffer. For example: ",abc}garbage{1,2".
+                                    // Since we've started to receive a good packet, discard 
+                                    //  everything prior to the start character.
+                                    startIdx = packetBuffer.lastIndexOf(PACKET_START_CHAR);
+                                    packetBuffer.delete(0, startIdx);
+                                } else {
+                                    // Buffer contains a full packet. Extract it and clean up buffer
+                                    retval = packetBuffer.substring(startIdx+1, endIdx-1);
+                                    packetBuffer.delete(0, endIdx+1);
+                                    break;
+                                } 
                             } else {
-                                // Buffer contains a full packet. Extract it and clean up buffer
-                                retval = packetBuffer.substring(startIdx+1, endIdx-1);
-                                packetBuffer.delete(0, endIdx+1);
-                                break;
-                            } 
+                            // In this case, we have a start character, but no end to the buffer yet. 
+                            //  Do nothing, just wait for more characters to come in.
+                            sleep(5);
+                            }
                         } else {
-                          // In this case, we have a start character, but no end to the buffer yet. 
-                          //  Do nothing, just wait for more characters to come in.
-                          sleep(5);
+                            // Buffer contains no start characters. None of the current buffer contents can 
+                            //  be meaningful. Discard the whole thing.
+                            packetBuffer.delete(0, packetBuffer.length());
+                            sleep(5);
                         }
                     } else {
-                        // Buffer contains no start characters. None of the current buffer contents can 
-                        //  be meaningful. Discard the whole thing.
-                        packetBuffer.delete(0, packetBuffer.length());
                         sleep(5);
                     }
-                } else {
-                    sleep(5);
+                } catch (IOException e) {
+                    Robot.logger.error("JeVois error");
                 }
             }
         }
@@ -532,13 +579,18 @@ public class JeVois {
      * comes in.
      */
     public void blockAndPrintAllSerial(){
-        if (visionPort != null){
+        if (visionClient != null){
             while(!Thread.interrupted()){
-                if (visionPort.getBytesReceived() > 0) {
-                    Robot.logger.log(Level.INFO, visionPort.readString());
-                } else {
-                    Robot.logger.log(Level.INFO, "Nothing Rx'ed");
-                    sleep(100);
+                try {
+                    String str = input.readLine();
+                    if (str != null) {
+                        Robot.logger.log(Level.INFO, str);
+                    } else {
+                        Robot.logger.log(Level.INFO, "Nothing Rx'ed");
+                        sleep(100);
+                    }
+                } catch (IOException e) {
+                    Robot.logger.error("JeVois error");
                 }
             }
         }
