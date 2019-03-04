@@ -28,10 +28,10 @@ public class Robot extends TimedRobot {
     public static UserInput userInput;
 
     // Subsystems
-    //public static PeripheralSubsystem peripheralSubsystem;
+    public static PeripheralSubsystem peripheralSubsystem;
     public static Diagnostic diagnostic;
     public static DriveTrain driveTrain;
-    //public static FlameThrower flameThrower;
+    public static FlameThrower flameThrower;
     public static GamePlay gamePlay;
 
     // Yup, this is a logger, use it!
@@ -66,11 +66,11 @@ public class Robot extends TimedRobot {
      * Registers stuff and sets default module, optionally
      */
     private void register() {
-        //registerSubsystem(peripheralSubsystem = new PeripheralSubsystem());
+        registerSubsystem(peripheralSubsystem = new PeripheralSubsystem());
         registerSubsystem(userInput = new UserInput());
         registerSubsystem(diagnostic = new Diagnostic());
         registerSubsystem(driveTrain = new DriveTrain());
-        //registerSubsystem(flameThrower = new FlameThrower());
+        registerSubsystem(flameThrower = new FlameThrower());
         registerSubsystem(gamePlay = new GamePlay());
         registerControlModule(new TestAutonModule());
         registerControlModule(new TestTeleopModule()); // This is the default one until manual setting default
