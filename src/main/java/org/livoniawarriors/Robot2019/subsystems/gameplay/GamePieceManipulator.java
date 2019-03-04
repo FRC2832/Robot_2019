@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 
 /**
- * Add your docs here.
+ * Game piece manipulator class
  */
 public class GamePieceManipulator {
 
@@ -70,34 +70,21 @@ public class GamePieceManipulator {
             return;
         }
 
-        //leftIntakeMotor.set(1);
-        //if (tilter.get() == Value.kForward) {
-            if (controller.getOtherAxis(2) != 0 /*&& !hasBall()*/) {    
-                //Intake
-                leftIntakeMotor.set(controller.getOtherAxis(2));
-            } else if (controller.getOtherAxis(3) != 0 /*&& hasBall()*/) {
-                //Expel
-                leftIntakeMotor.set(-1 * controller.getOtherAxis(3));
-            } else {
-                leftIntakeMotor.set(0);
-            }
-        //}
+        //Move intake motors
+        if (controller.getOtherAxis(2) != 0 /*&& !hasBall()*/) {    
+            leftIntakeMotor.set(controller.getOtherAxis(2));
+        } else if (controller.getOtherAxis(3) != 0 /*&& hasBall()*/) {
+            leftIntakeMotor.set(-1 * controller.getOtherAxis(3));
+        } else {
+            leftIntakeMotor.set(0);
+        }
 
-        //Variable Control
-        //Commented out methods are discrete solinoid control
-        //if (flower.get() == Value.kReverse) {
-            if (controller.getButton(Button.Y)) {
-                moveIntakeUp();
-                //tilter.set(Value.kReverse);
-            } else if (controller.getButton(Button.B)) {
-                moveIntakeDown();
-                //tilter.set(Value.kForward);
-            } else {
-                tilter.set(Value.kOff);
-            }
-        // } else {
-        //     tilter.set(Value.kReverse);
-        // }
+        //Move Tilter
+        if (controller.getButton(Button.Y)) {
+            moveIntakeUp();
+        } else if (controller.getButton(Button.B)) {
+            moveIntakeDown();
+        }
         
         if (controller.getButtonPressed(Button.A)) {
             moveFlower();
@@ -111,11 +98,13 @@ public class GamePieceManipulator {
     }
 
     private void moveFlower() {
-        if (flower.get() == Value.kForward) {
-            flower.set(Value.kReverse);
-            pushHatch();
-        } else {
-            flower.set(Value.kForward);
+        if (!intakeDown) {
+            if (flower.get() == Value.kForward) {
+                flower.set(Value.kReverse);
+                pushHatch();
+            } else {
+                flower.set(Value.kForward);
+            }
         }
     }
 
@@ -147,7 +136,7 @@ public class GamePieceManipulator {
                     extender.set(false);
                     extenderThread = null;
                 } catch (InterruptedException e) {
-                    Robot.logger.error("Extender Thread interrupted", e);
+                    Robot.logger.warn("Extender Thread interrupted", e);
                 }
             }
         };
