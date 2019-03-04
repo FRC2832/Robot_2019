@@ -1,13 +1,8 @@
 package org.livoniawarriors.Robot2019.modules;
 
 import org.livoniawarriors.Robot2019.IControlModule;
-import org.livoniawarriors.Robot2019.Robot;
-import org.livoniawarriors.Robot2019.auton.Auton;
 import org.livoniawarriors.Robot2019.auton.AutonDeadReckoning;
-import org.livoniawarriors.Robot2019.auton.AutonPaths;
-
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 public class TestAutonModule implements IControlModule {
 /*

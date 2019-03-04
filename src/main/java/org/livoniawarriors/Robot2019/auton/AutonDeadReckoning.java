@@ -1,7 +1,5 @@
 package org.livoniawarriors.Robot2019.auton;
 
-import org.livoniawarriors.Robot2019.ICsvLogger;
-import org.livoniawarriors.Robot2019.ISubsystem;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.auton.DeadReckoning;
 
