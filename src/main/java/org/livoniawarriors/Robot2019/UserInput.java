@@ -42,9 +42,10 @@ public class UserInput implements ISubsystem {
     @Override
     public void init() {
         controllers = new ArrayList<>();
-        controllers.add(new Controller(0));
-        controllers.add(new Controller(1));
-        controllers.add(new Controller(2));
+        controllers.add(new Controller(Controllers.XBOX.value));
+        controllers.add(new Controller(Controllers.L_FLIGHTSTICK.value));
+        controllers.add(new Controller(Controllers.R_FLIGHTSTICK.value));
+        controllers.add(new Controller(Controllers.TEST_XBOX.value));
         inst = NetworkTableInstance.getDefault();
         table = inst.getTable("datatable");
         Shuffleboard.getTab("tab").add(new LogButton());
