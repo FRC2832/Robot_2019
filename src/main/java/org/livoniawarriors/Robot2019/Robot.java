@@ -11,7 +11,6 @@ import org.livoniawarriors.Robot2019.subsystems.diagnostic.Diagnostic;
 import org.livoniawarriors.Robot2019.subsystems.flamethrower.FlameThrower;
 import org.livoniawarriors.Robot2019.subsystems.gameplay.*;
 import org.livoniawarriors.Robot2019.subsystems.peripherals.PeripheralSubsystem;
-
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -245,6 +244,7 @@ public class Robot extends TimedRobot {
                 logger.error(defaultModule.getClass().getSimpleName(), t);
             }
         }
+        
     }
 
     @Override
