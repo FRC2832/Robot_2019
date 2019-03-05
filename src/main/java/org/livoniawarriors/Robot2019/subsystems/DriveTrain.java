@@ -121,6 +121,7 @@ public class DriveTrain implements ISubsystem {
      * @return completion
      */
     public boolean lazyDriveTime(float time, double speed, boolean reset) {
+        auto = false;
         if(reset)
             startTime = Timer.getFPGATimestamp();
         if(startTime + time > Timer.getFPGATimestamp())
