@@ -25,7 +25,7 @@ public class UserInput implements ISubsystem {
     private SendableChooser<String> chooser;
     private HashMap<String, Integer> tableEntries;
     
-    public void createValue(String selectedTab, String title, int handle, Object value) {
+    public void putValue(String selectedTab, String title, int handle, Object value) {
         if (tableEntries.containsKey(title)){
             if (null != selectedTab && null != title && null != value){
                 ShuffleboardTab currentTab = Shuffleboard.getTab(selectedTab);

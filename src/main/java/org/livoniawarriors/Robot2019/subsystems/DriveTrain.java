@@ -2,11 +2,9 @@ package org.livoniawarriors.Robot2019.subsystems;
 
 import com.ctre.phoenix.motorcontrol.SensorCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 import jaci.pathfinder.Pathfinder;
-import jaci.pathfinder.PathfinderJNI;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
 import jaci.pathfinder.followers.EncoderFollower;
@@ -17,8 +15,8 @@ import org.livoniawarriors.Robot2019.Robot;
 
 public class DriveTrain implements ISubsystem {
 
-    private final static int TICKS_PER_ROTATION = 200; //TODO: Fix
-    private final static double WHEEL_DIAMETER = 100; //TODO: Fix
+    private final static int TICKS_PER_ROTATION = 2540; //TODO: Fix
+    private final static double WHEEL_DIAMETER = 8 * Math.PI; //TODO: Fix
     private final static double WHEEL_BASE_WIDTH = 0.5; // TODO: Fix
 
     private final static double P = 1; //TODO: Figure out these values
@@ -36,8 +34,6 @@ public class DriveTrain implements ISubsystem {
     private EncoderFollower rightFollower;
     private SensorCollection rightEncoder, leftEncoder;
     Trajectory.Config pathConfig;
-
-    private Notifier followerNotifier;
     private boolean auto;
 
     @Override
@@ -92,7 +88,7 @@ public class DriveTrain implements ISubsystem {
         rightFollower.configurePIDVA(P, I, D, 1/ MAX_VELOCITY, ACCELERATION_GAIN);
         leftFollower.setTrajectory(new Trajectory(0));
         rightFollower.setTrajectory(new Trajectory(0));
-        pathConfig = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH, 0.05, 1.7, 2.0, 60.0);
+        pathConfig = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 0.05, 1.7, 2.0, 60.0);
     }
 
     /**
@@ -121,8 +117,8 @@ public class DriveTrain implements ISubsystem {
 
     @Override
     public void update(boolean enabled) {
-        Robot.userInput.createValue("Me", "encoderL", 2, leftEncoder.getQuadraturePosition());
-        Robot.userInput.createValue("Me", "encoderR", 2, rightEncoder.getQuadraturePosition());
+        Robot.userInput.putValue("Me", "encoderL", 2, leftEncoder.getQuadraturePosition());
+        Robot.userInput.putValue("Me", "encoderR", 2, rightEncoder.getQuadraturePosition());
 
         if(!enabled)
             return;

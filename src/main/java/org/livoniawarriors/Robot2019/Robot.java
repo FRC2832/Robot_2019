@@ -23,7 +23,7 @@ public class Robot extends TimedRobot {
     private List<ISubsystem> subsystems;
     private Map<String, IControlModule> modules;
     private IControlModule activeModule;
-    private IControlModule defaultModule;
+    private IControlModule defaultModule, telepModule;
     private IControlModule fallbackModule; // The one switched to if a module finishes. If null, it defaults to the last registered module
 
     // Input handling
@@ -78,6 +78,7 @@ public class Robot extends TimedRobot {
         registerControlModule(new TestAutonModule());
         registerControlModule(new TestTeleopModule()); // This is the default one until manual setting default
         setDefaultModule(TestTeleopModule.class);
+        setTeleopModule(TestTeleopModule.class);
     }
 
     /**
@@ -112,6 +113,20 @@ public class Robot extends TimedRobot {
         if(!modules.containsKey(module.getSimpleName()))
             System.err.println("Module not registered: " + module.getSimpleName()); // @Todo logging
         setDefaultModule(modules.get(module.getSimpleName()));
+    }
+
+    /**
+     * Sets the module to switch to when starting teleop
+     * @param module
+     */
+    private void setTeleopModule(Class<? extends IControlModule> module) {
+        if(!modules.containsKey(module.getSimpleName()))
+            System.err.println("Module not registered: " + module.getSimpleName()); // @Todo logging
+        setTeleopModule(modules.get(module.getSimpleName()));
+    }
+
+    private void setTeleopModule(IControlModule module) {
+        telepModule = module;
     }
 
     /**
@@ -228,35 +243,15 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        teleopInit();
-    }
-
-    @Override
-    public void autonomousPeriodic() {
-        teleopPeriodic();
-    }
-
-    @Override
-    public void teleopInit() {
-        if(activeModule != null) {
-            try {
-                activeModule.start();
-            } catch (Throwable t) {
-                logger.error(activeModule.getClass().getSimpleName(), t);
-            }
-        }
-        else {
-            activeModule = defaultModule;
-            try {
-                activeModule.start();
-            } catch (Throwable t) {
-                logger.error(activeModule.getClass().getSimpleName(), t);
-            }
+        activeModule = defaultModule;
+        try {
+            activeModule.start();
+        } catch (Throwable t) {
+            logger.error(activeModule.getClass().getSimpleName(), t);
         }
     }
 
-    @Override
-    public void teleopPeriodic() {
+    private void periodic() {
         if(activeModule == null) {
             activeModule = defaultModule;
             try {
@@ -292,6 +287,28 @@ public class Robot extends TimedRobot {
                 logger.error(activeModule.getClass().getSimpleName(), t);
             }
         }
+    }
+
+    @Override
+    public void autonomousPeriodic() {
+        periodic();
+    }
+
+    @Override
+    public void teleopInit() {
+        if (activeModule != telepModule) {
+            activeModule = telepModule;
+            try {
+                activeModule.start();
+            } catch (Throwable t) {
+                logger.error(activeModule.getClass().getSimpleName(), t);
+            }
+        }
+    }
+
+    @Override
+    public void teleopPeriodic() {
+        periodic();
     }
 
     @Override

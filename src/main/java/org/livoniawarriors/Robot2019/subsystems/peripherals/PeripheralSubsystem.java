@@ -30,6 +30,7 @@ public class PeripheralSubsystem implements ISubsystem {
     private static final int PIGEON_PORT = 24;
     private JeVois jeVois;
     private AnalogInput pressureSensor;
+    private double startingYaw;
 
     private Compressor compressor;
 
@@ -53,6 +54,7 @@ public class PeripheralSubsystem implements ISubsystem {
         CameraServer.getInstance().startAutomaticCapture();
         notifier = new Notifier(() -> digitBoard.display(Integer.toString((int)getPressure())));
         notifier.startPeriodic(REV_ROBOTICS_DIGIT_MXP_DISPLAY_UPDATE_PERIOD);
+        startingYaw = getYaw();
     }
 
     @Override
@@ -100,7 +102,7 @@ public class PeripheralSubsystem implements ISubsystem {
     public double getYaw() {
         //returns the yaw; copy method and change array element to get pitch or roll
         pigeon.getYawPitchRoll(yawPitchRoll);
-        return yawPitchRoll[0];
+        return yawPitchRoll[0] - startingYaw;
     }
 
     public double getPressure() {
