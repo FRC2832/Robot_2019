@@ -77,7 +77,13 @@ public class DriveTrain implements ISubsystem {
 
     }
 
-    public boolean driveForwardLazy(boolean reset, double distance) {
+    /**
+     * Drive forward a distance using encoders, defaulting to left encoder
+     * @param distance the target distance
+     * @param reset whether or not to reset postion to measure from
+     * @return true is it has driven the target distance
+     */
+    public boolean driveForwardLazy(double distance, boolean reset) {
         double enc = encoderToInch(leftEncoder);
         if(reset) {
             prevPosLeft = encoderToInch(leftEncoder);
