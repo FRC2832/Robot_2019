@@ -15,13 +15,7 @@ public class FullyAutonModule implements IControlModule {
 
     @Override
     public void init() {
-        try {
-            new JNILoader("pathfinder").load();
-            new JNILoader("pathfinderjni").load();
-            // System.loadLibrary("pathfinderjni");
-        } catch (Exception e) {
-            Robot.logger.error(e);
-        }
+
     }
 
     @Override
