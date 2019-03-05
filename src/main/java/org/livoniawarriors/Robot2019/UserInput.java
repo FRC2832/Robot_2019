@@ -29,6 +29,7 @@ public class UserInput implements ISubsystem {
     private NetworkTable table;
     private SendableChooser<String> autonChooser;
     private HashMap<String, Integer> tableEntries;
+    private HashMap<String, SendableChooser<?>> choosers;
     
     public void createValue(String selectedTab, String title, int handle, Object value) {
         if (tableEntries.containsKey(title)){
@@ -54,20 +55,22 @@ public class UserInput implements ISubsystem {
             }
         }
     }
-    /** Add an option to a Sendable Chooser
-     * @param chooser The sendable chooser
-     * @param name The name that appears on the dashboard
-     * @param option What is returned if the option is selected
-     * @param defaultOption Whether or not it is the default option
-    */
-    public void addOption(SendableChooser<String> chooser, String name, String option, boolean defaultOption) {
-        if (defaultOption) {
-            chooser.setDefaultOption(name, option);
+
+
+    public <T> void createSendableChooser(String chooserName, HashMap<String, T> options, String defaultName, T defaultOption) {
+        SendableChooser<T> chooser = new SendableChooser<T>();
+        chooser.setName(chooserName);
+        for (String option: options.keySet()) {
+            chooser.addOption(option, options.get(option));
         }
-        else {
-            chooser.addOption(name, option);
-        }
+        chooser.setDefaultOption(defaultName, defaultOption);
+        choosers.put(chooserName, chooser);
     }
+
+    public <T> T querySendableChooser(String name) {
+        return (T)choosers.get(name).getSelected();
+    }
+
     /**
      * Get option from sendable chooser
      * @param chooser The sendable chooser
@@ -83,6 +86,7 @@ public class UserInput implements ISubsystem {
 
     @Override
     public void init() {
+        choosers = new HashMap<>();
         controllers = new ArrayList<>();
         controllers.add(new Controller(0));
         controllers.add(new Controller(1));
@@ -91,7 +95,7 @@ public class UserInput implements ISubsystem {
         table = inst.getTable("datatable");
         Shuffleboard.getTab("tab").add(new LogButton());
         autonChooser = new SendableChooser<>();
-        tableEntries = new HashMap<String, Integer>();
+        tableEntries = new HashMap<>();
     }
 
     @Override
