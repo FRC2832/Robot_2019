@@ -12,6 +12,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
+import org.livoniawarriors.Robot2019.UserInput.Controllers;
 
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -61,7 +62,7 @@ public class GamePieceManipulator {
 
         ballSensor = new AnalogInput(ANALOG_INPUT_CHANNEL);
     
-        controller = Robot.userInput.getController(1);
+        controller = Robot.userInput.getController(Controllers.XBOX);
         
         intakeDown = false; //TODO: find out if intake starts up or down
     }
@@ -72,15 +73,15 @@ public class GamePieceManipulator {
         }
 
         //Intake
-        if (controller.getTriggerAxis(Hand.kLeft) != 0 && !hasBall()) {    
-            leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
+        if (controller.getOtherAxis(2) != 0 && !hasBall()) {    
+            leftIntakeMotor.set(controller.getOtherAxis(2));
         } else {
             leftIntakeMotor.set(0);
         }
 
         //Expel
-        if (controller.getTriggerAxis(Hand.kRight) != 0 && hasBall()) {
-            leftIntakeMotor.set(-1 * controller.getTriggerAxis(Hand.kRight));
+        if (controller.getOtherAxis(3) != 0 && hasBall()) {
+            leftIntakeMotor.set(-1 * controller.getOtherAxis(3));
         } else {
             leftIntakeMotor.set(0);
         }

@@ -8,6 +8,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import org.apache.logging.log4j.Level;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput.Button;
+import org.livoniawarriors.Robot2019.UserInput.Controllers;
+import org.livoniawarriors.Robot2019.UserInput.Joystick;
 
 public class Climber {
 
@@ -45,13 +47,14 @@ public class Climber {
 		}
 		//As much security as a nuclear launch; ABSOLUTELY NO accidental climber triggers
 		//Maybe have a SmartDashboard button to "arm" the climber?
-		if(Robot.userInput.getController(0).getButton(Button.BUMPER_R)
-			&& Robot.userInput.getController(1).getButton(Button.BUMPER_R)) {
+		//TODO: Set flightstick buttons
+		if(Robot.userInput.getController(Controllers.XBOX).getButton(Button.BUMPER_R)
+			&& Robot.userInput.getController(Controllers.XBOX).getButton(Button.BUMPER_L) && Robot.userInput.getController(Controllers.XBOX).getButton(Button.START)) {
 			if(Robot.gamePlay.getElevatorHeight() < 0.1) {
 				launchClimber();
 				System.out.println("Climber launch initiated; self-destructing");
 			} else {
-				System.out.println("CLIMBER will NOT run: elevator is up!");
+				System.out.println("I'm sorry Dave. I'm afraid I can't do that.");
 				Robot.logger.log(Level.DEBUG, "Attempted climber run with elevator up");
 			}
 		}
