@@ -55,14 +55,16 @@ public class GamePieceManipulator {
         extender = new Solenoid(EXTENDER);
         leftIntakeMotor = new WPI_TalonSRX(LEFT_INTAKE);
         rightIntakeMotor = new WPI_TalonSRX(RIGHT_INTAKE);
-        rightIntakeMotor.follow(leftIntakeMotor);
+        leftIntakeMotor.setInverted(true);
         rightIntakeMotor.setInverted(true);
-
         ballSensor = new AnalogInput(ANALOG_INPUT_CHANNEL);
     
         controller = Robot.userInput.getController(Controllers.XBOX);
         
         intakeDown = false; //TODO: find out if intake starts up or down
+
+        tilter.set(Value.kReverse);
+        flower.set(Value.kReverse);
     }
 
     public void update(boolean isEnabled) {
@@ -72,23 +74,31 @@ public class GamePieceManipulator {
         
         //Move intake motors
         if (intakeDown) {
-            if (controller.getOtherAxis(2) != 0 /*&& !hasBall()*/) {    
-                leftIntakeMotor.set(controller.getOtherAxis(2));
-            } else if (controller.getOtherAxis(3) != 0 /*&& hasBall()*/) {
-                leftIntakeMotor.set(-1 * controller.getOtherAxis(3));
+            //Move Left Intake Motor
+            if (controller.getOtherAxis(1) != 0 /*&& !hasBall()*/) {    
+                leftIntakeMotor.set(controller.getOtherAxis(1)); 
             } else {
                 leftIntakeMotor.set(0);
+
+            }
+            //Move Right Intake Motor
+            if (controller.getOtherAxis(5) != 0 /*&& hasBall()*/) {
+                rightIntakeMotor.set(-1 * controller.getOtherAxis(5)); 
+            } else {
+                rightIntakeMotor.set(0);
             }
         }
 
         //Move Tilter
-        if (controller.getButton(Button.Y)) {
+        if (controller.getPOV() == 0) {
             moveIntakeUp();
-        } else if (controller.getButton(Button.B)) {
+        } else if (controller.getPOV() == 180) {
             moveIntakeDown();
         }
         
-        if (controller.getButtonPressed(Button.A)) {
+        System.out.println(controller.getPOV());
+
+        if (controller.getButtonPressed(Button.B)) {
             moveFlower();
         } 
         
