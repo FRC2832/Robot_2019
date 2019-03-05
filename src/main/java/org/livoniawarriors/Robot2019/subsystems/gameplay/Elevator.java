@@ -173,6 +173,7 @@ public class Elevator implements PIDSource, PIDOutput {
     public void pidWrite(double output) {
         if (!manual) {
             elevatorMotor.set(output);
+            //System.out.println("Current motor output: " + output);
         }
     }
 

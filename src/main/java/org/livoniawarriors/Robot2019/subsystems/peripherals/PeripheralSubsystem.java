@@ -27,8 +27,6 @@ public class PeripheralSubsystem implements ISubsystem {
     private double[] yawPitchRoll = new double[3];
 
     private static final int PRESSURE_SENSOR_PORT = 1;
-    private static final int PIGEON_PORT = 24;
-    private JeVois jeVois;
     private AnalogInput pressureSensor;
 
     private Compressor compressor;
@@ -44,13 +42,11 @@ public class PeripheralSubsystem implements ISubsystem {
         proxSensor = new Ultrasonic(0,1); //TODO: change output port and input port
         proxSensor.setEnabled(false);
         proxSensor.setAutomaticMode(false);
-        pigeon = new PigeonIMU(PIGEON_PORT);
+        pigeon = new PigeonIMU(DriveTrain.DRIVE_MOTER_FR);
         pressureSensor = new AnalogInput(PRESSURE_SENSOR_PORT);
         compressor = new Compressor();
         compressor.start();
         digitBoard = new REVDigitBoard();
-        jeVois = new JeVois();
-        CameraServer.getInstance().startAutomaticCapture();
         notifier = new Notifier(() -> digitBoard.display(Integer.toString((int)getPressure())));
         notifier.startPeriodic(REV_ROBOTICS_DIGIT_MXP_DISPLAY_UPDATE_PERIOD);
     }
@@ -59,23 +55,6 @@ public class PeripheralSubsystem implements ISubsystem {
     public void update(boolean enabled) {
         lidar.update();
 
-        //digitBoard.display(Double.toString(getPressure()));
-        System.out.println("==============+++==============");
-        System.out.print("Vision Online: ");
-        System.out.println(jeVois.isVisionOnline());
-        System.out.print("Target Visible: ");
-        System.out.println(jeVois.isTgtVisible());
-        System.out.print("Target Angle: ");
-        System.out.println(jeVois.getTgtAngle_Deg());
-        System.out.print("Target Range:");
-        System.out.println(jeVois.getTgtRange_in());
-        System.out.print("Serial Packet RX Rate: ");
-        System.out.println(jeVois.getPacketRxRate_PPS());
-        System.out.print("JeVois Framerate: ");
-        System.out.println(jeVois.getJeVoisFramerate_FPS());
-        System.out.print("JeVois CPU Load: ");
-        System.out.println(jeVois.getJeVoisCpuLoad_pct());
-        System.out.println("===============================\n\n\n");
 
     }
 
@@ -92,6 +71,13 @@ public class PeripheralSubsystem implements ISubsystem {
     public void diagnose() {
 
     }
+    public void resetEncoder(Encoder e){
+        e.reset();
+    }
+
+    public double encoderDist(Encoder e, double radius){
+        return e.getRaw() * 2*Math.PI*radius;
+    }
 
     public double proxSensorDistance(){
         proxSensor.setEnabled(true);
@@ -105,7 +91,10 @@ public class PeripheralSubsystem implements ISubsystem {
         return yawPitchRoll[0];
     }
 
+
+
     public double getPressure() {
         return 250d * pressureSensor.getAverageVoltage() / 5d - 25d;
+        
     }
 }
