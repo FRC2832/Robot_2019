@@ -77,7 +77,7 @@ public class Robot extends TimedRobot {
         registerControlModule(new FullyAutonModule());
         registerControlModule(new TestAutonModule());
         registerControlModule(new TestTeleopModule()); // This is the default one until manual setting default
-        setDefaultModule(TestTeleopModule.class);
+        setDefaultModule(FullyAutonModule.class);
         setTeleopModule(TestTeleopModule.class);
     }
 
