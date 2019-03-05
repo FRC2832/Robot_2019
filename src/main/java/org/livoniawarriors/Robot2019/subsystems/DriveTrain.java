@@ -17,7 +17,7 @@ public class DriveTrain implements ISubsystem {
 
     private final static int TICKS_PER_ROTATION = 2540; //TODO: Fix
     private final static double WHEEL_DIAMETER = 8 * Math.PI; //TODO: Fix
-    private final static double WHEEL_BASE_WIDTH = 0.5; // TODO: Fix
+    private final static double WHEEL_BASE_WIDTH = 2; // TODO: Fix
 
     private final static double P = 1; //TODO: Figure out these values
     private final static double I = 0;
@@ -88,7 +88,7 @@ public class DriveTrain implements ISubsystem {
         rightFollower.configurePIDVA(P, I, D, 1/ MAX_VELOCITY, ACCELERATION_GAIN);
         leftFollower.setTrajectory(new Trajectory(0));
         rightFollower.setTrajectory(new Trajectory(0));
-        pathConfig = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 0.05, 1.7, 2.0, 60.0);
+        pathConfig = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 0.05, 1.7, 2.0, 60.0); // Might need to convert to imperial
     }
 
     /**
@@ -132,7 +132,6 @@ public class DriveTrain implements ISubsystem {
 
             double angleDifference = Pathfinder.boundHalfDegrees(desired_heading - gyro_heading);
             double turn = 0.8 * (-1.0 / 80.0) * angleDifference;
-            Robot.logger.error("HIIIIIIIIIIIIII: " + l + turn);
 
             drive.tankDrive(l + turn, r - turn);
         }
