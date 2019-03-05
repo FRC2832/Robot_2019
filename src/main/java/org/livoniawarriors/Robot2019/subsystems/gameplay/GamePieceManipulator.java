@@ -69,14 +69,16 @@ public class GamePieceManipulator {
         if (!isEnabled) {
             return;
         }
-
+        
         //Move intake motors
-        if (controller.getOtherAxis(2) != 0 /*&& !hasBall()*/) {    
-            leftIntakeMotor.set(controller.getOtherAxis(2));
-        } else if (controller.getOtherAxis(3) != 0 /*&& hasBall()*/) {
-            leftIntakeMotor.set(-1 * controller.getOtherAxis(3));
-        } else {
-            leftIntakeMotor.set(0);
+        if (intakeDown) {
+            if (controller.getOtherAxis(2) != 0 /*&& !hasBall()*/) {    
+                leftIntakeMotor.set(controller.getOtherAxis(2));
+            } else if (controller.getOtherAxis(3) != 0 /*&& hasBall()*/) {
+                leftIntakeMotor.set(-1 * controller.getOtherAxis(3));
+            } else {
+                leftIntakeMotor.set(0);
+            }
         }
 
         //Move Tilter
