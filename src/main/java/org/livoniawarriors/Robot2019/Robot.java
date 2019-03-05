@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.livoniawarriors.Robot2019.modules.FullyAutonModule;
 import org.livoniawarriors.Robot2019.modules.TestAutonModule;
 import org.livoniawarriors.Robot2019.modules.TestTeleopModule;
 import org.livoniawarriors.Robot2019.subsystems.*;
@@ -72,9 +73,10 @@ public class Robot extends TimedRobot {
         registerSubsystem(driveTrain = new DriveTrain());
         registerSubsystem(flameThrower = new FlameThrower());
         registerSubsystem(gamePlay = new GamePlay());
+        registerControlModule(new FullyAutonModule());
         registerControlModule(new TestAutonModule());
         registerControlModule(new TestTeleopModule()); // This is the default one until manual setting default
-        setDefaultModule(TestTeleopModule.class);
+        setDefaultModule(FullyAutonModule.class);
     }
 
     /**
@@ -239,9 +241,9 @@ public class Robot extends TimedRobot {
         else {
             activeModule = defaultModule;
             try {
-                defaultModule.start();
+                activeModule.start();
             } catch (Throwable t) {
-                logger.error(defaultModule.getClass().getSimpleName(), t);
+                logger.error(activeModule.getClass().getSimpleName(), t);
             }
         }
         

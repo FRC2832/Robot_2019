@@ -1,5 +1,6 @@
 package org.livoniawarriors.Robot2019.subsystems.peripherals;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.ISubsystem;
 import org.livoniawarriors.Robot2019.Robot;
@@ -20,85 +21,91 @@ import org.apache.logging.log4j.Level;
 
 public class PeripheralSubsystem implements ISubsystem {
 
-	private Lidar lidar;
-	private Ultrasonic proxSensor;
-	private PigeonIMU pigeon;
-	private double[] yawPitchRoll = new double[3];
+    private Lidar lidar;
+    private Ultrasonic proxSensor;
+    private PigeonIMU pigeon;
+    private double[] yawPitchRoll = new double[3];
 
-	private static final int PRESSURE_SENSOR_PORT = 1;
-	private AnalogInput pressureSensor;
+    private static final int PRESSURE_SENSOR_PORT = 1;
+    private static final int PIGEON_PORT = 24;
+    private JeVois jeVois;
+    private AnalogInput pressureSensor;
 
-	private REVDigitBoard digitBoard;
+    private Compressor compressor;
 
-	@Override
-	public void init() {
-		lidar = new Lidar();
-		proxSensor = new Ultrasonic(0,1); //TODO: change output port and input port
-		proxSensor.setEnabled(false);
-		proxSensor.setAutomaticMode(false);
-		pigeon = new PigeonIMU(DriveTrain.DRIVE_MOTER_BL);
-		pressureSensor = new AnalogInput(PRESSURE_SENSOR_PORT);
-		digitBoard = new REVDigitBoard();
-	}
+    private Notifier notifier;
+    private final static double REV_ROBOTICS_DIGIT_MXP_DISPLAY_UPDATE_PERIOD = .25;
 
-	@Override
-	public void update(boolean enabled) {
-		lidar.update();
-		digitBoard.display(Double.toString(getPressure()));
-	}
+    private REVDigitBoard digitBoard;
 
-	@Override
-	public void dispose() throws IOException {
-		lidar.dispose();
-	}
-	@Override
-	public void csv(ICsvLogger csv) {
+    @Override
+    public void init() {
+        lidar = new Lidar();
+        proxSensor = new Ultrasonic(0,1); //TODO: change output port and input port
+        proxSensor.setEnabled(false);
+        proxSensor.setAutomaticMode(false);
+        pigeon = new PigeonIMU(PIGEON_PORT);
+        pressureSensor = new AnalogInput(PRESSURE_SENSOR_PORT);
+        compressor = new Compressor();
+        compressor.start();
+        digitBoard = new REVDigitBoard();
+        jeVois = new JeVois();
+        CameraServer.getInstance().startAutomaticCapture();
+        notifier = new Notifier(() -> digitBoard.display(Integer.toString((int)getPressure())));
+        notifier.startPeriodic(REV_ROBOTICS_DIGIT_MXP_DISPLAY_UPDATE_PERIOD);
+    }
 
-	}
+    @Override
+    public void update(boolean enabled) {
+        lidar.update();
 
-	@Override
-	public void diagnose() {
+        //digitBoard.display(Double.toString(getPressure()));
+        System.out.println("==============+++==============");
+        System.out.print("Vision Online: ");
+        System.out.println(jeVois.isVisionOnline());
+        System.out.print("Target Visible: ");
+        System.out.println(jeVois.isTgtVisible());
+        System.out.print("Target Angle: ");
+        System.out.println(jeVois.getTgtAngle_Deg());
+        System.out.print("Target Range:");
+        System.out.println(jeVois.getTgtRange_in());
+        System.out.print("Serial Packet RX Rate: ");
+        System.out.println(jeVois.getPacketRxRate_PPS());
+        System.out.print("JeVois Framerate: ");
+        System.out.println(jeVois.getJeVoisFramerate_FPS());
+        System.out.print("JeVois CPU Load: ");
+        System.out.println(jeVois.getJeVoisCpuLoad_pct());
+        System.out.println("===============================\n\n\n");
 
-	}
+    }
 
-	public void resetEncoder(Encoder e){
-		e.reset();
-	}
+    @Override
+    public void dispose() throws IOException {
+        lidar.dispose();
+    }
+    @Override
+    public void csv(ICsvLogger csv) {
 
-	public double encoderDist(Encoder e, double radius){
-		return e.getRaw() * 2*Math.PI*radius;
-	}
+    }
 
-	public double proxSensorDistance(){
-		proxSensor.setEnabled(true);
-		proxSensor.ping();
-		return proxSensor.getRangeMM();
-	}
+    @Override
+    public void diagnose() {
 
-	public double getYaw() {
-		//returns the yaw; copy method and change array element to get pitch or roll
-		pigeon.getYawPitchRoll(yawPitchRoll);
-		return yawPitchRoll[0];
-	}
+    }
 
-	/**
-	 * Get acceleration from Pigeon in inches per second squared
-	 * @return acceleration in in/s/s
-	 */
-	public double getAcc() {
-		short xyz[] = new short[3];
-		short rawAccel;
-		pigeon.getBiasedAccelerometer(xyz);
-		rawAccel = xyz[0];
-		double gees = rawAccel / 16384d; //Covert result to G's
-		double inpsps = gees * 386.08858; // Conver G's to in/s/s
-		return inpsps;
+    public double proxSensorDistance(){
+        proxSensor.setEnabled(true);
+        proxSensor.ping();
+        return proxSensor.getRangeMM();
+    }
 
-	}
-		
-	
+    public double getYaw() {
+        //returns the yaw; copy method and change array element to get pitch or roll
+        pigeon.getYawPitchRoll(yawPitchRoll);
+        return yawPitchRoll[0];
+    }
 
-	public double getPressure() {
-		return 250d * pressureSensor.getVoltage() / 5d - 25d;
-	}
+    public double getPressure() {
+        return 250d * pressureSensor.getAverageVoltage() / 5d - 25d;
+    }
 }
