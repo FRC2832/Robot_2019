@@ -71,7 +71,7 @@ public class DriveTrain implements ISubsystem {
 
     }
 
-    private double encoderToInch(SensorCollection encoder) {
+    private double getEncoderInInches(SensorCollection encoder) {
         double raw = encoder.getQuadraturePosition();
         return raw * ENCODER_RATIO;
 
@@ -84,10 +84,10 @@ public class DriveTrain implements ISubsystem {
      * @return true is it has driven the target distance
      */
     public boolean driveForwardLazy(double distance, boolean reset) {
-        double enc = encoderToInch(leftEncoder);
+        double enc = getEncoderInInches(leftEncoder);
         if(reset) {
-            prevPosLeft = encoderToInch(leftEncoder);
-            prevPosRight = encoderToInch(rightEncoder);
+            prevPosLeft = getEncoderInInches(leftEncoder);
+            prevPosRight = getEncoderInInches(rightEncoder);
         }
         //Using left encoder
         if(enc - prevPosLeft >= distance) {

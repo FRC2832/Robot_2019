@@ -240,4 +240,4 @@ if __name__ == "__main__":
                 conn.send('map\n')
                 conn.send(mapbytes)
                 conn.send('\n')
-conn.send('transform\n' + x + '\n' + y + '\n' + theta + '\n')
+                conn.send('transform\n' + x + '\n' + y + '\n' + theta + '\n')
