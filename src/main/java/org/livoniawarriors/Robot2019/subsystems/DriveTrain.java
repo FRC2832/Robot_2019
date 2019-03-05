@@ -2,6 +2,7 @@ package org.livoniawarriors.Robot2019.subsystems;
 
 import com.ctre.phoenix.motorcontrol.SensorCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 import jaci.pathfinder.Pathfinder;
@@ -35,6 +36,7 @@ public class DriveTrain implements ISubsystem {
     private SensorCollection rightEncoder, leftEncoder;
     Trajectory.Config pathConfig;
     private boolean auto;
+    private double startTime;
 
     @Override
     public void csv(ICsvLogger csv) {
@@ -109,6 +111,23 @@ public class DriveTrain implements ISubsystem {
     public void tankDrive(double left, double right, boolean squaredInputs) {
         drive.tankDrive(left, right, squaredInputs);
         auto = false;
+    }
+
+    /**
+     * Drive forward for a time without anything fancy at all
+     * @param time to drive
+     * @param speed to drive
+     * @param reset encoder zero point
+     * @return completion
+     */
+    public boolean lazyDriveTime(float time, double speed, boolean reset) {
+        if(reset)
+            startTime = Timer.getFPGATimestamp();
+        if(startTime + time > Timer.getFPGATimestamp())
+            return true;
+        else
+            drive.tankDrive(speed, speed);
+        return false;
     }
 
     public boolean isTrajectoryDone() {

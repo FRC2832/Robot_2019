@@ -32,6 +32,10 @@ public class FullyAutonModule implements IControlModule {
     private void updateState(boolean changed) {
         switch (state) {
             case 0:
+                if(Robot.driveTrain.lazyDriveTime(2, 0.7, changed))
+                    incrementState();
+                break;
+            case 1:
                 if(changed) {
                     Trajectory trajectory = Robot.driveTrain.generateTrajectory(new Waypoint[] {
                             new Waypoint(-4, -1, Pathfinder.d2r(0.1)),
@@ -42,9 +46,6 @@ public class FullyAutonModule implements IControlModule {
                 }
                 if (Robot.driveTrain.isTrajectoryDone())
                     incrementState();
-                break;
-            case 1:
-
                 break;
             case 2:
 
