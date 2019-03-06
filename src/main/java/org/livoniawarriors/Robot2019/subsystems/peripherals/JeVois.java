@@ -91,49 +91,66 @@ public class JeVois {
      * Pass TRUE to additionaly enable a USB camera stream of what the vision camera is seeing.
      */
     public JeVois(boolean useUSBStream) {
-        int retry_counter = 0;
-        
-        //Retry strategy to get this serial port open.
-        //I have yet to see a single retry used assuming the camera is plugged in
-        // but you never know.
-        while(visionClient == null && retry_counter++ < 10){
-            try {
-                Robot.logger.log(Level.INFO, "Creating JeVois Socket...");
-                visionClient = new Socket("frcvision.local", 1234);
-                input = new BufferedReader(new InputStreamReader(visionClient.getInputStream()));
-                output = new BufferedWriter(new OutputStreamWriter(visionClient.getOutputStream()));
-                Robot.logger.log(Level.INFO, "SUCCESS!!");
-            } catch (Exception e) {
-                Robot.logger.log(Level.INFO, "FAILED!!");
-                e.printStackTrace();
-                sleep(500);
-                Robot.logger.log(Level.INFO, "Retry " + Integer.toString(retry_counter));
+        new Thread() {
+            @Override
+            public void run() {
+                int retry_counter = 0;
+
+                //Retry strategy to get this serial port open.
+                //I have yet to see a single retry used assuming the camera is plugged in
+                // but you never know.
+                while(visionClient ==null&&retry_counter++ < 10)
+
+                {
+                    try {
+                        Robot.logger.log(Level.INFO, "Creating JeVois Socket...");
+                        visionClient = new Socket("frcvision.local", 1234);
+                        input = new BufferedReader(new InputStreamReader(visionClient.getInputStream()));
+                        output = new BufferedWriter(new OutputStreamWriter(visionClient.getOutputStream()));
+                        Robot.logger.log(Level.INFO, "SUCCESS!!");
+                    } catch (Exception e) {
+                        Robot.logger.log(Level.INFO, "FAILED!!");
+                        e.printStackTrace();
+                        try {
+                            sleep(500);
+                        } catch (Exception e1) {
+
+                        }
+                        Robot.logger.log(Level.INFO, "Retry " + Integer.toString(retry_counter));
+                    }
+                }
+
+
+                //Report an error if we didn't get to open the serial port
+                if(visionClient ==null)
+
+                {
+                    Robot.logger.error("Cannot open socket to JeVois. Not starting vision system.");
+                    return;
+                }
+
+                //Test to make sure we are actually talking to the JeVois
+                if(
+
+                        sendPing() !=0)
+
+                {
+                    Robot.logger.error("JeVois ping test failed. Not starting vision system.");
+                    return;
+                }
+
+                //Ensure the JeVois is starting with the stream off.
+                stopDataOnlyStream();
+
+                setCameraStreamActive(useUSBStream);
+
+                start();
+
+                //Start listening for packets
+                packetListenerThread.setDaemon(true);
+                packetListenerThread.start();
             }
-        }
-
-        
-        //Report an error if we didn't get to open the serial port
-        if(visionClient == null){
-            Robot.logger.error("Cannot open socket to JeVois. Not starting vision system.");
-            return;
-        }
-        
-        //Test to make sure we are actually talking to the JeVois
-        if(sendPing() != 0){
-            Robot.logger.error("JeVois ping test failed. Not starting vision system.");
-            return;
-        }
-        
-        //Ensure the JeVois is starting with the stream off.
-        stopDataOnlyStream();
-
-        setCameraStreamActive(useUSBStream);
-        start();
-
-        //Start listening for packets
-        packetListenerThread.setDaemon(true);
-        packetListenerThread.start();
-
+        }.start();
     } 
 
     public String revieve() {

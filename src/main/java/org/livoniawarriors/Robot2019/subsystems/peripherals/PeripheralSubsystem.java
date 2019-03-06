@@ -23,7 +23,6 @@ import org.apache.logging.log4j.Level;
 public class PeripheralSubsystem implements ISubsystem {
 
     private Lidar lidar;
-    private Ultrasonic proxSensor;
     private PigeonIMU pigeon;
     private double[] yawPitchRoll = new double[3];
 
@@ -40,15 +39,14 @@ public class PeripheralSubsystem implements ISubsystem {
     private final static double REV_ROBOTICS_DIGIT_MXP_DISPLAY_UPDATE_PERIOD = .25;
 
     private REVDigitBoard digitBoard;
+    private CasseroleRIOLoadMonitor loadMonitor;
     private DigitalInput bottomOut;
-    
+
 
     @Override
     public void init() {
         lidar = new Lidar();
-        proxSensor = new Ultrasonic(0,1); //TODO: change output port and input port
-        proxSensor.setEnabled(false);
-        proxSensor.setAutomaticMode(false);
+        loadMonitor = new CasseroleRIOLoadMonitor();
         pigeon = new PigeonIMU(PIGEON_PORT);
         pressureSensor = new AnalogInput(PRESSURE_SENSOR_PORT);
         compressor = new Compressor();
@@ -65,7 +63,7 @@ public class PeripheralSubsystem implements ISubsystem {
     @Override
     public void update(boolean enabled) {
         //digitBoard.display(Double.toString(getPressure()));
-        System.out.println("==============+++==============");
+        /*System.out.println("==============+++==============");
         System.out.print("Vision Online: ");
         System.out.println(jeVois.isVisionOnline());
         System.out.print("Target Visible: ");
@@ -80,7 +78,7 @@ public class PeripheralSubsystem implements ISubsystem {
         System.out.println(jeVois.getJeVoisFramerate_FPS());
         System.out.print("JeVois CPU Load: ");
         System.out.println(jeVois.getJeVoisCpuLoad_pct());
-        System.out.println("===============================\n\n\n");
+        System.out.println("===============================\n\n\n");*/
 
     }
 
@@ -90,18 +88,13 @@ public class PeripheralSubsystem implements ISubsystem {
     }
     @Override
     public void csv(ICsvLogger csv) {
-
+        csv.log("Memory Usage", loadMonitor.getMemLoadPct());
+        csv.log("Cpu Usage", loadMonitor.getCPULoadPct());
     }
 
     @Override
     public void diagnose() {
 
-    }
-
-    public double proxSensorDistance(){
-        proxSensor.setEnabled(true);
-        proxSensor.ping();
-        return proxSensor.getRangeMM();
     }
 
     public double getYaw() {

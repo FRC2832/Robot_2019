@@ -223,16 +223,13 @@ public class Robot extends TimedRobot {
                 logger.error(subsystem.getClass().getSimpleName(), t);
             }
         });
+        userInput.putValue("tab", "Active Module", 3, activeModule.getClass().getSimpleName());
     }
 
     @Override
     public void disabledInit() {
         if(activeModule != null) {
-            try {
-                activeModule.stop();
-            } catch (Throwable t) {
-                logger.error(activeModule.getClass().getSimpleName(), t);
-            }
+            stopModule(activeModule);
             activeModule = null;
         }
     }
@@ -244,8 +241,22 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousInit() {
         activeModule = defaultModule;
+        startModule(activeModule);
+    }
+
+    private void startModule(IControlModule module) {
+        logger.log(Level.INFO, "Starting module: " + module.getClass().getSimpleName());
         try {
-            activeModule.start();
+            module.start();
+        } catch (Throwable t) {
+            logger.error(activeModule.getClass().getSimpleName(), t);
+        }
+    }
+
+    private void stopModule(IControlModule module) {
+        logger.log(Level.INFO, "Stopping module: " + activeModule.getClass().getSimpleName());
+        try {
+            module.stop();
         } catch (Throwable t) {
             logger.error(activeModule.getClass().getSimpleName(), t);
         }
@@ -254,38 +265,26 @@ public class Robot extends TimedRobot {
     private void periodic() {
         if(activeModule == null) {
             activeModule = defaultModule;
-            try {
-                activeModule.start();
-            } catch (Throwable t) {
-                logger.error(activeModule.getClass().getSimpleName(), t);
-            }
+            startModule(activeModule);
         }
 
         try {
             var startTime = System.currentTimeMillis();
             activeModule.update();
             var length = System.currentTimeMillis() - startTime;
-            if(length > 2)
+            if(length > 4)
                 Robot.logger.warn("");
         } catch (Throwable t) {
             logger.error(activeModule.getClass().getSimpleName(), t);
         }
 
         if(activeModule.isFinished()) {
-            try {
-                activeModule.stop();
-            } catch (Throwable t) {
-                logger.error(activeModule.getClass().getSimpleName(), t);
-            }
+            stopModule(activeModule);
             if(fallbackModule != null)
                 activeModule = fallbackModule;
             else
                 activeModule = defaultModule;
-            try {
-                activeModule.start();
-            } catch (Throwable t) {
-                logger.error(activeModule.getClass().getSimpleName(), t);
-            }
+            startModule(activeModule);
         }
     }
 
@@ -297,12 +296,9 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         if (activeModule != telepModule) {
+            stopModule(activeModule);
             activeModule = telepModule;
-            try {
-                activeModule.start();
-            } catch (Throwable t) {
-                logger.error(activeModule.getClass().getSimpleName(), t);
-            }
+            startModule(activeModule);
         }
     }
 
