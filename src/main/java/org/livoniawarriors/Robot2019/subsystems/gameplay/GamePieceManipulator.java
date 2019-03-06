@@ -105,6 +105,10 @@ public class GamePieceManipulator {
         Robot.userInput.createValue("John", "Do I have a ball?", 2, hasBall());
     }
 
+    public boolean doingBall() {
+        return intakeDown;
+    }
+
     public boolean hasBall() {
         return ballSensor.getVoltage() < 1.5;
     }
