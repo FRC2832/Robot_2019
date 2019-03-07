@@ -26,7 +26,6 @@ public class UnderConsoleLights {
             ld.setColor(2, color);
             ld.setColor(3, color);
             ld.setColor(4, color);
-            ld.update();
         }
     }
 
@@ -50,7 +49,6 @@ public class UnderConsoleLights {
                     (tempGreen + (int)(Math.random() * varFact)), 
                     (tempBlue + (int)(Math.random() * varFact))), 0.8f);
             }
-            ld.update();
         }
     }
 
