@@ -47,18 +47,6 @@ public class LightDrive {
             Robot.logger.error("Couldn't send LightDrive message");
         }
         sendBuffer.rewind();
-      
-        //attempts to recieve message
-        receiveID.putInt(CAN_ID + 4);
-        receiveID.rewind();
-        try {
-            receiveArray = CANJNI.FRCNetCommCANSessionMuxReceiveMessage(receiveID.asIntBuffer(), 
-                MSG_ID_MASK, timestampBuffer);
-        }
-        catch (CANMessageNotFoundException e) {
-            //Robot.logger.error("Couldn't receive LightDrive message", e);
-        }
-
     }
 
     public void setColor(int channel, Color color) {
