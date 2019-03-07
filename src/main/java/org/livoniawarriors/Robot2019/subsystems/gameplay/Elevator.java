@@ -12,6 +12,7 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import org.apache.logging.log4j.Level;
+import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
@@ -210,15 +211,13 @@ public class Elevator implements PIDSource, PIDOutput {
 
     }
 
+    void csv(ICsvLogger logger) {
+        logger.log("Elevator Height", getElevatorHeight());
+    }
+
     public void diagnose() {
         double testElevHeight = getElevatorHeight();
-        if (testElevHeight >= 0 && testElevHeight <= 100) {
-            System.out.println("Method getElevatorHeight() is reported as a success with the value of " + testElevHeight);
-            Robot.logger.log(Level.ERROR, String.format("Method getElevatorHeight() returned value {0} and did not detect failure", testElevHeight));
-        } else {
-            System.out.println("Method getElevatorHeight() is reported as a failure with the value of " + testElevHeight);
-            Robot.logger.log(Level.ERROR, String.format("Method getElevatorHeight() returned value {0} and DETECTED FAILURE!!!", testElevHeight));
-        }
-
+        if (testElevHeight == 0)
+            Robot.logger.log(Level.DEBUG, String.format("Method getElevatorHeight() returned value %s and DETECTED FAILURE!!!", testElevHeight));
     }
 }

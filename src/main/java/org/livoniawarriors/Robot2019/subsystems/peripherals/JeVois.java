@@ -103,14 +103,12 @@ public class JeVois {
 
                 {
                     try {
-                        Robot.logger.log(Level.INFO, "Creating JeVois Socket...");
                         visionClient = new Socket("frcvision.local", 1234);
                         input = new BufferedReader(new InputStreamReader(visionClient.getInputStream()));
                         output = new BufferedWriter(new OutputStreamWriter(visionClient.getOutputStream()));
-                        Robot.logger.log(Level.INFO, "SUCCESS!!");
+                        Robot.logger.log(Level.INFO, "SUCCESS in creation of jevois socket");
                     } catch (Exception e) {
-                        Robot.logger.log(Level.INFO, "FAILED!!");
-                        e.printStackTrace();
+                        Robot.logger.log(Level.INFO, Integer.toString(retry_counter) + " FAIL to create Jevois socket: " + e.getLocalizedMessage());
                         try {
                             sleep(500);
                         } catch (Exception e1) {

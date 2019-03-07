@@ -56,11 +56,10 @@ public class DriveTrain implements ISubsystem {
             auto = true;
     }
 
-    public void startTrajectory(Trajectory trajectory) {
+    public void startTrajectory(Trajectory trajectoryLeft, Trajectory trajectoryRight) {
         auto = true;
-        var modifier = new TankModifier(trajectory).modify(WHEEL_BASE_WIDTH);
-        leftFollower.setTrajectory(modifier.getLeftTrajectory());
-        rightFollower.setTrajectory(modifier.getRightTrajectory());
+        leftFollower.setTrajectory(trajectoryLeft);
+        rightFollower.setTrajectory(trajectoryRight);
     }
 
     public Trajectory generateTrajectory(Waypoint[] waypoints) {
@@ -124,8 +123,10 @@ public class DriveTrain implements ISubsystem {
         auto = false;
         if(reset)
             startTime = Timer.getFPGATimestamp();
-        if(startTime + time > Timer.getFPGATimestamp())
+        if(startTime + time < Timer.getFPGATimestamp()) {
+            drive.tankDrive(0, 0);
             return true;
+        }
         else
             drive.tankDrive(speed, speed);
         return false;

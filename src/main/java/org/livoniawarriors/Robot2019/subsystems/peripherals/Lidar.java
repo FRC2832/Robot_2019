@@ -1,6 +1,7 @@
 package org.livoniawarriors.Robot2019.subsystems.peripherals;
 
 import edu.wpi.first.wpilibj.Notifier;
+import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.Robot;
 
 import java.io.*;
@@ -32,8 +33,12 @@ public class Lidar {
             input = new BufferedReader(new InputStreamReader(client.getInputStream()));
             output = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
         } catch (IOException e) {
-            Robot.logger.error("Couldn't connect to LIDAR", e);
+            //Robot.logger.error("Couldn't connect to LIDAR");
         }
+    }
+
+    void csv(ICsvLogger logger) {
+        logger.log("Lidar On", client != null);
     }
 
     private void update() {

@@ -8,7 +8,6 @@ import org.livoniawarriors.Robot2019.modules.FullyAutonModule;
 import org.livoniawarriors.Robot2019.modules.TestAutonModule;
 import org.livoniawarriors.Robot2019.modules.TestTeleopModule;
 import org.livoniawarriors.Robot2019.subsystems.*;
-import org.livoniawarriors.Robot2019.subsystems.diagnostic.Diagnostic;
 import org.livoniawarriors.Robot2019.subsystems.flamethrower.FlameThrower;
 import org.livoniawarriors.Robot2019.subsystems.gameplay.*;
 import org.livoniawarriors.Robot2019.subsystems.peripherals.PeripheralSubsystem;
@@ -31,7 +30,6 @@ public class Robot extends TimedRobot {
 
     // Subsystems
     public static PeripheralSubsystem peripheralSubsystem;
-    public static Diagnostic diagnostic;
     public static DriveTrain driveTrain;
     public static FlameThrower flameThrower;
     public static GamePlay gamePlay;
@@ -39,6 +37,7 @@ public class Robot extends TimedRobot {
     // Yup, this is a logger, use it!
     public static Logger logger;
 
+    private List<Notifier> subsytemNotifiers;
     private final Logger csvLogger;
     private final Level CSV = Level.getLevel("CSV");
     private final ICsvLogger csvBufferWriter;
@@ -62,6 +61,7 @@ public class Robot extends TimedRobot {
         csvNotifier = new Notifier(this::logCSV);
         diagnosticNotifier = new Notifier(this::diagnose);
         logger.error("Hi");
+        subsytemNotifiers = new ArrayList<>();
     }
 
     /**
@@ -70,7 +70,6 @@ public class Robot extends TimedRobot {
     private void register() {
         registerSubsystem(peripheralSubsystem = new PeripheralSubsystem());
         registerSubsystem(userInput = new UserInput());
-        registerSubsystem(diagnostic = new Diagnostic());
         registerSubsystem(driveTrain = new DriveTrain());
         registerSubsystem(flameThrower = new FlameThrower());
         registerSubsystem(gamePlay = new GamePlay());
@@ -87,7 +86,7 @@ public class Robot extends TimedRobot {
      */
     private void registerControlModule(IControlModule module) {
         if(modules.containsKey(module.getClass().getSimpleName()))
-            System.err.println("Duplicate registration of module: " + module.getClass().getName());// @Todo logging
+            logger.error("Duplicate registration of module: " + module.getClass().getName());// 
         modules.put(module.getClass().getSimpleName(), module);
     }
 
@@ -97,8 +96,19 @@ public class Robot extends TimedRobot {
      */
     private void registerSubsystem(ISubsystem subsystem) {
         if(subsystems.contains(subsystem))
-            System.err.println("Duplicate registration of subsystem: " + subsystem.getClass().getName()); // @Todo logging
+            logger.error("Duplicate registration of subsystem: " + subsystem.getClass().getName()); // 
         subsystems.add(subsystem);
+        subsytemNotifiers.add(new Notifier(() -> {
+            try {
+                var startTime = System.currentTimeMillis();
+                subsystem.update(isEnabled());
+                var length = System.currentTimeMillis() - startTime;
+                if(length > 19)
+                    Robot.logger.warn("Subsystem " + subsystem.getClass().getSimpleName() + " took too many millis: " + length);
+            } catch (Throwable t) {
+                logger.error(subsystem.getClass().getSimpleName(), t);
+            }
+        }));
     }
 
     private void setDefaultModule(IControlModule module) {
@@ -110,8 +120,10 @@ public class Robot extends TimedRobot {
      * @param module to set as, you guessed it, default
      */
     private void setDefaultModule(Class<? extends IControlModule> module) {
-        if(!modules.containsKey(module.getSimpleName()))
-            System.err.println("Module not registered: " + module.getSimpleName()); // @Todo logging
+        if(!modules.containsKey(module.getSimpleName())) {
+            logger.error("Module not registered: " + module.getSimpleName()); // 
+            return;
+        }
         setDefaultModule(modules.get(module.getSimpleName()));
     }
 
@@ -121,7 +133,7 @@ public class Robot extends TimedRobot {
      */
     private void setTeleopModule(Class<? extends IControlModule> module) {
         if(!modules.containsKey(module.getSimpleName()))
-            System.err.println("Module not registered: " + module.getSimpleName()); // @Todo logging
+            logger.error("Module not registered: " + module.getSimpleName()); // 
         setTeleopModule(modules.get(module.getSimpleName()));
     }
 
@@ -212,18 +224,8 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        subsystems.forEach(subsystem -> {
-            try {
-                var startTime = System.currentTimeMillis();
-                subsystem.update(isEnabled());
-                var length = System.currentTimeMillis() - startTime;
-                if(length > 2)
-                    Robot.logger.warn("Subsystem " + subsystem.getClass().getSimpleName() + " took too many millis: " + length);
-            } catch (Throwable t) {
-                logger.error(subsystem.getClass().getSimpleName(), t);
-            }
-        });
-        userInput.putValue("tab", "Active Module", 3, activeModule.getClass().getSimpleName());
+        if(activeModule != null)
+            userInput.putValue("tab", "Active Module", 3, activeModule.getClass().getSimpleName());
     }
 
     @Override
@@ -296,7 +298,8 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         if (activeModule != telepModule) {
-            stopModule(activeModule);
+            if(activeModule != null)
+                stopModule(activeModule);
             activeModule = telepModule;
             startModule(activeModule);
         }

@@ -5,6 +5,7 @@ import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.PathfinderFRC;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
+import org.apache.logging.log4j.Level;
 import org.livoniawarriors.Robot2019.IControlModule;
 import org.livoniawarriors.Robot2019.Robot;
 
@@ -33,17 +34,11 @@ public class FullyAutonModule implements IControlModule {
         switch (state) {
             case 0:
                 if(Robot.driveTrain.lazyDriveTime(2, 0.7, changed))
-                    incrementState();
+                    ;//incrementState();
                 break;
             case 1:
-                if(changed) {
-                    Trajectory trajectory = Robot.driveTrain.generateTrajectory(new Waypoint[] {
-                            new Waypoint(-4, -1, Pathfinder.d2r(0.1)),
-                            new Waypoint(-2, -2, 0),
-                            new Waypoint(0, 0, 0)
-                    });
-                    Robot.driveTrain.startTrajectory(trajectory);
-                }
+                if(changed)
+                    Robot.driveTrain.startTrajectory(PathfinderFRC.getTrajectory("Path.right"), PathfinderFRC.getTrajectory("Path.left"));
                 if (Robot.driveTrain.isTrajectoryDone())
                     incrementState();
                 break;
@@ -59,6 +54,7 @@ public class FullyAutonModule implements IControlModule {
     private void incrementState() {
         state++;
         stateChanged = true;
+        Robot.logger.log(Level.INFO, "Switching to state " + state);
     }
 
     @Override

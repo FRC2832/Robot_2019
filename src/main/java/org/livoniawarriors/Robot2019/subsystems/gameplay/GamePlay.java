@@ -34,7 +34,7 @@ public class GamePlay implements ISubsystem {
 
     @Override
     public void csv(ICsvLogger csv) {
-
+		elevator.csv(csv);
     }
 
 	@Override

@@ -53,8 +53,15 @@ public class PeripheralSubsystem implements ISubsystem {
         compressor.start();
         digitBoard = new REVDigitBoard();
         jeVois = new JeVois();
-        CameraServer.getInstance().startAutomaticCapture();
-        notifier = new Notifier(() -> digitBoard.display(Integer.toString((int)getPressure())));
+        //CameraServer.getInstance().startAutomaticCapture();
+        notifier = new Notifier(() -> {
+            var value = new StringBuilder(Integer.toString((int)Math.abs(getPressure())));
+            value.reverse();
+            while (value.length() < 4)
+                value.append("0");
+            value.reverse();
+            digitBoard.display(value.toString());
+        });
         notifier.startPeriodic(REV_ROBOTICS_DIGIT_MXP_DISPLAY_UPDATE_PERIOD);
         startingYaw = getYaw();
         bottomOut = new DigitalInput(BOTTOM_OUT_PIN);
