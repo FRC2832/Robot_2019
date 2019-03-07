@@ -16,6 +16,8 @@ import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
+import org.livoniawarriors.Robot2019.UserInput.Controllers;
+import org.livoniawarriors.Robot2019.UserInput;
 
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
@@ -67,7 +69,8 @@ public class Elevator implements PIDSource, PIDOutput {
         pidController.setInputRange(-Double.MAX_VALUE, Double.MAX_VALUE);
         pidController.setContinuous(true);
 
-        controller = Robot.userInput.getController(0);
+
+        controller = Robot.userInput.getController(Controllers.XBOX);
 
         currentSetHeight = ElevatorHeights.LowHatch;
 
@@ -85,6 +88,7 @@ public class Elevator implements PIDSource, PIDOutput {
         pidController.setSetpoint(height.getHeight());
         currentSetHeight = height;
         setToMovingPID();
+        manual = false;
     }
 
     private void setToMovingPID() {
@@ -125,45 +129,58 @@ public class Elevator implements PIDSource, PIDOutput {
             return;
         }
 
-        if (!manual) {
 
-            //PID Mode
-            if (!pidController.isEnabled()) {
-                pidController.enable();
-            }
-            if (pidController.onTarget() && movingPID) {
-                setToMaintiningPID();
-            }
-            if (controller.getButtonPressed(Button.A)) {
-                setElevatorHeight(ElevatorHeights.LowHatch);
-                System.out.println("Setting elevator to Low Hatch");
-            } else if (controller.getButtonPressed(Button.X)) {
-                setElevatorHeight(ElevatorHeights.MidHatch);
-                System.out.println("Setting elevator to Mid Hatch");
-            } else if (controller.getButtonPressed(Button.Y)) {
-                setElevatorHeight(ElevatorHeights.TopHatch);
-                System.out.println("Setting elevator to Top Hatch");
-            } else if (controller.getButtonPressed(Button.B)) {
-                manual = !manual;
-            }
-        } else {
+        //PID Mode
+        if (!manual && !pidController.isEnabled()) {
+            pidController.enable();
+        }
+        if (!manual && pidController.onTarget() && movingPID) {
+            setToMaintiningPID();
+        }
 
-            //Manual Mode
-            if (controller.getTriggerAxis(Hand.kRight) != 0) {
-                elevatorMotor.set(controller.getTriggerAxis(Hand.kRight) * 1);
-                System.out.println("Moving motor up forwards");
-            } else if (controller.getTriggerAxis(Hand.kLeft) != 0) {
-                elevatorMotor.set(-1 * controller.getTriggerAxis(Hand.kLeft) * 1);
-                System.out.println("Moving motor up backwards");
+        if (controller.getButtonPressed(Button.A)) {
+            if (Robot.gamePlay.doingBall()) {
+                setElevatorHeight(ElevatorHeights.LowPort);
             } else {
-                elevatorMotor.set(0);
+                setElevatorHeight(ElevatorHeights.LowHatch);
+            }
+        } else if (controller.getButtonPressed(Button.X)) {
+            if (Robot.gamePlay.doingBall()) {
+                setElevatorHeight(ElevatorHeights.MidPort);
+            } else {
+                setElevatorHeight(ElevatorHeights.MidHatch);
+            }
+        } else if (controller.getButtonPressed(Button.Y)) {
+            if (Robot.gamePlay.doingBall()) {
+                setElevatorHeight(ElevatorHeights.TopPort);
+            } else {
+                setElevatorHeight(ElevatorHeights.TopHatch);
             }
         }
 
+        //Manual Mode
+        if (controller.getOtherAxis(Robot.userInput.R_TRIGGER) != 0) {
+            elevatorMotor.set(controller.getOtherAxis(Robot.userInput.R_TRIGGER) * 1);
+            manual = true;
+            if (pidController.isEnabled()) {
+                pidController.disable();
+            }
+            //System.out.println("Moving motor up forwards");
+        } else if (controller.getOtherAxis(Robot.userInput.L_TRIGGER) != 0) {
+            elevatorMotor.set(-1 * controller.getOtherAxis(Robot.userInput.L_TRIGGER) * 1);
+            manual = true;
+            if (pidController.isEnabled()) {
+                pidController.disable();
+            }
+            //System.out.println("Moving motor up backwards");
+        } else if (!pidController.isEnabled()) {
+            elevatorMotor.set(0);
+        }
+
         //System.out.println("Current Elevator Height: " + getElevatorHeight());
-        Robot.userInput.putValue("John", "Elevator Height", 2, getElevatorHeight());
-        Robot.userInput.putValue("John", "Set Height", 2, currentSetHeight);
-        Robot.userInput.putValue("John", "PID", 2, movingPID);
+        Robot.userInput.createValue("John", "Elevator Height", 2, getElevatorHeight());
+        Robot.userInput.createValue("John", "Set Height", 2, currentSetHeight);
+        Robot.userInput.createValue("John", "PID", 2, movingPID);
 
     }
 

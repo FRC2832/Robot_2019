@@ -25,7 +25,11 @@ public class GamePlay implements ISubsystem {
 	
 	public double getElevatorHeight() {
 		return elevator.getElevatorHeight();
-	}
+    }
+    
+    public boolean doingBall() {
+        return gamePieceManipulator.doingBall();
+    }
 
 	@Override
 	public void dispose() throws Exception {

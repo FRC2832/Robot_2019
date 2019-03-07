@@ -12,33 +12,33 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
+import org.livoniawarriors.Robot2019.UserInput.Controllers;
 
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 
 /**
- * Add your docs here.
+ * Game piece manipulator class
  */
 public class GamePieceManipulator {
 
     private final static int RIGHT_INTAKE = 14;
     private final static int LEFT_INTAKE = 15;
 
-    private final static int TILTER_UP = 4;
-    private final static int TILTER_DOWN = 5;
+    private final static int TILTER_UP = 2;
+    private final static int TILTER_DOWN= 3;
     private final static int FLOWER_IN = 0;
     private final static int FLOWER_OUT = 1;
-    private final static int LEFT_EXTENDER_IN = 2;
-    private final static int LEFT_EXTENDER_OUT = 3;
-    private final static int RIGHT_EXTENDER_IN = 6;
-    private final static int RIGHT_EXTENDER_OUT = 7;
+    private final static int EXTENDER = 4;
 
 
     private final static int ANALOG_INPUT_CHANNEL = 0;
 
-    private DoubleSolenoid flower, tilter, leftExtender, rightExtender;
+    private DoubleSolenoid flower, tilter; 
+    private Solenoid extender;
     private WPI_TalonSRX leftIntakeMotor, rightIntakeMotor;
 
     private AnalogInput ballSensor;
@@ -52,60 +52,61 @@ public class GamePieceManipulator {
     public GamePieceManipulator() {
         flower = new DoubleSolenoid(FLOWER_IN, FLOWER_OUT);
         tilter = new DoubleSolenoid(TILTER_DOWN, TILTER_UP);
-        leftExtender = new DoubleSolenoid(LEFT_EXTENDER_IN, LEFT_EXTENDER_OUT);
-        rightExtender = new DoubleSolenoid(RIGHT_EXTENDER_IN, RIGHT_EXTENDER_OUT);
+        extender = new Solenoid(EXTENDER);
         leftIntakeMotor = new WPI_TalonSRX(LEFT_INTAKE);
         rightIntakeMotor = new WPI_TalonSRX(RIGHT_INTAKE);
-        rightIntakeMotor.follow(leftIntakeMotor);
+        leftIntakeMotor.setInverted(true);
         rightIntakeMotor.setInverted(true);
-
         ballSensor = new AnalogInput(ANALOG_INPUT_CHANNEL);
     
-        controller = Robot.userInput.getController(1);
+        controller = Robot.userInput.getController(Controllers.XBOX);
         
         intakeDown = false; //TODO: find out if intake starts up or down
+
+        tilter.set(Value.kReverse);
+        flower.set(Value.kReverse);
     }
 
     public void update(boolean isEnabled) {
         if (!isEnabled) {
             return;
         }
-
-        //Intake
-        if (controller.getTriggerAxis(Hand.kLeft) != 0 && !hasBall()) {    
-            leftIntakeMotor.set(controller.getTriggerAxis(Hand.kLeft));
-        } else {
-            leftIntakeMotor.set(0);
-        }
-
-        //Expel
-        if (controller.getTriggerAxis(Hand.kRight) != 0 && hasBall()) {
-            leftIntakeMotor.set(-1 * controller.getTriggerAxis(Hand.kRight));
-        } else {
-            leftIntakeMotor.set(0);
-        }
-
-        //Variable Control
-        //Commented out methods are discrete solinoid control
-        if (flower.get() == Value.kReverse) {
-            if (controller.getButton(Button.Y)) {
-                //moveIntakeUp();
-                tilter.set(Value.kReverse);
-            } else if (controller.getButton(Button.B)) {
-                //moveIntakeDown();
-                tilter.set(Value.kForward);
+        
+        //Move intake motors
+        if (intakeDown) {
+            //Move Left Intake Motor
+            if (controller.getOtherAxis(1) != 0 && !hasBall()) {    
+                leftIntakeMotor.set(controller.getOtherAxis(1)); 
             } else {
-                tilter.set(Value.kOff);
+                leftIntakeMotor.set(0);
+
             }
-        } else {
-            tilter.set(Value.kReverse);
+            //Move Right Intake Motor
+            if (controller.getOtherAxis(5) != 0 && hasBall()) {
+                rightIntakeMotor.set(-1 * controller.getOtherAxis(5)); 
+            } else {
+                rightIntakeMotor.set(0);
+            }
+        }
+
+        //Move Tilter
+        if (controller.getPOV() == 0) {
+            moveIntakeUp();
+        } else if (controller.getPOV() == 180) {
+            moveIntakeDown();
         }
         
-        if (controller.getButtonPressed(Button.A)) {
+        System.out.println(controller.getPOV());
+
+        if (controller.getButtonPressed(Button.B)) {
             moveFlower();
         } 
         
         Robot.userInput.putValue("John", "Do I have a ball?", 2, hasBall());
+    }
+
+    public boolean doingBall() {
+        return intakeDown;
     }
 
     public boolean hasBall() {
@@ -113,11 +114,13 @@ public class GamePieceManipulator {
     }
 
     private void moveFlower() {
-        if (flower.get() == Value.kForward) {
-            flower.set(Value.kReverse);
-            pushHatch();
-        } else {
-            flower.set(Value.kForward);
+        if (!intakeDown) {
+            if (flower.get() == Value.kForward) {
+                flower.set(Value.kReverse);
+                pushHatch();
+            } else {
+                flower.set(Value.kForward);
+            }
         }
     }
 
@@ -136,9 +139,6 @@ public class GamePieceManipulator {
     }
 
     public void pushHatch() {
-        leftExtender.set(Value.kForward);
-        rightExtender.set(Value.kForward);
-
         if (extenderThread != null) {
             extenderThread.interrupt();
         }
@@ -146,12 +146,13 @@ public class GamePieceManipulator {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(200);
-                    leftExtender.set(Value.kReverse);
-                    rightExtender.set(Value.kReverse);
+                    Thread.sleep(150);
+                    extender.set(true);
+                    Thread.sleep(1000);
+                    extender.set(false);
                     extenderThread = null;
                 } catch (InterruptedException e) {
-                    Robot.logger.error("Extender Thread interrupted", e);
+                    Robot.logger.warn("Extender Thread interrupted", e);
                 }
             }
         };
