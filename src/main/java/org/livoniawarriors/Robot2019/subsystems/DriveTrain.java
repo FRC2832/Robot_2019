@@ -2,9 +2,14 @@ package org.livoniawarriors.Robot2019.subsystems;
 
 import com.ctre.phoenix.motorcontrol.SensorCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
+import jaci.pathfinder.Pathfinder;
+import jaci.pathfinder.Trajectory;
+import jaci.pathfinder.Waypoint;
+import jaci.pathfinder.followers.EncoderFollower;
+import jaci.pathfinder.modifiers.TankModifier;
 import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.ISubsystem;
 import org.livoniawarriors.Robot2019.Robot;
@@ -15,6 +20,7 @@ public class DriveTrain implements ISubsystem {
     private static final double WHEEL_DIAMETER = 8;
 
     private static final double ENCODER_RATIO = WHEEL_DIAMETER * Math.PI / TICKS_PER_ROTATION;
+    private final static double WHEEL_BASE_WIDTH = 2; // TODO: Fix
 
     public final static int DRIVE_MOTER_FL = 25;
     public final static int DRIVE_MOTER_FR = 10;
@@ -22,20 +28,40 @@ public class DriveTrain implements ISubsystem {
     public final static int DRIVE_MOTER_BR = 11;
 
     private DifferentialDrive drive;
-    private PowerDistributionPanel pdp;
     private SensorCollection rightEncoder, leftEncoder;
 
     private double prevPosLeft;
     private double prevPosRight;
+    Trajectory.Config pathConfig;
+    private boolean auto;
+    private double startTime;
 
     @Override
     public void csv(ICsvLogger csv) {
-        csv.log("Voltage", pdp.getVoltage());
+
     }
 
     @Override
     public void diagnose() {
 
+    }
+
+    /**
+     * Resumes an interrupted trajectory
+     */
+    public void resumeTrajectoy() {
+        if(!isTrajectoryDone())
+            auto = true;
+    }
+
+    public void startTrajectory(Trajectory trajectoryLeft, Trajectory trajectoryRight) {
+        auto = true;
+        leftFollower.setTrajectory(trajectoryLeft);
+        rightFollower.setTrajectory(trajectoryRight);
+    }
+
+    public Trajectory generateTrajectory(Waypoint[] waypoints) {
+        return Pathfinder.generate(waypoints, pathConfig);
     }
 
     @Override
@@ -54,7 +80,17 @@ public class DriveTrain implements ISubsystem {
         talonBackRight.setInverted(true);
 
         drive = new DifferentialDrive(talonFrontLeft, talonFrontRight);
-        pdp = new PowerDistributionPanel();
+        leftFollower = new EncoderFollower();
+        leftEncoder = talonBackLeft.getSensorCollection();
+        leftFollower.configureEncoder(leftEncoder.getQuadraturePosition(), TICKS_PER_ROTATION, WHEEL_DIAMETER);
+        leftFollower.configurePIDVA(P, I, D, 1/ MAX_VELOCITY, ACCELERATION_GAIN);
+        rightFollower = new EncoderFollower();
+        rightEncoder = talonBackRight.getSensorCollection();
+        rightFollower.configureEncoder(rightEncoder.getQuadraturePosition(), TICKS_PER_ROTATION, WHEEL_DIAMETER);
+        rightFollower.configurePIDVA(P, I, D, 1/ MAX_VELOCITY, ACCELERATION_GAIN);
+        leftFollower.setTrajectory(new Trajectory(0));
+        rightFollower.setTrajectory(new Trajectory(0));
+        pathConfig = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 0.05, 1.7, 2.0, 60.0); // Might need to convert to imperial
     }
 
 
@@ -63,19 +99,53 @@ public class DriveTrain implements ISubsystem {
     }
 
 
-    public void tankDrive(double left, double right, boolean squaredInputs) {
-        drive.tankDrive(left, right, squaredInputs); 
+    /**
+     * Drive forward for a time without anything fancy at all
+     * @param time to drive
+     * @param speed to drive
+     * @param reset encoder zero point
+     * @return completion
+     */
+    public boolean lazyDriveTime(float time, double speed, boolean reset) {
+        auto = false;
+        if(reset)
+            startTime = Timer.getFPGATimestamp();
+        if(startTime + time < Timer.getFPGATimestamp()) {
+            drive.tankDrive(0, 0);
+            return true;
+        }
+        else
+            drive.tankDrive(speed, speed);
+        return false;
+    }
+
+    public boolean isTrajectoryDone() {
+        return leftFollower.isFinished() && rightFollower.isFinished();
     }
 
     @Override
     public void update(boolean enabled) {
+        Robot.userInput.putValue("tab", "encoderL", leftEncoder.getQuadraturePosition());
+        Robot.userInput.putValue("tab", "encoderR", rightEncoder.getQuadraturePosition());
+
+        if(!enabled)
+            return;
+
+        if(auto && !isTrajectoryDone()) {
+            double l = leftFollower.calculate(leftEncoder.getQuadraturePosition());
+            double r = leftFollower.calculate(rightEncoder.getQuadraturePosition());
+
+            double angleDifference = Pathfinder.boundHalfDegrees(desired_heading - gyro_heading);
+            double turn = 0.8 * (-1.0 / 80.0) * angleDifference;
+
+            drive.tankDrive(l + turn, r - turn);
+        }
 
     }
 
     private double getEncoderInInches(SensorCollection encoder) {
         double raw = encoder.getQuadraturePosition();
         return raw * ENCODER_RATIO;
-
     }
 
     /**
