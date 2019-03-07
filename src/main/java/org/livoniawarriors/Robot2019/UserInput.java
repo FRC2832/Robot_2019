@@ -1,5 +1,6 @@
 package org.livoniawarriors.Robot2019;
 
+import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.networktables.NetworkTable;
@@ -95,6 +96,10 @@ public class UserInput implements ISubsystem {
                 Robot.logger.log(Level.DEBUG, "Can't update a null value to shuffleboard :who:");
             }
         }
+    }
+
+    public NetworkTableValue getNetworkTableValue(String title) {
+        return table.getEntry(title).getValue();
     }
 
     public void addOption(String name, String option, boolean defaultOption) {

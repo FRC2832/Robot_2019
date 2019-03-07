@@ -14,16 +14,13 @@ public class TestTeleopModule implements IControlModule {
     private double lStick;
     private double rStick;
     private double slider;
-    private boolean flightstickoMode;
-
 
     @Override
     public void init() {
         flightstickLeft = Robot.userInput.getController(Controllers.L_FLIGHTSTICK);
         flightstickRight = Robot.userInput.getController(Controllers.R_FLIGHTSTICK);
         driverXbox = Robot.userInput.getController(Controllers.TEST_XBOX);
-        flightstickoMode = true;
-        Robot.userInput.putValue("tab", "Controller Mode", 7, flightstickoMode);
+        Robot.userInput.putValue("tab", "Controller Mode", 7, true);
     }
 
     @Override
@@ -48,11 +45,11 @@ public class TestTeleopModule implements IControlModule {
     }
 
     public void updateControllers() {
-        if (flightstickoMode) {
+        if (Robot.userInput.getNetworkTableValue("Controller Mode").getBoolean()) {
             lStick = flightstickLeft.getJoystickY(Joystick.FLIGHTSTICK);
             rStick = flightstickRight.getJoystickY(Joystick.FLIGHTSTICK);
             if (flightstickRight.getButtonPressed(Button.THUMB)){
-                slider = flightstickRight.getOtherAxis(Robot.userInput.FLIPPER_AXIS);
+                slider = flightstickRight.getOtherAxis(UserInput.FLIPPER_AXIS);
                 lStick = lStick * slider;
                 rStick = rStick * slider;
             }
