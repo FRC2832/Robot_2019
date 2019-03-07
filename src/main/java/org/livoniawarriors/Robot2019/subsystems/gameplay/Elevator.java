@@ -12,17 +12,16 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import org.apache.logging.log4j.Level;
+import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
 import org.livoniawarriors.Robot2019.UserInput.Controllers;
-import org.livoniawarriors.Robot2019.UserInput;
 
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 
 /**
  * Elevator not-subsystem that includes a PID controller to control the elevator
@@ -128,7 +127,7 @@ public class Elevator implements PIDSource, PIDOutput {
             return;
         }
 
-        
+
         //PID Mode
         if (!manual && !pidController.isEnabled()) {
             pidController.enable();
@@ -158,15 +157,15 @@ public class Elevator implements PIDSource, PIDOutput {
         }
 
         //Manual Mode
-        if (controller.getOtherAxis(Robot.userInput.R_TRIGGER) != 0) {
-            elevatorMotor.set(controller.getOtherAxis(Robot.userInput.R_TRIGGER) * 1);
+        if (controller.getOtherAxis(UserInput.R_TRIGGER) != 0) {
+            elevatorMotor.set(controller.getOtherAxis(UserInput.R_TRIGGER) * 1);
             manual = true;
             if (pidController.isEnabled()) {
                 pidController.disable();
             }
             //System.out.println("Moving motor up forwards");
-        } else if (controller.getOtherAxis(Robot.userInput.L_TRIGGER) != 0) {
-            elevatorMotor.set(-1 * controller.getOtherAxis(Robot.userInput.L_TRIGGER) * 1);
+        } else if (controller.getOtherAxis(UserInput.L_TRIGGER) != 0) {
+            elevatorMotor.set(-1 * controller.getOtherAxis(UserInput.L_TRIGGER) * 1);
             manual = true;
             if (pidController.isEnabled()) {
                 pidController.disable();
@@ -175,12 +174,11 @@ public class Elevator implements PIDSource, PIDOutput {
         } else if (!pidController.isEnabled()) {
             elevatorMotor.set(0);
         }
-    
 
         //System.out.println("Current Elevator Height: " + getElevatorHeight());
-        Robot.userInput.createValue("John", "Elevator Height", getElevatorHeight());
-        Robot.userInput.createValue("John", "Set Height", currentSetHeight);
-        Robot.userInput.createValue("John", "PID", movingPID);
+        Robot.userInput.putValue("John", "Elevator Height", getElevatorHeight());
+        Robot.userInput.putValue("John", "Set Height", currentSetHeight.getHeight());
+        Robot.userInput.putValue("John", "PID", movingPID);
 
     }
 
@@ -188,7 +186,6 @@ public class Elevator implements PIDSource, PIDOutput {
     public void pidWrite(double output) {
         if (!manual) {
             elevatorMotor.set(output);
-            //System.out.println("Current motor output: " + output);
         }
     }
 
@@ -229,15 +226,13 @@ public class Elevator implements PIDSource, PIDOutput {
 
     }
 
+    void csv(ICsvLogger logger) {
+        logger.log("Elevator Height", getElevatorHeight());
+    }
+
     public void diagnose() {
         double testElevHeight = getElevatorHeight();
-        if (testElevHeight >= 0 && testElevHeight <= 100) {
-            System.out.println("Method getElevatorHeight() is reported as a success with the value of " + testElevHeight);
-            Robot.logger.log(Level.ERROR, String.format("Method getElevatorHeight() returned value {0} and did not detect failure", testElevHeight));
-        } else {
-            System.out.println("Method getElevatorHeight() is reported as a failure with the value of " + testElevHeight);
-            Robot.logger.log(Level.ERROR, String.format("Method getElevatorHeight() returned value {0} and DETECTED FAILURE!!!", testElevHeight));
-        }
-
+        if (testElevHeight == 0)
+            Robot.logger.log(Level.DEBUG, String.format("Method getElevatorHeight() returned value %s and DETECTED FAILURE!!!", testElevHeight));
     }
 }
