@@ -75,14 +75,14 @@ public class GamePieceManipulator {
         //Move intake motors
         if (intakeDown) {
             //Move Left Intake Motor
-            if (controller.getOtherAxis(1) != 0 /*&& !hasBall()*/) {    
+            if (controller.getOtherAxis(1) != 0 && !hasBall()) {    
                 leftIntakeMotor.set(controller.getOtherAxis(1)); 
             } else {
                 leftIntakeMotor.set(0);
 
             }
             //Move Right Intake Motor
-            if (controller.getOtherAxis(5) != 0 /*&& hasBall()*/) {
+            if (controller.getOtherAxis(5) != 0 && hasBall()) {
                 rightIntakeMotor.set(-1 * controller.getOtherAxis(5)); 
             } else {
                 rightIntakeMotor.set(0);
@@ -103,6 +103,10 @@ public class GamePieceManipulator {
         } 
         
         Robot.userInput.createValue("John", "Do I have a ball?", 2, hasBall());
+    }
+
+    public boolean doingBall() {
+        return intakeDown;
     }
 
     public boolean hasBall() {
