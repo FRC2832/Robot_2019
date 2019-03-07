@@ -29,6 +29,8 @@ public class UserInput implements ISubsystem {
     private NetworkTable table;
     private SendableChooser<String> chooser;
     private HashMap<String, Integer> tableEntries;    
+    private int i = 0;
+    private int currentI;
 
 
     public Object getSelected() {
@@ -72,16 +74,17 @@ public class UserInput implements ISubsystem {
     public void csv(ICsvLogger csv) {
 
     }
-
-    public void createValue(String selectedTab, String title, int handle, Object value) {
+    
+    public void createValue(String selectedTab, String title, Object value) {
+        currentI = i++;
         if (tableEntries.containsKey(title)){
             if (null != selectedTab && null != title && null != value){
                 ShuffleboardTab currentTab = Shuffleboard.getTab(selectedTab);
-                NetworkTableEntry currentEntry = new NetworkTableEntry(inst, handle);
+                NetworkTableEntry currentEntry = new NetworkTableEntry(inst, currentI);
                 currentEntry.setValue(value);
                 currentEntry = table.getEntry(title);
                 currentEntry = currentTab.add(title, value).getEntry();
-                tableEntries.put(title, handle);
+                tableEntries.put(title, currentI);
             }
             else {
                 Robot.logger.log(Level.DEBUG, "Null value added to shuffleboard. ID10T error.");

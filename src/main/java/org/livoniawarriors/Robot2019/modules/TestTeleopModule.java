@@ -25,7 +25,7 @@ public class TestTeleopModule implements IControlModule {
         flightstickRight = Robot.userInput.getController(Controllers.R_FLIGHTSTICK);
         driverXbox = Robot.userInput.getController(Controllers.TEST_XBOX);
         flightstickoMode = true;
-        Robot.userInput.createValue("tab", "Controller Mode", 7, flightstickoMode);
+        Robot.userInput.createValue("tab", "Controller Mode", flightstickoMode);
     }
 
     @Override
