@@ -28,10 +28,6 @@ public class TestTeleopModule implements IControlModule {
         Robot.userInput.createValue("tab", "Controller Mode", 7, flightstickoMode);
     }
 
-    public void myTeleopInit() {
-
-    }
-
     @Override
     public void start() {
 
