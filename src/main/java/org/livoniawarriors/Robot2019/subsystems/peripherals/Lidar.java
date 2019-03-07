@@ -1,14 +1,11 @@
 package org.livoniawarriors.Robot2019.subsystems.peripherals;
 
 import edu.wpi.first.wpilibj.Notifier;
-import edu.wpi.first.wpilibj.PIDBase;
-import edu.wpi.first.wpilibj.PIDController;
+import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.Robot;
 
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.stream.Collectors;
 
 public class Lidar {
 
@@ -20,12 +17,14 @@ public class Lidar {
     private Transform transform;
     private BufferedReader input;
     private BufferedWriter output;
-    private Notifier notifier;
+    private Notifier connectNotifier, updateNotifier;
 
     public Lidar() {
         transform = new Transform();
-        notifier = new Notifier(this::tryConnect);
-        notifier.startPeriodic(CONNECT_ATTEMPT_DELAY);
+        connectNotifier = new Notifier(this::tryConnect);
+        connectNotifier.startPeriodic(CONNECT_ATTEMPT_DELAY);
+        updateNotifier = new Notifier(this::update);
+        updateNotifier.startPeriodic(0.05);
     }
 
     private void tryConnect() {
@@ -34,11 +33,15 @@ public class Lidar {
             input = new BufferedReader(new InputStreamReader(client.getInputStream()));
             output = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
         } catch (IOException e) {
-            Robot.logger.error("Couldn't connect to LIDAR", e);
+            //Robot.logger.error("Couldn't connect to LIDAR");
         }
     }
 
-    public void update() {
+    void csv(ICsvLogger logger) {
+        logger.log("Lidar On", client != null);
+    }
+
+    private void update() {
         if(client != null) {
             try {
                 String line;
@@ -113,6 +116,6 @@ public class Lidar {
     public void dispose() throws IOException {
         if(client != null)
             client.close();
-        notifier.close();
+        connectNotifier.close();
     }
 }

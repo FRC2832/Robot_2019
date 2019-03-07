@@ -1,8 +1,8 @@
 package org.livoniawarriors.Robot2019;
 
+import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.drive.Vector2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -28,7 +28,9 @@ public class UserInput implements ISubsystem {
     private NetworkTableInstance inst;
     private NetworkTable table;
     private SendableChooser<String> chooser;
-    private HashMap<String, Integer> tableEntries;    
+    private HashMap<String, Integer> tableEntries;
+    private int i = 0;
+    private int currentI;
 
 
     public Object getSelected() {
@@ -73,15 +75,16 @@ public class UserInput implements ISubsystem {
 
     }
 
-    public void createValue(String selectedTab, String title, int handle, Object value) {
+    public void putValue(String selectedTab, String title, Object value) {
+        currentI = i++;
         if (tableEntries.containsKey(title)){
             if (null != selectedTab && null != title && null != value){
                 ShuffleboardTab currentTab = Shuffleboard.getTab(selectedTab);
-                NetworkTableEntry currentEntry = new NetworkTableEntry(inst, handle);
+                NetworkTableEntry currentEntry = new NetworkTableEntry(inst, currentI);
                 currentEntry.setValue(value);
                 currentEntry = table.getEntry(title);
                 currentEntry = currentTab.add(title, value).getEntry();
-                tableEntries.put(title, handle);
+                tableEntries.put(title, currentI);
             }
             else {
                 Robot.logger.log(Level.DEBUG, "Null value added to shuffleboard. ID10T error.");
@@ -96,6 +99,10 @@ public class UserInput implements ISubsystem {
                 Robot.logger.log(Level.DEBUG, "Can't update a null value to shuffleboard :who:");
             }
         }
+    }
+
+    public NetworkTableValue getNetworkTableValue(String title) {
+        return table.getEntry(title).getValue();
     }
 
     public void addOption(String name, String option, boolean defaultOption) {
@@ -256,7 +263,7 @@ public class UserInput implements ISubsystem {
      */
     public static class JoystickMapping {
         private int x, y;
-        
+
         private JoystickMapping(int x, int y) {
             this.x = x;
             this.y = y;
@@ -272,8 +279,8 @@ public class UserInput implements ISubsystem {
     }
 
     public enum Joystick {
-        LEFT(new JoystickMapping(0,1)), 
-        RIGHT(new JoystickMapping(4,5)), 
+        LEFT(new JoystickMapping(0,1)),
+        RIGHT(new JoystickMapping(4,5)),
         FLIGHTSTICK(new JoystickMapping(0,1));
 
         private final JoystickMapping value;
