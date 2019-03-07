@@ -87,8 +87,13 @@ public class PeripheralSubsystem implements ISubsystem {
 
     public double getYaw() {
         //returns the yaw; copy method and change array element to get pitch or roll
-        pigeon.getYawPitchRoll(yawPitchRoll);
-        return yawPitchRoll[0];
+        if(pigeon != null) {
+            pigeon.getYawPitchRoll(yawPitchRoll);
+            return yawPitchRoll[0];
+        } else {
+            Robot.logger.log(Level.ERROR, "No pigeon exists");
+            return 0;
+        }
     }
 
 

@@ -92,6 +92,7 @@ public class DriveTrain implements ISubsystem {
         }
         //Using left encoder
         if(enc - prevPosLeft >= distance) {
+            tankDrive(0,0);
             return true;
         } else {
             tankDrive(0.8, 0.8);
@@ -132,7 +133,7 @@ public class DriveTrain implements ISubsystem {
     public double deadReckon(double startPos, long startTime) {
         double velocity = leftEncoder.getQuadratureVelocity() * 10;
         double velocityINpS = velocity * ENCODER_RATIO;
-        long changeTime = System.nanoTime() - startTime;
+        double changeTime = System.nanoTime() - startTime / 1000000;
         return velocityINpS * changeTime;
     }
 
