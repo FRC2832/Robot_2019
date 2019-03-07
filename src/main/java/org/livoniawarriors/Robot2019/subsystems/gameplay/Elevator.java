@@ -157,15 +157,15 @@ public class Elevator implements PIDSource, PIDOutput {
         }
 
         //Manual Mode
-        if (controller.getOtherAxis(Robot.userInput.R_TRIGGER) != 0) {
-            elevatorMotor.set(controller.getOtherAxis(Robot.userInput.R_TRIGGER) * 1);
+        if (controller.getOtherAxis(UserInput.R_TRIGGER) != 0) {
+            elevatorMotor.set(controller.getOtherAxis(UserInput.R_TRIGGER) * 1);
             manual = true;
             if (pidController.isEnabled()) {
                 pidController.disable();
             }
             //System.out.println("Moving motor up forwards");
-        } else if (controller.getOtherAxis(Robot.userInput.L_TRIGGER) != 0) {
-            elevatorMotor.set(-1 * controller.getOtherAxis(Robot.userInput.L_TRIGGER) * 1);
+        } else if (controller.getOtherAxis(UserInput.L_TRIGGER) != 0) {
+            elevatorMotor.set(-1 * controller.getOtherAxis(UserInput.L_TRIGGER) * 1);
             manual = true;
             if (pidController.isEnabled()) {
                 pidController.disable();
