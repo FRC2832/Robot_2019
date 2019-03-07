@@ -33,7 +33,7 @@ public class FullyAutonModule implements IControlModule {
     private void updateState(boolean changed) {
         switch (state) {
             case 0:
-                if(Robot.driveTrain.lazyDriveTime(2, 0.7, changed))
+                if(Robot.driveTrain.lazyDriveTime(1, -0.8, changed))
                     ;//incrementState();
                 break;
             case 1:

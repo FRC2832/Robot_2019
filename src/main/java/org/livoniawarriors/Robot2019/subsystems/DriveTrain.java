@@ -138,8 +138,8 @@ public class DriveTrain implements ISubsystem {
 
     @Override
     public void update(boolean enabled) {
-        Robot.userInput.putValue("Me", "encoderL", 2, leftEncoder.getQuadraturePosition());
-        Robot.userInput.putValue("Me", "encoderR", 2, rightEncoder.getQuadraturePosition());
+        Robot.userInput.putValue("tab", "encoderL", 5, leftEncoder.getQuadraturePosition());
+        Robot.userInput.putValue("tab", "encoderR", 6, rightEncoder.getQuadraturePosition());
 
         if(!enabled)
             return;
