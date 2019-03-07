@@ -17,13 +17,11 @@ import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
 import org.livoniawarriors.Robot2019.UserInput.Controllers;
-import org.livoniawarriors.Robot2019.UserInput;
 
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 
 /**
  * Elevator not-subsystem that includes a PID controller to control the elevator
@@ -178,9 +176,9 @@ public class Elevator implements PIDSource, PIDOutput {
         }
 
         //System.out.println("Current Elevator Height: " + getElevatorHeight());
-        Robot.userInput.createValue("John", "Elevator Height", 2, getElevatorHeight());
-        Robot.userInput.createValue("John", "Set Height", 2, currentSetHeight);
-        Robot.userInput.createValue("John", "PID", 2, movingPID);
+        Robot.userInput.putValue("John", "Elevator Height", 2, getElevatorHeight());
+        Robot.userInput.putValue("John", "Set Height", 2, currentSetHeight);
+        Robot.userInput.putValue("John", "PID", 2, movingPID);
 
     }
 

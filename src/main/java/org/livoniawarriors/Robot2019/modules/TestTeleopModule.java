@@ -1,13 +1,11 @@
 package org.livoniawarriors.Robot2019.modules;
 
-import edu.wpi.first.wpilibj.GenericHID;
 import org.livoniawarriors.Robot2019.IControlModule;
 import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
 import org.livoniawarriors.Robot2019.UserInput.Controllers;
 import org.livoniawarriors.Robot2019.UserInput.Joystick;
-import org.livoniawarriors.Robot2019.ControlMapping;
 
 public class TestTeleopModule implements IControlModule {
     private UserInput.Controller flightstickLeft;
@@ -25,7 +23,7 @@ public class TestTeleopModule implements IControlModule {
         flightstickRight = Robot.userInput.getController(Controllers.R_FLIGHTSTICK);
         driverXbox = Robot.userInput.getController(Controllers.TEST_XBOX);
         flightstickoMode = true;
-        Robot.userInput.createValue("tab", "Controller Mode", 7, flightstickoMode);
+        Robot.userInput.putValue("tab", "Controller Mode", 7, flightstickoMode);
     }
 
     @Override

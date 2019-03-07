@@ -114,7 +114,6 @@ public class JeVois {
                         } catch (Exception e1) {
 
                         }
-                        Robot.logger.log(Level.INFO, "Retry " + Integer.toString(retry_counter));
                     }
                 }
 
