@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.ISubsystem;
+import org.livoniawarriors.Robot2019.Robot;
 
 public class DriveTrain implements ISubsystem {
 
@@ -96,6 +97,43 @@ public class DriveTrain implements ISubsystem {
             tankDrive(0.8, 0.8);
             return false;
         }
+    }
+
+    /**
+     * Turns to a given angle by comparing position to starting angle
+     * @param angle the turn angle desired
+     * @return true when turning is complete
+     */
+    public boolean turnLazy(double angle) {
+        double start = Robot.peripheralSubsystem.getYaw();
+        if(angle < 0) { //We want to turn right
+            if(Math.abs(start) < Math.abs(angle)) {
+                tankDrive(0.6, -0.6); //Turn right
+                return false;
+            } else {
+                return true; //Done turning
+            }
+        } else { //We want to turn left
+            if(Math.abs(start) < Math.abs(angle)) {
+                tankDrive(-0.6, 0.6); //Turn left
+                return false;
+            } else {
+                return true; //Done turning
+            }
+        }
+    }
+
+    /**
+     * Get the current position in inches based on change in velocity over given time, retrieved from encoders
+     * @param startPos the starting position, from which to count
+     * @param startTime the time from which to start measuring
+     * @return position in inches
+     */
+    public double deadReckon(double startPos, long startTime) {
+        double velocity = leftEncoder.getQuadratureVelocity() * 10;
+        double velocityINpS = velocity * ENCODER_RATIO;
+        long changeTime = System.nanoTime() - startTime;
+        return velocityINpS * changeTime;
     }
 
     @Override
