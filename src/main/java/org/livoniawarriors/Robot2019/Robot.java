@@ -224,7 +224,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         if(activeModule != null)
-            userInput.putValue("tab", "Active Module", 3, activeModule.getClass().getSimpleName());
+            userInput.putValue("tab", "Active Module", activeModule.getClass().getSimpleName());
     }
 
     @Override

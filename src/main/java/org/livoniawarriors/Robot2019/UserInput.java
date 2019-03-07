@@ -29,7 +29,6 @@ public class UserInput implements ISubsystem {
     private NetworkTable table;
     private SendableChooser<String> chooser;
     private HashMap<String, Integer> tableEntries;
-    private HashMap<String, Integer> tableEntries;
     private int i = 0;
     private int currentI;
 
@@ -76,9 +75,7 @@ public class UserInput implements ISubsystem {
 
     }
 
-    public void putValue(String selectedTab, String title, int handle, Object value) {
-
-    public void createValue(String selectedTab, String title, Object value) {
+    public void putValue(String selectedTab, String title, Object value) {
         currentI = i++;
         if (tableEntries.containsKey(title)){
             if (null != selectedTab && null != title && null != value){
