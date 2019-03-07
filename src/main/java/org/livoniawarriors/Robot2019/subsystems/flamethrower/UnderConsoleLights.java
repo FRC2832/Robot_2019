@@ -9,7 +9,6 @@ import java.lang.Math;
 public class UnderConsoleLights {
     private ArrayList<LightDrive> lightDrives = new ArrayList<>();
     private final int NUM_DRIVES = 1;
-
     //TODO: add appropriate number of drives
 
     public UnderConsoleLights() {
@@ -20,11 +19,23 @@ public class UnderConsoleLights {
 
     public void changeColor(Color color) {
         for(LightDrive ld : lightDrives) {
+            if(ld == null) {
+                continue;
+            }
             ld.setColor(1, color);
             ld.setColor(2, color);
             ld.setColor(3, color);
             ld.setColor(4, color);
             ld.update();
+        }
+    }
+
+    public void closeNotifier(){
+        for(LightDrive ld : lightDrives) {
+            if(ld == null) {
+                continue;
+            }
+            ld.closeNotifier();
         }
     }
 
@@ -47,8 +58,11 @@ public class UnderConsoleLights {
         if(DriverStation.getInstance().getAlliance().equals(DriverStation.Alliance.Blue)) {
             blueLights();
         }
-        else {
+        else if(DriverStation.getInstance().getAlliance().equals(DriverStation.Alliance.Red)){
             redLights();
+        }
+        else {
+            greenLights();
         }
     }
 

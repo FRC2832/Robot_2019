@@ -11,7 +11,6 @@ public class FlameThrower implements ISubsystem {
     public void init() {
         lightsConsole = new UnderConsoleLights();
         lightsConsole.greenLights();
-
     }
 
     @Override
@@ -31,7 +30,7 @@ public class FlameThrower implements ISubsystem {
 
     @Override
     public void dispose() throws Exception {
-
+        lightsConsole.closeNotifier();
     }
 
     @Override
