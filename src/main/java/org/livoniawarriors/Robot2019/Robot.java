@@ -207,6 +207,7 @@ public class Robot extends TimedRobot {
         // Initialize module stuffs
         subsystems = new ArrayList<>();
         modules = new LinkedHashMap<>();
+        CameraServer.getInstance().startAutomaticCapture();
 
         // Register stuff
         register();
