@@ -31,7 +31,7 @@ public class TestTeleopModule implements IControlModule {
     @Override
     public void update() {
        updateControllers();
-       Robot.driveTrain.tankDrive(lStick, rStick);
+       Robot.driveTrain.tankDrive(lStick, rStick, false);
     }
 
     @Override

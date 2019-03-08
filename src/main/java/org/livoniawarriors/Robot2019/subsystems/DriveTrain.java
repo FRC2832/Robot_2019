@@ -1,5 +1,6 @@
 package org.livoniawarriors.Robot2019.subsystems;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SensorCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.Timer;
@@ -38,6 +39,11 @@ public class DriveTrain implements ISubsystem {
     private boolean auto;
     private double startTime;
 
+    WPI_TalonSRX talonFrontLeft;
+    WPI_TalonSRX talonFrontRight;
+    WPI_TalonSRX talonBackLeft;
+    WPI_TalonSRX talonBackRight;
+
     @Override
     public void csv(ICsvLogger csv) {
 
@@ -68,10 +74,10 @@ public class DriveTrain implements ISubsystem {
 
     @Override
     public void init() {
-        WPI_TalonSRX talonFrontLeft = new WPI_TalonSRX(DRIVE_MOTER_FL);
-        WPI_TalonSRX talonFrontRight = new WPI_TalonSRX(DRIVE_MOTER_FR);
-        WPI_TalonSRX talonBackLeft = new WPI_TalonSRX(DRIVE_MOTER_BL);
-        WPI_TalonSRX talonBackRight = new WPI_TalonSRX(DRIVE_MOTER_BR);
+        talonFrontLeft = new WPI_TalonSRX(DRIVE_MOTER_FL);
+        talonFrontRight = new WPI_TalonSRX(DRIVE_MOTER_FR);
+        talonBackLeft = new WPI_TalonSRX(DRIVE_MOTER_BL);
+        talonBackRight = new WPI_TalonSRX(DRIVE_MOTER_BR);
         talonBackLeft.follow(talonFrontLeft);
         talonBackRight.follow(talonFrontRight);
         talonFrontLeft.setInverted(true);
@@ -138,6 +144,10 @@ public class DriveTrain implements ISubsystem {
 
     @Override
     public void update(boolean enabled) {
+        talonBackLeft.setNeutralMode(enabled ? NeutralMode.Brake : NeutralMode.Coast);
+        talonBackRight.setNeutralMode(enabled ? NeutralMode.Brake : NeutralMode.Coast);
+        talonFrontLeft.setNeutralMode(enabled ? NeutralMode.Brake : NeutralMode.Coast);
+        talonFrontRight.setNeutralMode(enabled ? NeutralMode.Brake : NeutralMode.Coast);
         Robot.userInput.putValue("tab", "encoderL", leftEncoder.getQuadraturePosition());
         Robot.userInput.putValue("tab", "encoderR", rightEncoder.getQuadraturePosition());
 

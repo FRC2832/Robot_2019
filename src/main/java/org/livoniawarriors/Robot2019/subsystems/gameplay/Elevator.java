@@ -190,7 +190,7 @@ public class Elevator implements PIDSource, PIDOutput {
         Robot.userInput.putValue("John", "Elevator Height", getElevatorHeight());
         Robot.userInput.putValue("John", "Set Height", currentSetHeight.getHeight());
         Robot.userInput.putValue("John", "PID", movingPID);
-
+        Robot.userInput.putValue("John", "raw elevator", elevatorMotor.getEncoder().getPosition());
     }
 
     @Override
