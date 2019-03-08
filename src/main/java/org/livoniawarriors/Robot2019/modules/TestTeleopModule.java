@@ -64,7 +64,7 @@ public class TestTeleopModule implements IControlModule {
         }
         else {
             lStick = driverXbox.getJoystickY(Joystick.LEFT);
-            rStick = driverXbox.getJoystickX(Joystick.RIGHT);
+            rStick = driverXbox.getJoystickY(Joystick.RIGHT);
         }
     }
 }

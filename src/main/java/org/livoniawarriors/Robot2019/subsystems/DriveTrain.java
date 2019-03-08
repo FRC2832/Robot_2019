@@ -78,7 +78,7 @@ public class DriveTrain implements ISubsystem {
         talonFrontRight.setInverted(true);
         talonBackLeft.setInverted(true);
         talonBackRight.setInverted(true);
-        drive = new DifferentialDrive(talonFrontLeft, talonFrontRight);
+        drive = new DifferentialDrive(talonFrontRight, talonFrontLeft);
         leftFollower = new EncoderFollower();
         leftEncoder = talonBackLeft.getSensorCollection();
         leftFollower.configureEncoder(leftEncoder.getQuadraturePosition(), TICKS_PER_ROTATION, WHEEL_DIAMETER);

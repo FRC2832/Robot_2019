@@ -74,7 +74,7 @@ public class Robot extends TimedRobot {
         registerSubsystem(peripheralSubsystem = new PeripheralSubsystem());
         registerSubsystem(userInput = new UserInput());
         registerSubsystem(driveTrain = new DriveTrain());
-        registerSubsystem(flameThrower = new FlameThrower());
+        //registerSubsystem(flameThrower = new FlameThrower());
         registerSubsystem(gamePlay = new GamePlay());
         registerControlModule(new FullyAutonModule());
         registerControlModule(new TestAutonModule());
@@ -103,7 +103,7 @@ public class Robot extends TimedRobot {
         if (subsystems.contains(subsystem))
             logger.error("Duplicate registration of subsystem: " + subsystem.getClass().getName()); //
         subsystems.add(subsystem);
-        subsytemNotifiers.add(new Notifier(() -> {
+        Notifier notifier = new Notifier(() -> {
             try {
                 var startTime = System.currentTimeMillis();
                 subsystem.update(isEnabled());
@@ -114,7 +114,8 @@ public class Robot extends TimedRobot {
             } catch (Throwable t) {
                 logger.error(subsystem.getClass().getSimpleName(), t);
             }
-        }));
+        });
+        subsytemNotifiers.add(notifier);
     }
 
     private void setDefaultModule(IControlModule module) {
@@ -227,6 +228,9 @@ public class Robot extends TimedRobot {
 
         // Start csv logging
         csvNotifier.startPeriodic(CSV_UPDATE_PERIOD);
+
+        // Start updating subsystems
+        subsytemNotifiers.forEach(notifier -> notifier.startPeriodic(0.05));
 
         // Start diagnosing
         diagnosticNotifier.startPeriodic(DIAGNOSTIC_PERIOD);
