@@ -65,7 +65,7 @@ public class GamePieceManipulator {
         intakeDown = false; //TODO: find out if intake starts up or down
 
         tilter.set(Value.kReverse);
-        flower.set(Value.kReverse);
+        flower.set(Value.kForward);
     }
 
     public void update(boolean isEnabled) {

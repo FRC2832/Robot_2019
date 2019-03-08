@@ -87,7 +87,7 @@ public class UserInput implements ISubsystem {
     }
 
     public NetworkTableValue getNetworkTableValue(String title) {
-        return table.getEntry(title).getValue();
+        return tableEntries.get(title).getValue();
     }
 
     public void addOption(String name, String option, boolean defaultOption) {
