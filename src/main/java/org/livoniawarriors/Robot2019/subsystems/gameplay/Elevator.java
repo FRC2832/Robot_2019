@@ -196,10 +196,11 @@ public class Elevator implements PIDSource, PIDOutput {
     @Override
     public void pidWrite(double output) {
         if (!manual) {
-            if(output < 0 && lowerLimit.get()) 
-                elevatorMotor.set(0);
-            else            
-                elevatorMotor.set(output);
+            if(output < 0 && lowerLimit.get()) { 
+                //elevatorMotor.set(0);
+            } else {           
+                //elevatorMotor.set(output);
+            }
         }
     }
 
