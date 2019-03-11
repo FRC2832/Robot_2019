@@ -22,11 +22,11 @@ import org.livoniawarriors.Robot2019.Robot;
 
 public class DriveTrain implements ISubsystem {
 
-    private final static int TICKS_PER_ROTATION = 2540; //TODO: Fix
-    private final static double WHEEL_DIAMETER = 8 * Math.PI; //TODO: Fix
-    private final static double WHEEL_BASE_WIDTH = 2; // TODO: Fix
+    private final static int TICKS_PER_ROTATION = 2540;
+    private final static double WHEEL_DIAMETER = 8;
+    private final static double WHEEL_BASE_WIDTH = 2;
 
-    private final static double P = 1; //TODO: Figure out these values
+    private final static double P = 1;
     private final static double I = 0;
     private final static double D = 0;
     private final static double MAX_VELOCITY = 1;
@@ -41,6 +41,7 @@ public class DriveTrain implements ISubsystem {
     private DifferentialDrive drive;
     private EncoderFollower leftFollower;
     private EncoderFollower rightFollower;
+    private int encoderOffsetRight, encoderOffsetLeft;
     private SensorCollection rightEncoder, leftEncoder;
     Trajectory.Config pathConfig;
     private boolean auto;
@@ -92,22 +93,24 @@ public class DriveTrain implements ISubsystem {
         });
         encoderPoller = new Notifier(this::pollEncoders);
         encoderPoller.startPeriodic(ENCODER_POLL_RATE);
-        drive = new DifferentialDrive(talonFrontRight, talonFrontLeft);
+        drive = new DifferentialDrive(talonFrontLeft, talonFrontRight);
         leftFollower = new EncoderFollower();
-        leftEncoder = talonBackLeft.getSensorCollection();
+        leftEncoder = talonFrontLeft.getSensorCollection();
         leftFollower.configureEncoder(leftEncoder.getQuadraturePosition(), TICKS_PER_ROTATION, WHEEL_DIAMETER);
         leftFollower.configurePIDVA(P, I, D, 1/ MAX_VELOCITY, ACCELERATION_GAIN);
         rightFollower = new EncoderFollower();
-        rightEncoder = talonBackRight.getSensorCollection();
+        rightEncoder = talonFrontRight.getSensorCollection();
         rightFollower.configureEncoder(rightEncoder.getQuadraturePosition(), TICKS_PER_ROTATION, WHEEL_DIAMETER);
         rightFollower.configurePIDVA(P, I, D, 1/ MAX_VELOCITY, ACCELERATION_GAIN);
         leftFollower.setTrajectory(new Trajectory(0));
         rightFollower.setTrajectory(new Trajectory(0));
+        encoderOffsetLeft = leftEncoder.getQuadraturePosition();
+        encoderOffsetRight = rightEncoder.getQuadraturePosition();
         pathConfig = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 0.05, 1.7, 2.0, 60.0); // Might need to convert to imperial
     }
 
     private void pollEncoders() {
-        encoderLastLeft = leftEncoder.getQuadraturePosition();
+        encoderLastLeft = -leftEncoder.getQuadraturePosition();
         encoderLastRight = rightEncoder.getQuadraturePosition();
     }
 
@@ -157,16 +160,16 @@ public class DriveTrain implements ISubsystem {
 
     @Override
     public void update(boolean enabled) {
-        talons.forEach(talon -> talon.setNeutralMode(enabled ? NeutralMode.Brake : NeutralMode.Coast));
-        Robot.userInput.putValue("tab", "encoderL", getEncoderPosition(false));
-        Robot.userInput.putValue("tab", "encoderR", getEncoderPosition(true));
+        talons.forEach(talon -> talon.setNeutralMode(false ? NeutralMode.Brake : NeutralMode.Coast));
+        Robot.userInput.putValue("tab", "encoderL", getEncoderPos(false));
+        Robot.userInput.putValue("tab", "encoderR", getEncoderPos(true));
 
         if(!enabled)
             return;
 
         if(auto && !isTrajectoryDone()) {
-            double l = leftFollower.calculate(getEncoderPosition(false));
-            double r = leftFollower.calculate(getEncoderPosition(true));
+            double l = leftFollower.calculate(getEncoderRaw(false));
+            double r = leftFollower.calculate(getEncoderRaw(true));
 
             double gyro_heading = Robot.peripheralSubsystem.getYaw();
             double desired_heading = Pathfinder.r2d(leftFollower.getHeading());  // Should also be in degrees
@@ -178,8 +181,12 @@ public class DriveTrain implements ISubsystem {
         }
     }
 
-    private int getEncoderPosition(boolean right) {
-        return right ? encoderLastRight : encoderLastLeft;
+    private int getEncoderRaw(boolean right) {
+        return right ? encoderLastRight : encoderLastLeft - (right ? encoderOffsetRight : encoderOffsetLeft);
+    }
+
+    private double getEncoderPos(boolean right) {
+        return getEncoderRaw(right) / (double)TICKS_PER_ROTATION * Math.PI * WHEEL_DIAMETER;
     }
 
     @Override

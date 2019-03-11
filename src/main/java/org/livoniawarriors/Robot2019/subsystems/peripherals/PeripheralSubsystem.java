@@ -30,7 +30,7 @@ public class PeripheralSubsystem implements ISubsystem {
     private static final int PIGEON_PORT = 11;
     private JeVois jeVois;
     private AnalogInput pressureSensor;
-    private double startingYaw;
+    //private double startingYaw;
     private final static int BOTTOM_OUT_PIN = 0;
 
     private Compressor compressor;
@@ -47,7 +47,7 @@ public class PeripheralSubsystem implements ISubsystem {
     public void init() {
         lidar = new Lidar();
         loadMonitor = new CasseroleRIOLoadMonitor();
-        pigeon = new PigeonIMU(PIGEON_PORT);
+        //pigeon = new PigeonIMU(PIGEON_PORT);
         pressureSensor = new AnalogInput(PRESSURE_SENSOR_PORT);
         compressor = new Compressor();
         compressor.start();
@@ -63,13 +63,13 @@ public class PeripheralSubsystem implements ISubsystem {
             digitBoard.display(value.toString());
         });
         notifier.startPeriodic(REV_ROBOTICS_DIGIT_MXP_DISPLAY_UPDATE_PERIOD);
-        startingYaw = getYaw();
+        //startingYaw = getYaw();
         bottomOut = new DigitalInput(BOTTOM_OUT_PIN);
     }
 
     @Override
     public void update(boolean enabled) {
-        Robot.userInput.putValue("tab", "Yaw", getYaw());
+        //Robot.userInput.putValue("tab", "Yaw", getYaw());
         //digitBoard.display(Double.toString(getPressure()));
         /*System.out.println("==============+++==============");
         System.out.print("Vision Online: ");
@@ -98,7 +98,7 @@ public class PeripheralSubsystem implements ISubsystem {
     public void csv(ICsvLogger csv) {
         csv.log("Memory Usage", loadMonitor.getMemLoadPct());
         csv.log("Cpu Usage", loadMonitor.getCPULoadPct());
-        csv.log("Yaw", getYaw());
+        //csv.log("Yaw", getYaw());
     }
 
     @Override
@@ -108,8 +108,9 @@ public class PeripheralSubsystem implements ISubsystem {
 
     public double getYaw() {
         //returns the yaw; copy method and change array element to get pitch or roll
-        pigeon.getYawPitchRoll(yawPitchRoll);
-        return yawPitchRoll[0] - startingYaw;
+        //pigeon.getYawPitchRoll(yawPitchRoll);
+        //return yawPitchRoll[0] - startingYaw;
+        return 0;
     }
 
     public double getPressure() {

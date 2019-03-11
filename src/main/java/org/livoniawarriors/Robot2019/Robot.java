@@ -1,6 +1,8 @@
 package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -246,6 +248,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledInit() {
+        Shuffleboard.stopRecording();
         if (activeModule != null) {
             stopModule(activeModule);
             activeModule = null;
@@ -258,6 +261,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
+        Shuffleboard.startRecording();
         activeModule = defaultModule;
         startModule(activeModule);
     }
@@ -318,6 +322,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
+        Shuffleboard.startRecording();
         if (activeModule != telepModule) {
             if (activeModule != null)
                 stopModule(activeModule);
