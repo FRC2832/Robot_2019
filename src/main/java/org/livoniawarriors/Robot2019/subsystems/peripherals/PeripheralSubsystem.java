@@ -27,7 +27,7 @@ public class PeripheralSubsystem implements ISubsystem {
     private double[] yawPitchRoll = new double[3];
 
     private static final int PRESSURE_SENSOR_PORT = 1;
-    private static final int PIGEON_PORT = 24;
+    private static final int PIGEON_PORT = 11;
     private JeVois jeVois;
     private AnalogInput pressureSensor;
     private double startingYaw;
@@ -69,6 +69,7 @@ public class PeripheralSubsystem implements ISubsystem {
 
     @Override
     public void update(boolean enabled) {
+        Robot.userInput.putValue("tab", "Yaw", getYaw());
         //digitBoard.display(Double.toString(getPressure()));
         /*System.out.println("==============+++==============");
         System.out.print("Vision Online: ");
@@ -97,6 +98,7 @@ public class PeripheralSubsystem implements ISubsystem {
     public void csv(ICsvLogger csv) {
         csv.log("Memory Usage", loadMonitor.getMemLoadPct());
         csv.log("Cpu Usage", loadMonitor.getCPULoadPct());
+        csv.log("Yaw", getYaw());
     }
 
     @Override

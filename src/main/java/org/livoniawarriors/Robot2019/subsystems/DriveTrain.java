@@ -1,9 +1,13 @@
 package org.livoniawarriors.Robot2019.subsystems;
 
+import java.util.Arrays;
+import java.util.List;
+
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SensorCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PIDSourceType;
+
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
@@ -12,7 +16,6 @@ import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
 import jaci.pathfinder.followers.EncoderFollower;
 import jaci.pathfinder.modifiers.TankModifier;
-import org.livoniawarriors.Robot2019.Helpers;
 import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.ISubsystem;
 import org.livoniawarriors.Robot2019.Robot;
@@ -26,16 +29,14 @@ public class DriveTrain implements ISubsystem {
     private final static double P = 1; //TODO: Figure out these values
     private final static double I = 0;
     private final static double D = 0;
-    private final static double P_TURN = 1;
-    private final static double I_TURN = 0;
-    private final static double D_TURN = 0;
     private final static double MAX_VELOCITY = 1;
     private final static double ACCELERATION_GAIN = 0;
     public final static int DRIVE_MOTER_FL = 25;
     public final static int DRIVE_MOTER_FR = 10;
     public final static int DRIVE_MOTER_BL = 24;
     public final static int DRIVE_MOTER_BR = 11;
-    private final static double TURN_TOLERANCE = 0.5;
+    private final static double ENCODER_POLL_RATE = 0.1d;
+    private final static double TALON_EXPERIATION_TIME = 0.1;
 
     private DifferentialDrive drive;
     private EncoderFollower leftFollower;
@@ -43,8 +44,10 @@ public class DriveTrain implements ISubsystem {
     private SensorCollection rightEncoder, leftEncoder;
     Trajectory.Config pathConfig;
     private boolean auto;
-    private double startTime, startEncoderL, startEncoderR, targetYaw;
-    private PIDController turnController, distController;
+    private double startTime;
+    private int encoderLastLeft, encoderLastRight;
+    private Notifier encoderPoller;
+    private List<WPI_TalonSRX> talons;
 
     @Override
     public void csv(ICsvLogger csv) {
@@ -80,13 +83,16 @@ public class DriveTrain implements ISubsystem {
         WPI_TalonSRX talonFrontRight = new WPI_TalonSRX(DRIVE_MOTER_FR);
         WPI_TalonSRX talonBackLeft = new WPI_TalonSRX(DRIVE_MOTER_BL);
         WPI_TalonSRX talonBackRight = new WPI_TalonSRX(DRIVE_MOTER_BR);
+        talons = Arrays.asList(new WPI_TalonSRX[]{talonFrontLeft, talonFrontRight, talonBackLeft, talonBackRight});
         talonBackLeft.follow(talonFrontLeft);
         talonBackRight.follow(talonFrontRight);
-        talonFrontLeft.setInverted(true);
-        talonFrontRight.setInverted(true);
-        talonBackLeft.setInverted(true);
-        talonBackRight.setInverted(true);
-        drive = new DifferentialDrive(talonFrontLeft, talonFrontRight);
+        talons.forEach(talon -> {
+            talon.setInverted(true);
+            talon.setExpiration(TALON_EXPERIATION_TIME);
+        });
+        encoderPoller = new Notifier(this::pollEncoders);
+        encoderPoller.startPeriodic(ENCODER_POLL_RATE);
+        drive = new DifferentialDrive(talonFrontRight, talonFrontLeft);
         leftFollower = new EncoderFollower();
         leftEncoder = talonBackLeft.getSensorCollection();
         leftFollower.configureEncoder(leftEncoder.getQuadraturePosition(), TICKS_PER_ROTATION, WHEEL_DIAMETER);
@@ -97,9 +103,12 @@ public class DriveTrain implements ISubsystem {
         rightFollower.configurePIDVA(P, I, D, 1/ MAX_VELOCITY, ACCELERATION_GAIN);
         leftFollower.setTrajectory(new Trajectory(0));
         rightFollower.setTrajectory(new Trajectory(0));
-        turnController = Helpers.buildPIDController(P_TURN, I_TURN, D_TURN, PIDSourceType.kDisplacement, Robot.peripheralSubsystem::getYaw, this::turnPID, 0.05);
-        turnController.setAbsoluteTolerance(TURN_TOLERANCE);
         pathConfig = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 0.05, 1.7, 2.0, 60.0); // Might need to convert to imperial
+    }
+
+    private void pollEncoders() {
+        encoderLastLeft = leftEncoder.getQuadraturePosition();
+        encoderLastRight = rightEncoder.getQuadraturePosition();
     }
 
     /**
@@ -122,29 +131,6 @@ public class DriveTrain implements ISubsystem {
         auto = false;
     }
 
-    public boolean turn(float deltaAngle, double speed, boolean reset) {
-        if(reset)
-            targetYaw = Robot.peripheralSubsystem.getYaw() + deltaAngle;
-        return face(targetYaw, speed, reset);
-    }
-
-    public boolean face(double targetAngle, double speed, boolean reset) {
-        auto = false;
-        if(reset) {
-            turnController.reset();
-            turnController.setSetpoint(targetAngle);
-            turnController.setOutputRange(0.2, speed);
-            turnController.enable();
-        }
-        if(Math.abs(turnController.getError()) < TURN_TOLERANCE) {
-            turnController.disable();
-            return true;
-        }
-        else
-            drive.tankDrive(speed, speed);
-        return false;
-    }
-
     /**
      * Drive forward for a time without anything fancy at all
      * @param time to drive
@@ -165,40 +151,22 @@ public class DriveTrain implements ISubsystem {
         return false;
     }
 
-    public boolean lazyDriveDistance(float distance, double speed, boolean reset) {
-        auto = false;
-        if(reset) {
-            startEncoderL = encoderLastLeft;
-            startEncoderR = encoderLastRight;
-        }
-        if(distance > 0 && encoderLastLeft > startEncoderL + distance || distance > 0 && encoderLastLeft < startEncoderL + distance) {
-            drive.tankDrive(0, 0);
-            return true;
-        }
-        else
-            drive.tankDrive(speed, speed);
-        return false;
-    }
-
-    private void turnPID(double value) {
-        drive.tankDrive(-value, value); // Check that this is the correct direction
-    }
-
     public boolean isTrajectoryDone() {
         return leftFollower.isFinished() && rightFollower.isFinished();
     }
 
     @Override
     public void update(boolean enabled) {
-        Robot.userInput.putValue("tab", "encoderL", leftEncoder.getQuadraturePosition());
-        Robot.userInput.putValue("tab", "encoderR", rightEncoder.getQuadraturePosition());
+        talons.forEach(talon -> talon.setNeutralMode(enabled ? NeutralMode.Brake : NeutralMode.Coast));
+        Robot.userInput.putValue("tab", "encoderL", getEncoderPosition(false));
+        Robot.userInput.putValue("tab", "encoderR", getEncoderPosition(true));
 
         if(!enabled)
             return;
 
         if(auto && !isTrajectoryDone()) {
-            double l = leftFollower.calculate(leftEncoder.getQuadraturePosition());
-            double r = rightFollower.calculate(rightEncoder.getQuadraturePosition());
+            double l = leftFollower.calculate(getEncoderPosition(false));
+            double r = leftFollower.calculate(getEncoderPosition(true));
 
             double gyro_heading = Robot.peripheralSubsystem.getYaw();
             double desired_heading = Pathfinder.r2d(leftFollower.getHeading());  // Should also be in degrees
@@ -208,6 +176,10 @@ public class DriveTrain implements ISubsystem {
 
             drive.tankDrive(l + turn, r - turn);
         }
+    }
+
+    private int getEncoderPosition(boolean right) {
+        return right ? encoderLastRight : encoderLastLeft;
     }
 
     @Override
