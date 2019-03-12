@@ -82,7 +82,7 @@ public class UserInput implements ISubsystem {
         }
         if(tableEntries.containsKey(title))
             tableEntries.get(title).setValue(value);
-        else 
+        else if (!table.containsKey(title))
             tableEntries.put(title, Shuffleboard.getTab(selectedTab).add(title, value).getEntry());
     }
 
