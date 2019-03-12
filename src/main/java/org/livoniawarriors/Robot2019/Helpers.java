@@ -10,11 +10,11 @@ import java.util.function.Supplier;
 
 public final class Helpers {
 
-    public static PIDController buildPIDController(double p, double i, double d, PIDSourceType pidType, Supplier<Double> input, Consumer<Double> output, double period) {
-        return buildPIDController(p, i, d, 0, pidType, input, output, period);
+    public static PIDController buildPIDController(double p, double i, double d, Supplier<Double> input, Consumer<Double> output, double period) {
+        return buildPIDController(p, i, d, 0, input, output, period);
     }
 
-    public static PIDController buildPIDController(double p, double i, double d, double f, PIDSourceType pidType, Supplier<Double> input, Consumer<Double> output, double period) {
+    public static PIDController buildPIDController(double p, double i, double d, double f, Supplier<Double> input, Consumer<Double> output, double period) {
         PIDSource pidSource = new PIDSource() {
             PIDSourceType pidSourceType;
 
