@@ -13,6 +13,7 @@ import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
 import org.livoniawarriors.Robot2019.UserInput.Controllers;
+import org.livoniawarriors.Robot2019.UserInput.Joystick;
 
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -25,13 +26,13 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
  */
 public class GamePieceManipulator {
 
-    private final static int RIGHT_INTAKE = 14;
-    private final static int LEFT_INTAKE = 15;
+    private final static int RIGHT_INTAKE = 15;
+    private final static int LEFT_INTAKE = 14;
 
-    private final static int TILTER_UP = 2;
-    private final static int TILTER_DOWN= 3;
-    private final static int FLOWER_IN = 0;
-    private final static int FLOWER_OUT = 1;
+    private final static int TILTER_UP = 0;
+    private final static int TILTER_DOWN= 1;
+    private final static int FLOWER_IN = 2;
+    private final static int FLOWER_OUT = 3;
     private final static int EXTENDER = 4;
 
 
@@ -56,7 +57,7 @@ public class GamePieceManipulator {
         leftIntakeMotor = new WPI_TalonSRX(LEFT_INTAKE);
         rightIntakeMotor = new WPI_TalonSRX(RIGHT_INTAKE);
         leftIntakeMotor.setInverted(true);
-        rightIntakeMotor.setInverted(true);
+        //rightIntakeMotor.setInverted(true);
         ballSensor = new AnalogInput(ANALOG_INPUT_CHANNEL);
     
         controller = Robot.userInput.getController(Controllers.XBOX);
@@ -64,7 +65,7 @@ public class GamePieceManipulator {
         intakeDown = false; //TODO: find out if intake starts up or down
 
         tilter.set(Value.kReverse);
-        flower.set(Value.kReverse);
+        flower.set(Value.kForward);
     }
 
     public void update(boolean isEnabled) {
@@ -75,15 +76,15 @@ public class GamePieceManipulator {
         //Move intake motors
         if (intakeDown) {
             //Move Left Intake Motor
-            if (controller.getOtherAxis(1) != 0 && !hasBall()) {
+            if (controller.getJoystickY(Joystick.LEFT) != 0) {
                 leftIntakeMotor.set(controller.getOtherAxis(1)); 
             } else {
                 leftIntakeMotor.set(0);
 
             }
             //Move Right Intake Motor
-            if (controller.getOtherAxis(5) != 0 && hasBall()) {
-                rightIntakeMotor.set(-1 * controller.getOtherAxis(5)); 
+            if (controller.getJoystickY(Joystick.RIGHT) != 0) {
+                rightIntakeMotor.set(controller.getOtherAxis(5)); 
             } else {
                 rightIntakeMotor.set(0);
             }
@@ -95,8 +96,6 @@ public class GamePieceManipulator {
         } else if (controller.getPOV() == 180) {
             moveIntakeDown();
         }
-        
-        System.out.println(controller.getPOV());
 
         if (controller.getButtonPressed(Button.B)) {
             moveFlower();

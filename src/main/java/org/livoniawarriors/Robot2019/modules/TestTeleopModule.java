@@ -31,7 +31,7 @@ public class TestTeleopModule implements IControlModule {
     @Override
     public void update() {
        updateControllers();
-       Robot.driveTrain.tankDrive(lStick, rStick);
+       Robot.driveTrain.tankDrive(lStick, rStick, false);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class TestTeleopModule implements IControlModule {
         }
         else {
             lStick = driverXbox.getJoystickY(Joystick.LEFT);
-            rStick = driverXbox.getJoystickX(Joystick.RIGHT);
+            rStick = driverXbox.getJoystickY(Joystick.RIGHT);
         }
     }
 }
