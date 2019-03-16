@@ -1,9 +1,13 @@
 package org.livoniawarriors.Robot2019;
 
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.livoniawarriors.Robot2019.UserInput.Button;
+import org.livoniawarriors.Robot2019.UserInput.Controllers;
 import org.livoniawarriors.Robot2019.modules.FullyAutonModule;
 import org.livoniawarriors.Robot2019.modules.TestAutonModule;
 import org.livoniawarriors.Robot2019.modules.TestTeleopModule;
@@ -22,7 +26,8 @@ public class Robot extends TimedRobot {
     private Map<String, IControlModule> modules;
     private IControlModule activeModule;
     private IControlModule defaultModule, telepModule;
-    private IControlModule fallbackModule; // The one switched to if a module finishes. If null, it defaults to the last registered module
+    private IControlModule fallbackModule; // The one switched to if a module finishes. If null, it defaults to the last
+                                           // registered module
 
     // Input handling
     public static UserInput userInput;
@@ -53,7 +58,8 @@ public class Robot extends TimedRobot {
     Robot() {
         instance = this;
         csvBuffer = new HashMap<>();
-        System.setProperty("log4j.configurationFile", Paths.get(Filesystem.getDeployDirectory().toString(), "log4j2.xml").toString());
+        System.setProperty("log4j.configurationFile",
+                Paths.get(Filesystem.getDeployDirectory().toString(), "log4j2.xml").toString());
         logger = LogManager.getLogger("LogLogger");
         csvLogger = LogManager.getLogger("CsvLogger");
         csvBufferWriter = csvBuffer::put;
@@ -70,7 +76,7 @@ public class Robot extends TimedRobot {
         registerSubsystem(peripheralSubsystem = new PeripheralSubsystem());
         registerSubsystem(userInput = new UserInput());
         registerSubsystem(driveTrain = new DriveTrain());
-        registerSubsystem(flameThrower = new FlameThrower());
+        //registerSubsystem(flameThrower = new FlameThrower());
         registerSubsystem(gamePlay = new GamePlay());
         registerControlModule(new FullyAutonModule());
         registerControlModule(new TestAutonModule());
@@ -81,33 +87,37 @@ public class Robot extends TimedRobot {
 
     /**
      * Registers a control module
+     * 
      * @param module to register
      */
     private void registerControlModule(IControlModule module) {
-        if(modules.containsKey(module.getClass().getSimpleName()))
-            logger.error("Duplicate registration of module: " + module.getClass().getName());// 
+        if (modules.containsKey(module.getClass().getSimpleName()))
+            logger.error("Duplicate registration of module: " + module.getClass().getName());//
         modules.put(module.getClass().getSimpleName(), module);
     }
 
     /**
      * Registers the subsystem, doesn't do much at present
+     * 
      * @param subsystem to register
      */
     private void registerSubsystem(ISubsystem subsystem) {
-        if(subsystems.contains(subsystem))
-            logger.error("Duplicate registration of subsystem: " + subsystem.getClass().getName()); // 
+        if (subsystems.contains(subsystem))
+            logger.error("Duplicate registration of subsystem: " + subsystem.getClass().getName()); //
         subsystems.add(subsystem);
-        subsytemNotifiers.add(new Notifier(() -> {
+        Notifier notifier = new Notifier(() -> {
             try {
                 var startTime = System.currentTimeMillis();
                 subsystem.update(isEnabled());
                 var length = System.currentTimeMillis() - startTime;
-                if(length > 19)
-                    Robot.logger.warn("Subsystem " + subsystem.getClass().getSimpleName() + " took too many millis: " + length);
+                if (length > 19)
+                    Robot.logger.warn(
+                            "Subsystem " + subsystem.getClass().getSimpleName() + " took too many millis: " + length);
             } catch (Throwable t) {
                 logger.error(subsystem.getClass().getSimpleName(), t);
             }
-        }));
+        });
+        subsytemNotifiers.add(notifier);
     }
 
     private void setDefaultModule(IControlModule module) {
@@ -116,11 +126,12 @@ public class Robot extends TimedRobot {
 
     /**
      * Sets the default module, go figure
+     * 
      * @param module to set as, you guessed it, default
      */
     private void setDefaultModule(Class<? extends IControlModule> module) {
-        if(!modules.containsKey(module.getSimpleName())) {
-            logger.error("Module not registered: " + module.getSimpleName()); // 
+        if (!modules.containsKey(module.getSimpleName())) {
+            logger.error("Module not registered: " + module.getSimpleName()); //
             return;
         }
         setDefaultModule(modules.get(module.getSimpleName()));
@@ -128,11 +139,12 @@ public class Robot extends TimedRobot {
 
     /**
      * Sets the module to switch to when starting teleop
+     * 
      * @param module
      */
     private void setTeleopModule(Class<? extends IControlModule> module) {
-        if(!modules.containsKey(module.getSimpleName()))
-            logger.error("Module not registered: " + module.getSimpleName()); // 
+        if (!modules.containsKey(module.getSimpleName()))
+            logger.error("Module not registered: " + module.getSimpleName()); //
         setTeleopModule(modules.get(module.getSimpleName()));
     }
 
@@ -142,6 +154,7 @@ public class Robot extends TimedRobot {
 
     /**
      * Switches the current module
+     * 
      * @param name of the module's class
      */
     private void setActiveModule(String name, IControlModule fallbackModule) {
@@ -161,6 +174,7 @@ public class Robot extends TimedRobot {
 
     /**
      * Switches the current module
+     * 
      * @param name of the module's class
      */
     private void setActiveModule(String name) {
@@ -179,9 +193,9 @@ public class Robot extends TimedRobot {
      * Called periodically to diagnose subsystems
      */
     private void diagnose() {
-        if(DriverStation.getInstance().isFMSAttached())
+        if (DriverStation.getInstance().isFMSAttached())
             return;
-        for (var subsystem: subsystems) {
+        for (var subsystem : subsystems) {
             try {
                 subsystem.diagnose();
             } catch (Throwable t) {
@@ -195,17 +209,19 @@ public class Robot extends TimedRobot {
         // Initialize module stuffs
         subsystems = new ArrayList<>();
         modules = new LinkedHashMap<>();
+        CameraServer.getInstance().startAutomaticCapture();
 
         // Register stuff
         register();
 
         // Set default to first registered if it isn't set
-        if(defaultModule == null)
+        if (defaultModule == null)
             setDefaultModule((IControlModule) modules.entrySet().toArray()[0]);
 
         // Initialize things
         logger.info("Initializing subsystems");
-        subsystems.forEach(ISubsystem::init); // No need for try catch, if this fails, all is lost, might as well System.exit(69);
+        subsystems.forEach(ISubsystem::init); // No need for try catch, if this fails, all is lost, might as well
+                                              // System.exit(69);
         logger.info("Initializing modules");
         modules.forEach((name, module) -> module.init());
 
@@ -216,6 +232,9 @@ public class Robot extends TimedRobot {
         // Start csv logging
         csvNotifier.startPeriodic(CSV_UPDATE_PERIOD);
 
+        // Start updating subsystems
+        subsytemNotifiers.forEach(notifier -> notifier.startPeriodic(0.05));
+
         // Start diagnosing
         diagnosticNotifier.startPeriodic(DIAGNOSTIC_PERIOD);
         diagnose();
@@ -223,13 +242,14 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        if(activeModule != null)
+        if (activeModule != null)
             userInput.putValue("tab", "Active Module", activeModule.getClass().getSimpleName());
     }
 
     @Override
     public void disabledInit() {
-        if(activeModule != null) {
+        Shuffleboard.stopRecording();
+        if (activeModule != null) {
             stopModule(activeModule);
             activeModule = null;
         }
@@ -241,6 +261,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
+        Shuffleboard.startRecording();
         activeModule = defaultModule;
         startModule(activeModule);
     }
@@ -261,11 +282,11 @@ public class Robot extends TimedRobot {
         } catch (Throwable t) {
             logger.error(activeModule.getClass().getSimpleName(), t);
         }
-        
+
     }
 
     private void periodic() {
-        if(activeModule == null) {
+        if (activeModule == null) {
             activeModule = defaultModule;
             startModule(activeModule);
         }
@@ -274,15 +295,15 @@ public class Robot extends TimedRobot {
             var startTime = System.currentTimeMillis();
             activeModule.update();
             var length = System.currentTimeMillis() - startTime;
-            if(length > 4)
+            if (length > 4)
                 Robot.logger.warn("");
         } catch (Throwable t) {
             logger.error(activeModule.getClass().getSimpleName(), t);
         }
 
-        if(activeModule.isFinished()) {
+        if (activeModule.isFinished()) {
             stopModule(activeModule);
-            if(fallbackModule != null)
+            if (fallbackModule != null)
                 activeModule = fallbackModule;
             else
                 activeModule = defaultModule;
@@ -293,12 +314,17 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousPeriodic() {
         periodic();
+        if (userInput.getController(Controllers.L_FLIGHTSTICK).getButtonPressed(Button.SIX)
+                || userInput.getController(Controllers.L_FLIGHTSTICK).getButtonPressed(Button.SEVEN)) {
+            setActiveModule(TestTeleopModule.class.getSimpleName());
+        }
     }
 
     @Override
     public void teleopInit() {
+        Shuffleboard.startRecording();
         if (activeModule != telepModule) {
-            if(activeModule != null)
+            if (activeModule != null)
                 stopModule(activeModule);
             activeModule = telepModule;
             startModule(activeModule);
@@ -321,13 +347,14 @@ public class Robot extends TimedRobot {
     }
 
     /**
-     * Disposes stuff. We don't care about errors here. Gets rid of needless catches for streams and such.
+     * Disposes stuff. We don't care about errors here. Gets rid of needless catches
+     * for streams and such.
      */
     @Override
     protected void finalize() {
         super.finalize();
         try {
-            for (ISubsystem subsystem: subsystems)
+            for (ISubsystem subsystem : subsystems)
                 subsystem.dispose();
         } catch (Exception e) {
             Robot.logger.error("Robot", e);

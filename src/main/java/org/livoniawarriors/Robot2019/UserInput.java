@@ -28,7 +28,7 @@ public class UserInput implements ISubsystem {
     private NetworkTableInstance inst;
     private NetworkTable table;
     private SendableChooser<String> chooser;
-    private HashMap<String, Integer> tableEntries;
+    private HashMap<String, NetworkTableEntry> tableEntries;
     private int i = 0;
     private int currentI;
 
@@ -52,7 +52,7 @@ public class UserInput implements ISubsystem {
         table = inst.getTable("datatable");
         Shuffleboard.getTab("tab").add(new LogButton());
         chooser = new SendableChooser<>();
-        tableEntries = new HashMap<String, Integer>();
+        tableEntries = new HashMap<String, NetworkTableEntry>();
     }
 
     @Override
@@ -76,33 +76,18 @@ public class UserInput implements ISubsystem {
     }
 
     public void putValue(String selectedTab, String title, Object value) {
-        currentI = i++;
-        if (tableEntries.containsKey(title)){
-            if (null != selectedTab && null != title && null != value){
-                ShuffleboardTab currentTab = Shuffleboard.getTab(selectedTab);
-                NetworkTableEntry currentEntry = new NetworkTableEntry(inst, currentI);
-                currentEntry.setValue(value);
-                currentEntry = table.getEntry(title);
-                currentEntry = currentTab.add(title, value).getEntry();
-                tableEntries.put(title, currentI);
-            }
-            else {
-                Robot.logger.log(Level.DEBUG, "Null value added to shuffleboard. ID10T error.");
-            }
+        if(value == null) {
+            Robot.logger.error("Tried to pass null value to shuffleboard");
+            return;
         }
-        else {
-            if (null != title && null != value) {
-                NetworkTableEntry selectedEntry = table.getEntry(title);
-                selectedEntry.setValue(value);
-            }
-            else {
-                Robot.logger.log(Level.DEBUG, "Can't update a null value to shuffleboard :who:");
-            }
-        }
+        if(tableEntries.containsKey(title))
+            tableEntries.get(title).setValue(value);
+        else if (!table.containsKey(title))
+            tableEntries.put(title, Shuffleboard.getTab(selectedTab).add(title, value).getEntry());
     }
 
     public NetworkTableValue getNetworkTableValue(String title) {
-        return table.getEntry(title).getValue();
+        return tableEntries.get(title).getValue();
     }
 
     public void addOption(String name, String option, boolean defaultOption) {
