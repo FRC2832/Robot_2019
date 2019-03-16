@@ -25,41 +25,31 @@ public class OldFashionedAuton implements IControlModule {
      *
      * @param changed state this periodic cycle
      */
-    private void updateState(boolean changed) {
+    private boolean updateState(boolean changed) {
         switch (state) {
             case 0:
-                if(Robot.driveTrain.lazyDriveTime(1, -0.8, changed))
-                    incrementState();
-                break;
+                return Robot.driveTrain.lazyDriveTime(1.4f, -0.7, changed);
             case 1:
-                if(Robot.driveTrain.turn(-90, 0.7, changed))
-                    incrementState();
-                break;
+                return Robot.driveTrain.turn(90, 0.7, changed); // TODO: check if pigion is connected, lower tolerances, and change this to face the initial direction plus 90
             case 2:
-                if(Robot.driveTrain.lazyDriveDistance(30, 0.8, changed))
-                    incrementState();
-                break;
+                return Robot.driveTrain.lazyDriveDistance(20, -0.5, changed);
             case 3:
-                if(Robot.driveTrain.turn(90, 0.7, changed))
-                    incrementState();
-                break;
+                return Robot.driveTrain.turn(-90, 0.7, changed);
             case 4:
-                if(Robot.driveTrain.lazyDriveDistance(30, 0.8, changed))
-                    incrementState();
-                break;
+                return Robot.driveTrain.lazyDriveDistance(5, -0.5, changed);
+            default:
+                return false;
         }
-    }
-
-    private void incrementState() {
-        state++;
-        stateChanged = true;
-        Robot.logger.log(Level.INFO, "Switching to state " + state);
     }
 
     @Override
     public void update() {
-        updateState(stateChanged);
-        stateChanged = false;
+        if (updateState(stateChanged)) {
+            stateChanged = true;
+            state++;
+        } else {
+            stateChanged = false;
+        }
     }
 
     @Override
@@ -69,6 +59,6 @@ public class OldFashionedAuton implements IControlModule {
 
     @Override
     public boolean isFinished() {
-        return state >= 5;
+        return false;//state >= 5;
     }
 }

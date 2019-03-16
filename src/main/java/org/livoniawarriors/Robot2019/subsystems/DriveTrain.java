@@ -7,8 +7,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SensorCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
-import edu.wpi.first.wpilibj.Notifier;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 import jaci.pathfinder.Pathfinder;
@@ -16,6 +15,7 @@ import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
 import jaci.pathfinder.followers.EncoderFollower;
 import jaci.pathfinder.modifiers.TankModifier;
+import org.livoniawarriors.Robot2019.Helpers;
 import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.ISubsystem;
 import org.livoniawarriors.Robot2019.Robot;
@@ -29,6 +29,9 @@ public class DriveTrain implements ISubsystem {
     private final static double P = 1;
     private final static double I = 0;
     private final static double D = 0;
+    private final static double P_TURN = 0.03;
+    private final static double I_TURN = 0;
+    private final static double D_TURN = 0.1;
     private final static double MAX_VELOCITY = 1;
     private final static double ACCELERATION_GAIN = 0;
     public final static int DRIVE_MOTER_FL = 25;
@@ -37,6 +40,7 @@ public class DriveTrain implements ISubsystem {
     public final static int DRIVE_MOTER_BR = 11;
     private final static double ENCODER_POLL_RATE = 0.1d;
     private final static double TALON_EXPERIATION_TIME = 0.1;
+    private final static double TURN_TOLERANCE = 5;
 
     private DifferentialDrive drive;
     private EncoderFollower leftFollower;
@@ -45,10 +49,12 @@ public class DriveTrain implements ISubsystem {
     private SensorCollection rightEncoder, leftEncoder;
     Trajectory.Config pathConfig;
     private boolean auto;
-    private double startTime;
+    private double startTime, startEncoderL, startEncoderR, targetYaw;
+    private PIDController turnController, distController;
     private int encoderLastLeft, encoderLastRight;
     private Notifier encoderPoller;
     private List<WPI_TalonSRX> talons;
+    private WPI_TalonSRX pigeonTalon;
 
     @Override
     public void csv(ICsvLogger csv) {
@@ -84,6 +90,7 @@ public class DriveTrain implements ISubsystem {
         WPI_TalonSRX talonFrontRight = new WPI_TalonSRX(DRIVE_MOTER_FR);
         WPI_TalonSRX talonBackLeft = new WPI_TalonSRX(DRIVE_MOTER_BL);
         WPI_TalonSRX talonBackRight = new WPI_TalonSRX(DRIVE_MOTER_BR);
+        pigeonTalon = talonBackRight;
         talons = Arrays.asList(new WPI_TalonSRX[]{talonFrontLeft, talonFrontRight, talonBackLeft, talonBackRight});
         talonBackLeft.follow(talonFrontLeft);
         talonBackRight.follow(talonFrontRight);
@@ -106,7 +113,29 @@ public class DriveTrain implements ISubsystem {
         rightFollower.setTrajectory(new Trajectory(0));
         encoderOffsetLeft = leftEncoder.getQuadraturePosition();
         encoderOffsetRight = rightEncoder.getQuadraturePosition();
+        turnController = new PIDController(P_TURN, I_TURN, D_TURN, new PIDSource() {
+            @Override
+            public void setPIDSourceType(PIDSourceType pidSource) {
+
+            }
+
+            @Override
+            public PIDSourceType getPIDSourceType() {
+                return PIDSourceType.kDisplacement;
+            }
+
+            @Override
+            public double pidGet() {
+                return Robot.peripheralSubsystem.getYaw();
+            }
+        }, this::turnPID, 0.05);
+        //turnController = Helpers.buildPIDController(P_TURN, I_TURN, D_TURN, Robot.peripheralSubsystem::getYaw, this::turnPID, 0.05);
+        turnController.setAbsoluteTolerance(TURN_TOLERANCE);
         pathConfig = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 0.05, 1.7, 2.0, 60.0); // Might need to convert to imperial
+    }
+
+    public WPI_TalonSRX getPigeonTalon() {
+        return pigeonTalon;
     }
 
     private void pollEncoders() {
@@ -154,8 +183,60 @@ public class DriveTrain implements ISubsystem {
         return false;
     }
 
+    public boolean turn(float deltaAngle, double speed, boolean reset) {
+        if(reset) {
+            Robot.logger.error("current: " + Robot.peripheralSubsystem.getYaw());
+            Robot.logger.error("delta: " + deltaAngle);
+            Robot.logger.error("target: " + Robot.peripheralSubsystem.getYaw() + deltaAngle);
+            targetYaw = Robot.peripheralSubsystem.getYaw() + deltaAngle;
+        }
+        return face(targetYaw, speed, reset);
+    }
+
+    public boolean face(double targetAngle, double speed, boolean reset) {
+        auto = false;
+        if(reset) {
+            turnController.reset();
+            turnController.setSetpoint(targetAngle);
+            turnController.setOutputRange(-speed, speed);
+            turnController.enable();
+        }
+        Robot.logger.error(Math.abs(targetAngle - Robot.peripheralSubsystem.getYaw()));
+        //if(Math.abs(targetAngle - Robot.peripheralSubsystem.getYaw()) < TURN_TOLERANCE) {
+        if(turnController.onTarget()) {
+            turnController.disable();
+            tankDrive(0, 0);
+            return true;
+        }
+        return false;
+    }
+
     public boolean isTrajectoryDone() {
         return leftFollower.isFinished() && rightFollower.isFinished();
+    }
+
+    public boolean lazyDriveDistance(float distance, double speed, boolean reset) {
+        auto = false;
+        if(reset) {
+            startEncoderL = getEncoderPos(false);
+            startEncoderR = encoderLastRight;
+        }
+        if(distance > 0 && getEncoderPos(false) > startEncoderL + distance || distance < 0 && getEncoderPos(false) < startEncoderL + distance) {
+            drive.tankDrive(0, 0);
+            return true;
+        }
+        else
+            drive.tankDrive(speed, speed, false);
+        return false;
+    }
+
+    private void turnPID(double value) {
+        if(!turnController.isEnabled())
+            return;
+        double deadzoned = (Math.abs(value) * 0.8 + 0.2) * Math.signum(value);
+        drive.tankDrive(deadzoned, -deadzoned, false); // Check that this is the correct direction
+        Robot.logger.error(deadzoned);
+
     }
 
     @Override
@@ -164,8 +245,10 @@ public class DriveTrain implements ISubsystem {
         Robot.userInput.putValue("tab", "encoderL", getEncoderPos(false));
         Robot.userInput.putValue("tab", "encoderR", getEncoderPos(true));
 
-        if(!enabled)
+        if(!enabled) {
+            turnController.disable();
             return;
+        }
 
         if(auto && !isTrajectoryDone()) {
             double l = leftFollower.calculate(getEncoderRaw(false));

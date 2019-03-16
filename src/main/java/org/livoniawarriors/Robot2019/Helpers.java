@@ -15,6 +15,8 @@ public final class Helpers {
     }
 
     public static PIDController buildPIDController(double p, double i, double d, double f, Supplier<Double> input, Consumer<Double> output, double period) {
+        Robot.logger.error(output);
+        Robot.logger.error(input);
         PIDSource pidSource = new PIDSource() {
             PIDSourceType pidSourceType;
 
@@ -33,6 +35,8 @@ public final class Helpers {
                 return input.get();
             }
         };
-        return new PIDController(p, i, d, f, pidSource, output::accept, period);
+        return new PIDController(p, i, d, f, pidSource, (value) -> {
+            Robot.logger.error("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS" + value);
+        }, period);
     }
 }

@@ -247,7 +247,7 @@ public class Elevator implements PIDSource, PIDOutput {
 
     public void diagnose() {
         double testElevHeight = getElevatorHeight();
-        if (testElevHeight == 0)
-            Robot.logger.log(Level.DEBUG, String.format("Method getElevatorHeight() returned value %s and DETECTED FAILURE!!!", testElevHeight));
+        //if (testElevHeight == 0)
+            //Robot.logger.log(Level.DEBUG, String.format("Method getElevatorHeight() returned value %s and DETECTED FAILURE!!!", testElevHeight));
     }
 }

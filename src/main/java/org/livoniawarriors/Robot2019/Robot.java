@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.livoniawarriors.Robot2019.UserInput.Button;
 import org.livoniawarriors.Robot2019.UserInput.Controllers;
 import org.livoniawarriors.Robot2019.modules.FullyAutonModule;
+import org.livoniawarriors.Robot2019.modules.OldFashionedAuton;
 import org.livoniawarriors.Robot2019.modules.TestAutonModule;
 import org.livoniawarriors.Robot2019.modules.TestTeleopModule;
 import org.livoniawarriors.Robot2019.subsystems.*;
@@ -73,15 +74,17 @@ public class Robot extends TimedRobot {
      * Registers stuff and sets default module, optionally
      */
     private void register() {
-        registerSubsystem(peripheralSubsystem = new PeripheralSubsystem());
+        peripheralSubsystem = new PeripheralSubsystem();
         registerSubsystem(userInput = new UserInput());
         registerSubsystem(driveTrain = new DriveTrain());
+        registerSubsystem(peripheralSubsystem); // Must happen after drive train
         //registerSubsystem(flameThrower = new FlameThrower());
         registerSubsystem(gamePlay = new GamePlay());
         registerControlModule(new FullyAutonModule());
         registerControlModule(new TestAutonModule());
+        registerControlModule(new OldFashionedAuton());
         registerControlModule(new TestTeleopModule()); // This is the default one until manual setting default
-        setDefaultModule(FullyAutonModule.class);
+        setDefaultModule(OldFashionedAuton.class);
         setTeleopModule(TestTeleopModule.class);
     }
 
