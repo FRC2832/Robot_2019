@@ -131,6 +131,7 @@ public class DriveTrain implements ISubsystem {
         }, this::turnPID, 0.05);
         //turnController = Helpers.buildPIDController(P_TURN, I_TURN, D_TURN, Robot.peripheralSubsystem::getYaw, this::turnPID, 0.05);
         turnController.setAbsoluteTolerance(TURN_TOLERANCE);
+        turnController.disable();
         pathConfig = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 0.05, 1.7, 2.0, 60.0); // Might need to convert to imperial
     }
 
