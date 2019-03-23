@@ -52,7 +52,7 @@ public class DriveTrain implements ISubsystem {
     private boolean auto;
     private double startTime, startEncoderL, startEncoderR, targetYaw, pidVelLeft, pidVelRight;
     private PIDController turnController, distController, leftVelocityController, rightVelocityController;
-    private int encoderLastLeft, encoderLastRight;
+    private int encoderLastLeft, encoderLastRight, encoderLastLeftVel, encoderLastRightVel;
     private Notifier encoderPoller;
     private List<WPI_TalonSRX> talons;
     private WPI_TalonSRX pigeonTalon;
@@ -144,7 +144,7 @@ public class DriveTrain implements ISubsystem {
 
             @Override
             public double pidGet() {
-                return leftEncoder.getQuadratureVelocity() * 10 / (double)TICKS_PER_ROTATION * Math.PI * WHEEL_DIAMETER;
+                return getEncoderVel(false);
             }
         }, this::writePIDVelocityLeft, 0.05);
         leftVelocityController.enable();
@@ -161,7 +161,7 @@ public class DriveTrain implements ISubsystem {
 
             @Override
             public double pidGet() {
-                return -rightEncoder.getQuadratureVelocity() * 10 / (double)TICKS_PER_ROTATION * Math.PI * WHEEL_DIAMETER;
+                return getEncoderVel(true);
             }
         }, this::writePIDVelocityRight, 0.05);
         rightVelocityController.enable();
@@ -176,6 +176,8 @@ public class DriveTrain implements ISubsystem {
     private void pollEncoders() {
         encoderLastLeft = -leftEncoder.getQuadraturePosition();
         encoderLastRight = rightEncoder.getQuadraturePosition();
+        encoderLastLeftVel = -leftEncoder.getQuadratureVelocity();
+        encoderLastRightVel = rightEncoder.getQuadratureVelocity();
     }
 
     /**
@@ -327,6 +329,10 @@ public class DriveTrain implements ISubsystem {
 
     private double getEncoderPos(boolean right) {
         return getEncoderRaw(right) / (double)TICKS_PER_ROTATION * Math.PI * WHEEL_DIAMETER;
+    }
+
+    private double getEncoderVel(boolean right) {
+        return (right ? encoderLastRightVel : encoderLastLeftVel) * 10 / (double)TICKS_PER_ROTATION * Math.PI * WHEEL_DIAMETER;
     }
 
     @Override
