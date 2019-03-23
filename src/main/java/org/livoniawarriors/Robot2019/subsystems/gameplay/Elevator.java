@@ -61,7 +61,7 @@ public class Elevator implements PIDSource, PIDOutput {
     public Elevator() {
         elevatorMotor = new CANSparkMax(ELEVATOR_MOTOR, MotorType.kBrushless);
         elevatorMotor.setIdleMode(IdleMode.kBrake);
-        elevatorMotor.setOpenLoopRampRate(0.7);
+        elevatorMotor.setOpenLoopRampRate(0.7); //TODO: Test different rates 
 
         pidController = new PIDController(movingP, movingI, movingD, movingF, this, this, 0.01);
 
