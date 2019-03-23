@@ -14,8 +14,6 @@ import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
 import jaci.pathfinder.followers.EncoderFollower;
-import jaci.pathfinder.modifiers.TankModifier;
-import org.livoniawarriors.Robot2019.Helpers;
 import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.ISubsystem;
 import org.livoniawarriors.Robot2019.Robot;
@@ -29,9 +27,12 @@ public class DriveTrain implements ISubsystem {
     private final static double P = 1;
     private final static double I = 0;
     private final static double D = 0;
-    private final static double P_TURN = 0.005;
+    private final static double P_TURN = 0.003;
     private final static double I_TURN = 0.0002;
     private final static double D_TURN = 0.01;
+    private final static double P_VEL = 0.1;
+    private final static double I_VEL = 0;
+    private final static double D_VEL = 0.5;
     private final static double MAX_VELOCITY = 1;
     private final static double ACCELERATION_GAIN = 0;
     public final static int DRIVE_MOTER_FL = 25;
@@ -49,8 +50,8 @@ public class DriveTrain implements ISubsystem {
     private SensorCollection rightEncoder, leftEncoder;
     Trajectory.Config pathConfig;
     private boolean auto;
-    private double startTime, startEncoderL, startEncoderR, targetYaw;
-    private PIDController turnController, distController;
+    private double startTime, startEncoderL, startEncoderR, targetYaw, pidVelLeft, pidVelRight;
+    private PIDController turnController, distController, leftVelocityController, rightVelocityController;
     private int encoderLastLeft, encoderLastRight;
     private Notifier encoderPoller;
     private List<WPI_TalonSRX> talons;
@@ -129,9 +130,42 @@ public class DriveTrain implements ISubsystem {
                 return Robot.peripheralSubsystem.getYaw();
             }
         }, this::turnPID, 0.05);
-        //turnController = Helpers.buildPIDController(P_TURN, I_TURN, D_TURN, Robot.peripheralSubsystem::getYaw, this::turnPID, 0.05);
-        turnController.setAbsoluteTolerance(TURN_TOLERANCE);
-        turnController.disable();
+
+        leftVelocityController = new PIDController(P_VEL, I_VEL, D_VEL, new PIDSource() {
+            @Override
+            public void setPIDSourceType(PIDSourceType pidSource) {
+
+            }
+
+            @Override
+            public PIDSourceType getPIDSourceType() {
+                return PIDSourceType.kDisplacement;
+            }
+
+            @Override
+            public double pidGet() {
+                return leftEncoder.getQuadratureVelocity() * 10 / (double)TICKS_PER_ROTATION * Math.PI * WHEEL_DIAMETER;
+            }
+        }, this::writePIDVelocityLeft, 0.05);
+        leftVelocityController.enable();
+        rightVelocityController = new PIDController(P_VEL, I_VEL, D_VEL, new PIDSource() {
+            @Override
+            public void setPIDSourceType(PIDSourceType pidSource) {
+
+            }
+
+            @Override
+            public PIDSourceType getPIDSourceType() {
+                return PIDSourceType.kDisplacement;
+            }
+
+            @Override
+            public double pidGet() {
+                return -rightEncoder.getQuadratureVelocity() * 10 / (double)TICKS_PER_ROTATION * Math.PI * WHEEL_DIAMETER;
+            }
+        }, this::writePIDVelocityRight, 0.05);
+        rightVelocityController.enable();
+        driveVelocity(0, 0);
         pathConfig = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, 0.05, 1.7, 2.0, 60.0); // Might need to convert to imperial
     }
 
@@ -180,7 +214,7 @@ public class DriveTrain implements ISubsystem {
             return true;
         }
         else
-            drive.tankDrive(speed, speed);
+            driveVelocity(speed, speed);
         return false;
     }
 
@@ -201,6 +235,7 @@ public class DriveTrain implements ISubsystem {
             turnController.setSetpoint(targetAngle);
             turnController.setOutputRange(-speed, speed);
             turnController.enable();
+            resetVelocityControllers();
         }
         Robot.logger.error(Math.abs(targetAngle - Robot.peripheralSubsystem.getYaw()));
         //if(Math.abs(targetAngle - Robot.peripheralSubsystem.getYaw()) < TURN_TOLERANCE) {
@@ -216,28 +251,49 @@ public class DriveTrain implements ISubsystem {
         return leftFollower.isFinished() && rightFollower.isFinished();
     }
 
+    private void writePIDVelocityLeft(double vel) {
+        pidVelLeft = vel;
+    }
+
+    private void writePIDVelocityRight(double vel) {
+        pidVelRight = vel;
+    }
+
+    public void resetVelocityControllers() {
+        leftVelocityController.reset();
+        rightVelocityController.reset();
+        leftVelocityController.enable();
+        rightVelocityController.enable();
+    }
+
+    public void driveVelocity(double left, double right) {
+        leftVelocityController.setSetpoint(left);
+        rightVelocityController.setSetpoint(right);
+        double deadZoneLeft = (Math.abs(pidVelLeft) * 0.8 + 0.2) * Math.signum(pidVelLeft);
+        double deadZoneRight = (Math.abs(pidVelRight) * 0.8 + 0.2) * Math.signum(pidVelRight);
+        drive.tankDrive(deadZoneLeft, deadZoneRight, false);
+    }
+
     public boolean lazyDriveDistance(float distance, double speed, boolean reset) {
         auto = false;
         if(reset) {
             startEncoderL = getEncoderPos(false);
             startEncoderR = encoderLastRight;
+            resetVelocityControllers();
         }
         if(distance > 0 && getEncoderPos(false) > startEncoderL + distance || distance < 0 && getEncoderPos(false) < startEncoderL + distance) {
-            drive.tankDrive(0, 0);
+            driveVelocity(0, 0);
             return true;
         }
         else
-            drive.tankDrive(speed, speed, false);
+            driveVelocity(speed, speed);
         return false;
     }
 
     private void turnPID(double value) {
         if(!turnController.isEnabled())
             return;
-        double deadzoned = (Math.abs(value) * 0.8 + 0.2) * Math.signum(value);
-        drive.tankDrive(deadzoned, -deadzoned, false); // Check that this is the correct direction
-        Robot.logger.error(deadzoned);
-
+        driveVelocity(value, -value);
     }
 
     @Override
@@ -261,7 +317,7 @@ public class DriveTrain implements ISubsystem {
             double angleDifference = Pathfinder.boundHalfDegrees(desired_heading - gyro_heading);
             double turn = 0.8 * (-1.0 / 80.0) * angleDifference;
 
-            drive.tankDrive(l + turn, r - turn);
+            driveVelocity(l + turn, r - turn);
         }
     }
 

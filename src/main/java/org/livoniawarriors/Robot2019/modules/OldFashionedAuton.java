@@ -30,15 +30,18 @@ public class OldFashionedAuton implements IControlModule {
     private boolean updateState(boolean changed) {
         switch (state) {
             case 0:
-                return Robot.driveTrain.lazyDriveTime(1.5f, -0.7, changed);
+                System.out.println();
+                Robot.driveTrain.driveVelocity(-5, -5);
+                return false;
+                //return Robot.driveTrain.lazyDriveTime(1.5f, -10, changed);
             case 1:
-                return Robot.driveTrain.face(forward + 90, 0.7, changed); // TODO: check if pigion is connected, lower tolerances, and change this to face the initial direction plus 90
+                return Robot.driveTrain.face(forward + 90, 5, changed); // TODO: check if pigion is connected, lower tolerances, and change this to face the initial direction plus 90
             case 2:
-                return Robot.driveTrain.lazyDriveDistance(20, -0.5, changed);
+                return Robot.driveTrain.lazyDriveDistance(20, -5, changed);
             case 3:
-                return Robot.driveTrain.face(forward, 0.7, changed);
+                return Robot.driveTrain.face(forward, 5, changed);
             case 4:
-                return Robot.driveTrain.lazyDriveDistance(5, -0.5, changed);
+                return Robot.driveTrain.lazyDriveDistance(5, -5, changed);
             default:
                 return false;
         }
