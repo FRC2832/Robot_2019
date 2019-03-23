@@ -11,54 +11,35 @@ import org.livoniawarriors.Robot2019.UserInput.Button;
 import org.livoniawarriors.Robot2019.UserInput.Controllers;
 import org.livoniawarriors.Robot2019.UserInput.Joystick;
 
+import edu.wpi.first.wpilibj.Spark;
+
 public class Climber {
 
-	private static final int CLIMB_MOTOR = 13;
-	private final double STOP_TURN_VALUE = 370; //*Should* be right, mathematically speaking
-	private CANSparkMax climbMotor; //NEO motor to control climber
-	private CANEncoder climbEncoder;
-
-	public double climbMotorSpeed;
+	private static final int CLIMB_LEFT = 0;
+	private static final int CLIMB_RIGHT = 1;
+	private static final double POWER = 0.7d;
+	private Spark climbLeft, climbRight;
 
 	public Climber() {
-		climbMotor = new CANSparkMax(CLIMB_MOTOR, MotorType.kBrushless);
-		climbMotor.setIdleMode(IdleMode.kBrake);
-
-		climbEncoder = climbMotor.getEncoder();
-	}
-	public void init() {
-		climbMotorSpeed = 0.8;
-	}
-
-	public void launchClimber() {
-			
-			//Prevent motor from going too far; there is a hard stop (I think?), but we want to be sure
-			if(climbEncoder.getPosition() < STOP_TURN_VALUE) {
-				climbMotor.set(climbMotorSpeed); //Appropriate speed will need to be found
-			} else {
-				climbMotor.set(0.0);
-			}
-		
+		climbLeft = new Spark(CLIMB_LEFT);
+		climbLeft.setInverted(true);
+		climbRight = new Spark(CLIMB_RIGHT);
 	}
 
 	public void update(boolean enabled) {
-		if(!enabled) {
+		if(!enabled) 
 			return;	
-		}
-		//As much security as a nuclear launch; ABSOLUTELY NO accidental climber triggers
-		//Maybe have a SmartDashboard button to "arm" the climber?
-		//TODO: Set flightstick buttons
-		if(Robot.userInput.getController(Controllers.XBOX).getButton(Button.BUMPER_R)
-			&& Robot.userInput.getController(Controllers.XBOX).getButton(Button.BUMPER_L) && Robot.userInput.getController(Controllers.XBOX).getButton(Button.START)) {
-			if(Robot.gamePlay.getElevatorHeight() < 0.1) {
-				launchClimber();
-				System.out.println("Climber launch initiated; self-destructing");
-			} else {
-				System.out.println("I'm sorry Dave. I'm afraid I can't do that.");
-				Robot.logger.log(Level.DEBUG, "Attempted climber run with elevator up");
-			}
-		}
 		
+		if(Robot.userInput.getController(Controllers.XBOX).getButton(Button.START))
+			setMotors(POWER);
+		else if(Robot.userInput.getController(Controllers.XBOX).getButton(Button.BACK))
+			setMotors(-POWER);
+		else
+			setMotors(0);
 	}
 
+	private void setMotors(double power) {
+		climbLeft.set(power);
+		climbRight.set(power);
+	}
 }

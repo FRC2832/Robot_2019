@@ -18,6 +18,7 @@ import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
 import org.livoniawarriors.Robot2019.UserInput.Controllers;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
@@ -33,6 +34,7 @@ public class Elevator implements PIDSource, PIDOutput {
 
     private static final double TOLERANCE = 1; // +- how many inches is acceptable
     private static final double MAX_MOTOR_SPEED = 0.7;
+    private static final int ELEVATOR_BOTTOM_LIMIT_PIN = 1;
 
     private static final double movingP = 0.9;
     private static final double movingI = 0.0;
@@ -52,6 +54,9 @@ public class Elevator implements PIDSource, PIDOutput {
     private boolean manual = false;
     private boolean movingPID;
     private ElevatorHeights currentSetHeight;
+    private boolean prevLimit;
+    private double heightOffset;
+    private DigitalInput lowerLimit;
 
     public Elevator() {
         elevatorMotor = new CANSparkMax(ELEVATOR_MOTOR, MotorType.kBrushless);
@@ -71,8 +76,9 @@ public class Elevator implements PIDSource, PIDOutput {
         controller = Robot.userInput.getController(Controllers.XBOX);
 
         currentSetHeight = ElevatorHeights.LowHatch;
-
+        lowerLimit = new DigitalInput(ELEVATOR_BOTTOM_LIMIT_PIN);
         setElevatorHeight(ElevatorHeights.LowHatch);
+        Robot.logger.log(Level.INFO, "Elevator started at " + getElevatorHeight());
     }
 
     /**
@@ -111,7 +117,7 @@ public class Elevator implements PIDSource, PIDOutput {
      *         information
      */
     public double getElevatorHeight() {
-        return elevatorMotor.getEncoder().getPosition() * (2 * Math.PI) / 49;
+        return elevatorMotor.getEncoder().getPosition() * (2 * Math.PI) / 49 - heightOffset;
         // Pulley has a 1 inch radius and 2 pi circumfrence
         // The gearbox has a ratio of 49:1
         // Therefore to go from encoders to elevator height we multiply by 2pi and
@@ -127,6 +133,10 @@ public class Elevator implements PIDSource, PIDOutput {
             return;
         }
 
+        // Zero height
+        if (lowerLimit.get() && !prevLimit) 
+            heightOffset += getElevatorHeight();
+        prevLimit = lowerLimit.get();
 
         //PID Mode
         if (!manual && !pidController.isEnabled()) {
@@ -159,6 +169,7 @@ public class Elevator implements PIDSource, PIDOutput {
         //Manual Mode
         if (controller.getOtherAxis(UserInput.R_TRIGGER) != 0) {
             elevatorMotor.set(controller.getOtherAxis(UserInput.R_TRIGGER) * 1);
+            System.out.println(controller.getOtherAxis(UserInput.R_TRIGGER) * 1);
             manual = true;
             if (pidController.isEnabled()) {
                 pidController.disable();
@@ -179,13 +190,17 @@ public class Elevator implements PIDSource, PIDOutput {
         Robot.userInput.putValue("John", "Elevator Height", getElevatorHeight());
         Robot.userInput.putValue("John", "Set Height", currentSetHeight.getHeight());
         Robot.userInput.putValue("John", "PID", movingPID);
-
+        Robot.userInput.putValue("John", "raw elevator", elevatorMotor.getEncoder().getPosition());
     }
 
     @Override
     public void pidWrite(double output) {
         if (!manual) {
-            elevatorMotor.set(output);
+            if(output < 0 && lowerLimit.get()) { 
+                //elevatorMotor.set(0);
+            } else {           
+                //elevatorMotor.set(output);
+            }
         }
     }
 

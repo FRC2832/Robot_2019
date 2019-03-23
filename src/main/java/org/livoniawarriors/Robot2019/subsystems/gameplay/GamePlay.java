@@ -1,7 +1,13 @@
 package org.livoniawarriors.Robot2019.subsystems.gameplay;
 
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+
 import org.livoniawarriors.Robot2019.ICsvLogger;
 import org.livoniawarriors.Robot2019.ISubsystem;
+import org.livoniawarriors.Robot2019.Robot;
+import org.livoniawarriors.Robot2019.UserInput;
+
+import edu.wpi.first.wpilibj.Talon;
 
 public class GamePlay implements ISubsystem {
 
@@ -9,10 +15,11 @@ public class GamePlay implements ISubsystem {
 	private GamePieceManipulator gamePieceManipulator;
     private Climber climber;
 
+
 	@Override
 	public void init() {
         elevator = new Elevator();
-		gamePieceManipulator = new GamePieceManipulator();
+        gamePieceManipulator = new GamePieceManipulator();
         climber = new Climber();
 	}
 
