@@ -29,9 +29,9 @@ public class DriveTrain implements ISubsystem {
     private final static double P = 1;
     private final static double I = 0;
     private final static double D = 0;
-    private final static double P_TURN = 0.03;
-    private final static double I_TURN = 0;
-    private final static double D_TURN = 0.1;
+    private final static double P_TURN = 0.005;
+    private final static double I_TURN = 0.0002;
+    private final static double D_TURN = 0.01;
     private final static double MAX_VELOCITY = 1;
     private final static double ACCELERATION_GAIN = 0;
     public final static int DRIVE_MOTER_FL = 25;

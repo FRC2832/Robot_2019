@@ -19,6 +19,8 @@ public class PeripheralSubsystem implements ISubsystem {
     private Lidar lidar;
     private PigeonIMU pigeon;
     private double[] yawPitchRoll = new double[3];
+    private int pigeonErrors;
+    private final static int PIGEON_ERROR_THRESHOLD = 50; // Errors until classified as not working
 
     private static final int PRESSURE_SENSOR_PORT = 1;
     private JeVois jeVois;
@@ -56,6 +58,9 @@ public class PeripheralSubsystem implements ISubsystem {
             digitBoard.display(value.toString());
         });
         digitboardNotifier.startPeriodic(REV_ROBOTICS_DIGIT_MXP_DISPLAY_UPDATE_PERIOD);
+        pigeonUpdater = new Notifier(this::updatePigeon);
+        pigeonUpdater.startPeriodic(0.05);
+        updatePigeon();
         startingYaw = getYaw();
         bottomOut = new DigitalInput(BOTTOM_OUT_PIN);
     }
@@ -100,14 +105,19 @@ public class PeripheralSubsystem implements ISubsystem {
 
     }
 
+    public boolean pigeonWorking() {
+        return pigeonErrors < PIGEON_ERROR_THRESHOLD;
+    }
+
+    private void updatePigeon() {
+        if(pigeon.getYawPitchRoll(yawPitchRoll).value != 0)
+            pigeonErrors++;
+        if(pigeonErrors == PIGEON_ERROR_THRESHOLD)
+            Robot.logger.error("Pigeon errors reached threshold");
+    }
+
     public double getYaw() {
-        if(pigeon == null)
-            return 0;
-        //returns the yaw; copy method and change array element to get pitch or roll
-        ErrorCode error = pigeon.getYawPitchRoll(yawPitchRoll);
-        //System.err.println(error.name());
         return yawPitchRoll[0] - startingYaw;
-        //return 0;
     }
 
     public double getPressure() {

@@ -8,6 +8,7 @@ public class OldFashionedAuton implements IControlModule {
 
     private int state;
     private boolean stateChanged;
+    private double forward;
 
     @Override
     public void init() {
@@ -18,6 +19,7 @@ public class OldFashionedAuton implements IControlModule {
     public void start() {
         state = 0;
         stateChanged = true;
+        forward = Robot.peripheralSubsystem.getYaw();
     }
 
     /**
@@ -28,13 +30,13 @@ public class OldFashionedAuton implements IControlModule {
     private boolean updateState(boolean changed) {
         switch (state) {
             case 0:
-                return Robot.driveTrain.lazyDriveTime(1.4f, -0.7, changed);
+                return Robot.driveTrain.lazyDriveTime(1.5f, -0.7, changed);
             case 1:
-                return Robot.driveTrain.turn(90, 0.7, changed); // TODO: check if pigion is connected, lower tolerances, and change this to face the initial direction plus 90
+                return Robot.driveTrain.face(forward + 90, 0.7, changed); // TODO: check if pigion is connected, lower tolerances, and change this to face the initial direction plus 90
             case 2:
                 return Robot.driveTrain.lazyDriveDistance(20, -0.5, changed);
             case 3:
-                return Robot.driveTrain.turn(-90, 0.7, changed);
+                return Robot.driveTrain.face(forward, 0.7, changed);
             case 4:
                 return Robot.driveTrain.lazyDriveDistance(5, -0.5, changed);
             default:
@@ -59,6 +61,6 @@ public class OldFashionedAuton implements IControlModule {
 
     @Override
     public boolean isFinished() {
-        return false;//state >= 5;
+        return state >= 5;
     }
 }

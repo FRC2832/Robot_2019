@@ -8,10 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.livoniawarriors.Robot2019.UserInput.Button;
 import org.livoniawarriors.Robot2019.UserInput.Controllers;
-import org.livoniawarriors.Robot2019.modules.FullyAutonModule;
-import org.livoniawarriors.Robot2019.modules.OldFashionedAuton;
-import org.livoniawarriors.Robot2019.modules.TestAutonModule;
-import org.livoniawarriors.Robot2019.modules.TestTeleopModule;
+import org.livoniawarriors.Robot2019.modules.*;
 import org.livoniawarriors.Robot2019.subsystems.*;
 import org.livoniawarriors.Robot2019.subsystems.flamethrower.FlameThrower;
 import org.livoniawarriors.Robot2019.subsystems.gameplay.*;
@@ -26,7 +23,7 @@ public class Robot extends TimedRobot {
     private List<ISubsystem> subsystems;
     private Map<String, IControlModule> modules;
     private IControlModule activeModule;
-    private IControlModule defaultModule, telepModule;
+    private IControlModule defaultModule;
     private IControlModule fallbackModule; // The one switched to if a module finishes. If null, it defaults to the last
                                            // registered module
 
@@ -80,12 +77,12 @@ public class Robot extends TimedRobot {
         registerSubsystem(peripheralSubsystem); // Must happen after drive train
         //registerSubsystem(flameThrower = new FlameThrower());
         registerSubsystem(gamePlay = new GamePlay());
+        registerControlModule(new DriveForwardAuton());
         registerControlModule(new FullyAutonModule());
         registerControlModule(new TestAutonModule());
         registerControlModule(new OldFashionedAuton());
         registerControlModule(new TestTeleopModule()); // This is the default one until manual setting default
-        setDefaultModule(OldFashionedAuton.class);
-        setTeleopModule(TestTeleopModule.class);
+        setDefaultModule(TestTeleopModule.class);
     }
 
     /**
@@ -138,21 +135,6 @@ public class Robot extends TimedRobot {
             return;
         }
         setDefaultModule(modules.get(module.getSimpleName()));
-    }
-
-    /**
-     * Sets the module to switch to when starting teleop
-     * 
-     * @param module
-     */
-    private void setTeleopModule(Class<? extends IControlModule> module) {
-        if (!modules.containsKey(module.getSimpleName()))
-            logger.error("Module not registered: " + module.getSimpleName()); //
-        setTeleopModule(modules.get(module.getSimpleName()));
-    }
-
-    private void setTeleopModule(IControlModule module) {
-        telepModule = module;
     }
 
     /**
@@ -241,12 +223,32 @@ public class Robot extends TimedRobot {
         // Start diagnosing
         diagnosticNotifier.startPeriodic(DIAGNOSTIC_PERIOD);
         diagnose();
+        Shuffleboard.getTab("tab").add(new SendableButton() {
+            @Override
+            protected void onEnable() {
+                startAuton();
+            }
+
+            @Override
+            protected void onDisable() {
+                activeModule = defaultModule;
+                startModule(activeModule);
+            }
+        });
     }
 
     @Override
     public void robotPeriodic() {
         if (activeModule != null)
             userInput.putValue("tab", "Active Module", activeModule.getClass().getSimpleName());
+    }
+
+    private void startAuton() {
+        if(peripheralSubsystem.pigeonWorking())
+            activeModule = modules.get(OldFashionedAuton.class.getSimpleName());
+        else
+            activeModule = modules.get(DriveForwardAuton.class.getSimpleName());
+        startModule(activeModule);
     }
 
     @Override
@@ -260,13 +262,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
-    }
-
-    @Override
-    public void autonomousInit() {
-        Shuffleboard.startRecording();
-        activeModule = defaultModule;
-        startModule(activeModule);
     }
 
     private void startModule(IControlModule module) {
@@ -289,6 +284,13 @@ public class Robot extends TimedRobot {
     }
 
     private void periodic() {
+        if(userInput.getController(Controllers.XBOX).getButton(Button.Y))
+            startAuton();
+        if(userInput.getController(Controllers.XBOX).getButton(Button.A)) {
+            activeModule = defaultModule;
+            startModule(defaultModule);
+        }
+
         if (activeModule == null) {
             activeModule = defaultModule;
             startModule(activeModule);
@@ -324,12 +326,17 @@ public class Robot extends TimedRobot {
     }
 
     @Override
+    public void autonomousInit() {
+        Shuffleboard.startRecording();
+    }
+
+    @Override
     public void teleopInit() {
         Shuffleboard.startRecording();
-        if (activeModule != telepModule) {
+        if (activeModule != defaultModule) {
             if (activeModule != null)
                 stopModule(activeModule);
-            activeModule = telepModule;
+            activeModule = defaultModule;
             startModule(activeModule);
         }
     }
