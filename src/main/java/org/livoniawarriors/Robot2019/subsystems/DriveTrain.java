@@ -303,6 +303,8 @@ public class DriveTrain implements ISubsystem {
         talons.forEach(talon -> talon.setNeutralMode(false ? NeutralMode.Brake : NeutralMode.Coast));
         Robot.userInput.putValue("tab", "encoderL", getEncoderPos(false));
         Robot.userInput.putValue("tab", "encoderR", getEncoderPos(true));
+        Robot.userInput.putValue("tab", "encoderVelL", getEncoderVel(false));
+        Robot.userInput.putValue("tab", "encoderVelR", getEncoderVel(true));
 
         if(!enabled) {
             turnController.disable();
