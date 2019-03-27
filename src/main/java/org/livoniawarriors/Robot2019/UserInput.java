@@ -20,7 +20,6 @@ import java.util.HashMap;
 public class UserInput implements ISubsystem {
 
     private static float DEADZONE = 0.1f;
-    public static int FLIPPER_AXIS = 3;
     public static int R_TRIGGER = 3;
     public static int L_TRIGGER = 2;
 
