@@ -12,25 +12,25 @@ import org.livoniawarriors.Robot2019.UserInput.Button;
 import org.livoniawarriors.Robot2019.UserInput.Controllers;
 import org.livoniawarriors.Robot2019.UserInput.Joystick;
 
-import edu.wpi.first.wpilibj.Spark;
+
 
 public class Climber {
 
-	private static final int CLIMBER = 13;
-	private Spark climber;
+	private static final int CLIMBER = 23;
+	private CANSparkMax climber;
 	private UserInput.Controller controller;
 
 	public Climber() {
-		climber = new Spark(CLIMBER);
+		climber = new CANSparkMax(CLIMBER, MotorType.kBrushless);
 		controller = Robot.userInput.getController(Controllers.XBOX);
 	}
 
 	public void update(boolean enabled) {
 		if(!enabled) 
-			return;	
+			return;
 		
 		if(controller.getButton(Button.BUMPER_R)) {
-			climber.set(0.8);
+			climber.set(-0.8);
 		}
 	}
 }
