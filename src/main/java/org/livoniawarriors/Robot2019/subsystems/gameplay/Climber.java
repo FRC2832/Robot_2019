@@ -30,7 +30,14 @@ public class Climber {
 			return;
 		
 		if(controller.getButton(Button.BUMPER_R)) {
-			climber.set(-0.8);
+			climber.set(-0.5);
+		}
+
+		else if(controller.getButton(Button.BUMPER_L)) {
+			climber.set(0.5);
+			
+		} else {
+			climber.set(0.0);
 		}
 	}
 }
