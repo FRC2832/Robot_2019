@@ -32,17 +32,17 @@ public class Elevator implements PIDSource, PIDOutput {
     private final static int ELEVATOR_MOTOR = 22;
     CANSparkMax elevatorMotor;
 
-    private static final double TOLERANCE = 1; // +- how many inches is acceptable
-    private static final double MAX_MOTOR_SPEED = 0.7;
+    private static final double TOLERANCE = 5; // +- how many inches is acceptable
+    private static final double MAX_MOTOR_SPEED = 0.8;
     private static final int ELEVATOR_BOTTOM_LIMIT_PIN = 1;
 
-    private static final double movingP = 0.9;
-    private static final double movingI = 0.0;
+    private static final double movingP = 0.7;
+    private static final double movingI = 0.01;
     private static final double movingD = 0.5;
     private static final double movingF = 0.7;
 
-    private static final double maintainerP = 0.5;
-    private static final double maintainerI = 0.0;
+    private static final double maintainerP = 0.4;
+    private static final double maintainerI = 0.01;
     private static final double maintainerD = 0.5;
     private static final double maintainerF = 0.2;
 
@@ -51,7 +51,7 @@ public class Elevator implements PIDSource, PIDOutput {
 
     private UserInput.Controller controller;
 
-    private boolean manual = false;
+    private boolean manual = true;
     private boolean movingPID;
     private ElevatorHeights currentSetHeight;
     private boolean prevLimit;
@@ -61,14 +61,14 @@ public class Elevator implements PIDSource, PIDOutput {
     public Elevator() {
         elevatorMotor = new CANSparkMax(ELEVATOR_MOTOR, MotorType.kBrushless);
         elevatorMotor.setIdleMode(IdleMode.kBrake);
-        elevatorMotor.setOpenLoopRampRate(0.7);
+        elevatorMotor.setOpenLoopRampRate(0.5);
 
         pidController = new PIDController(movingP, movingI, movingD, movingF, this, this, 0.01);
 
         setPIDSourceType(PIDSourceType.kDisplacement);
 
         pidController.setAbsoluteTolerance(TOLERANCE);
-        pidController.setOutputRange(-MAX_MOTOR_SPEED / 4, MAX_MOTOR_SPEED);
+        pidController.setOutputRange(-MAX_MOTOR_SPEED, MAX_MOTOR_SPEED);
         pidController.setInputRange(-Double.MAX_VALUE, Double.MAX_VALUE);
         pidController.setContinuous(true);
 
@@ -117,7 +117,8 @@ public class Elevator implements PIDSource, PIDOutput {
      *         information
      */
     public double getElevatorHeight() {
-        return elevatorMotor.getEncoder().getPosition() * (2 * Math.PI) / 49 - heightOffset;
+        return elevatorMotor.getEncoder().getPosition();
+        //return elevatorMotor.getEncoder().getPosition() * (2 * Math.PI) / 49 - heightOffset;
         // Pulley has a 1 inch radius and 2 pi circumfrence
         // The gearbox has a ratio of 49:1
         // Therefore to go from encoders to elevator height we multiply by 2pi and
@@ -125,6 +126,14 @@ public class Elevator implements PIDSource, PIDOutput {
     }
 
     public void update(boolean isEnabled) {
+
+        //System.out.println("Current Elevator Height: " + getElevatorHeight());
+        Robot.userInput.putValue("John", "Elevator Height", getElevatorHeight());
+        Robot.userInput.putValue("John", "Set Height", currentSetHeight.getHeight());
+        Robot.userInput.putValue("John", "PID", movingPID);
+        Robot.userInput.putValue("John", "raw elevator", elevatorMotor.getEncoder().getPosition());
+        Robot.userInput.putValue("John", "Offset", heightOffset);
+
         if (!isEnabled) {
             if (pidController.isEnabled()) {
                 pidController.disable();
@@ -186,20 +195,15 @@ public class Elevator implements PIDSource, PIDOutput {
             elevatorMotor.set(0);
         }
 
-        //System.out.println("Current Elevator Height: " + getElevatorHeight());
-        Robot.userInput.putValue("John", "Elevator Height", getElevatorHeight());
-        Robot.userInput.putValue("John", "Set Height", currentSetHeight.getHeight());
-        Robot.userInput.putValue("John", "PID", movingPID);
-        Robot.userInput.putValue("John", "raw elevator", elevatorMotor.getEncoder().getPosition());
     }
 
     @Override
     public void pidWrite(double output) {
         if (!manual) {
             if(output < 0 && lowerLimit.get()) { 
-                //elevatorMotor.set(0);
+                elevatorMotor.set(0);
             } else {           
-                //elevatorMotor.set(output);
+                elevatorMotor.set(output);
             }
         }
     }
@@ -225,8 +229,8 @@ public class Elevator implements PIDSource, PIDOutput {
     public enum ElevatorHeights {
 
         LowHatch(0), LowPort(8.5),
-        MidHatch(28), MidPort(36.5),
-        TopHatch(56), TopPort(64.5), 
+        MidHatch(150), MidPort(36.5),
+        TopHatch(270), TopPort(64.5), 
         ShipPort(17);
 
         private final double height;
