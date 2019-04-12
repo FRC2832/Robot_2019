@@ -101,7 +101,7 @@ public class GamePieceManipulator {
             moveFlower();
         } 
         
-        Robot.userInput.putValue("John", "Do I have a ball?", hasBall());
+        //Robot.userInput.putValue("John", "Do I have a ball?", hasBall());
     }
 
     public boolean doingBall() {

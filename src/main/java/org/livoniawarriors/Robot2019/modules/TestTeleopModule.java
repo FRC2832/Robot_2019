@@ -32,8 +32,8 @@ public class TestTeleopModule implements IControlModule {
     @Override
     public void update() {
        updateControllers();
-       Robot.userInput.putValue("John", "left Stick", lStick);
-       Robot.userInput.putValue("John", "right Stick", rStick);
+       //Robot.userInput.putValue("John", "left Stick", lStick);
+       //Robot.userInput.putValue("John", "right Stick", rStick);
        Robot.driveTrain.tankDrive(lStick, rStick, false);
     }
 
