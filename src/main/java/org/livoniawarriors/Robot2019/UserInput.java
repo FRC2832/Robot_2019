@@ -30,6 +30,9 @@ public class UserInput implements ISubsystem {
     private HashMap<String, NetworkTableEntry> tableEntries;
     private int i = 0;
     private int currentI;
+    private String selectedControllerMode;
+    private UserInput.controlMode controllerMode;
+    public int currentControlMode;
 
 
     public Object getSelected() {
@@ -57,6 +60,8 @@ public class UserInput implements ISubsystem {
     @Override
     public void update(boolean enabled) {
         controllers.forEach(Controller::update);
+        Robot.userInput.putValue("tab", "Controller Mode", selectedControllerMode);
+        currentControlMode = updateControllerMode(controlMode.valueOf(Robot.userInput.getNetworkTableValue("Controller Mode").getString()));
     }
 
     @Override
@@ -96,6 +101,15 @@ public class UserInput implements ISubsystem {
         else {
             chooser.addOption(name, option);
         }
+    }
+    
+    public int getCurrentControllerMode() {
+        return currentControlMode;
+    }
+
+    public int updateControllerMode(UserInput.controlMode mode) {
+        return mode.ordinal();
+
     }
 
     public class Controller extends GenericHID {
@@ -238,6 +252,18 @@ public class UserInput implements ISubsystem {
 
         private final int value;
         FlightStickButton(int value) {
+            this.value = value;
+        }
+    }
+
+    public enum controlMode {
+        JOYSTICKO(0),
+        TESTING(1),
+        DDRMATT(2),
+        GUITARHERO(3);
+
+        private final int value;
+        controlMode(int value) {
             this.value = value;
         }
     }

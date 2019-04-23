@@ -17,6 +17,8 @@ import org.livoniawarriors.Robot2019.Robot;
 import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
 import org.livoniawarriors.Robot2019.UserInput.Controllers;
+import org.livoniawarriors.Robot2019.modules.TestAutonModule;
+import org.livoniawarriors.Robot2019.modules.TestTeleopModule;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PIDController;
@@ -51,12 +53,15 @@ public class Elevator implements PIDSource, PIDOutput {
 
     private UserInput.Controller controller;
 
-    private boolean manual = false;
+    private boolean manual = true;
     private boolean movingPID;
     private ElevatorHeights currentSetHeight;
     private boolean prevLimit;
     private double heightOffset;
     private DigitalInput lowerLimit;
+    private Boolean upPressed;
+    private Boolean downPressed;
+
 
     public Elevator() {
         elevatorMotor = new CANSparkMax(ELEVATOR_MOTOR, MotorType.kBrushless);
@@ -167,31 +172,57 @@ public class Elevator implements PIDSource, PIDOutput {
         }
 
         //Manual Mode
-        if (controller.getOtherAxis(UserInput.R_TRIGGER) != 0) {
-            elevatorMotor.set(controller.getOtherAxis(UserInput.R_TRIGGER) * 1);
-            System.out.println(controller.getOtherAxis(UserInput.R_TRIGGER) * 1);
-            manual = true;
-            if (pidController.isEnabled()) {
-                pidController.disable();
+        if (Robot.userInput.getCurrentControllerMode() == 0 || Robot.userInput.getCurrentControllerMode() == 1) {
+            if (controller.getOtherAxis(UserInput.R_TRIGGER) != 0) {
+                elevatorMotor.set(controller.getOtherAxis(UserInput.R_TRIGGER) * 1);
+                System.out.println(controller.getOtherAxis(UserInput.R_TRIGGER) * 1);
+                manual = true;
+                if (pidController.isEnabled()) {
+                    pidController.disable();
+                }
+                //System.out.println("Moving motor up forwards");
+            } else if (controller.getOtherAxis(UserInput.L_TRIGGER) != 0) {
+                elevatorMotor.set(-1 * controller.getOtherAxis(UserInput.L_TRIGGER) * 1);
+                manual = true;
+                if (pidController.isEnabled()) {
+                    pidController.disable();
+                }
+                //System.out.println("Moving motor up backwards");
+            } else if (!pidController.isEnabled()) {
+                elevatorMotor.set(0);
             }
-            //System.out.println("Moving motor up forwards");
-        } else if (controller.getOtherAxis(UserInput.L_TRIGGER) != 0) {
-            elevatorMotor.set(-1 * controller.getOtherAxis(UserInput.L_TRIGGER) * 1);
-            manual = true;
-            if (pidController.isEnabled()) {
-                pidController.disable();
-            }
-            //System.out.println("Moving motor up backwards");
-        } else if (!pidController.isEnabled()) {
-            elevatorMotor.set(0);
         }
-
+        else if (Robot.userInput.getCurrentControllerMode() == 2) {
+            upPressed = controller.getButton(UserInput.Button.NINE);
+            downPressed = controller.getButton(UserInput.Button.TEN);
+            if (upPressed = true) {
+                elevatorMotor.set(1);
+                System.out.println("UP! UP! UP!");
+                manual = true;
+                if (pidController.isEnabled()) {
+                    pidController.disable();
+                }
+                //System.out.println("Moving motor up forwards");
+            } else if (downPressed = true) {
+                elevatorMotor.set(-1);
+                manual = true;
+                if (pidController.isEnabled()) {
+                    pidController.disable();
+                }
+                //System.out.println("Moving motor up backwards");
+            } else if (!pidController.isEnabled()) {
+                elevatorMotor.set(0);
+            }
+        }
         //System.out.println("Current Elevator Height: " + getElevatorHeight());
         Robot.userInput.putValue("John", "Elevator Height", getElevatorHeight());
         Robot.userInput.putValue("John", "Set Height", currentSetHeight.getHeight());
         Robot.userInput.putValue("John", "PID", movingPID);
         Robot.userInput.putValue("John", "raw elevator", elevatorMotor.getEncoder().getPosition());
-    }
+    
+
+
+}
 
     @Override
     public void pidWrite(double output) {

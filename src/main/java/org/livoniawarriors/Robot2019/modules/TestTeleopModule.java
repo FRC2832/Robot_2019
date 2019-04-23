@@ -7,6 +7,7 @@ import org.livoniawarriors.Robot2019.UserInput;
 import org.livoniawarriors.Robot2019.UserInput.Button;
 import org.livoniawarriors.Robot2019.UserInput.Controllers;
 import org.livoniawarriors.Robot2019.UserInput.Joystick;
+import org.livoniawarriors.Robot2019.UserInput.controlMode;
 
 public class TestTeleopModule implements IControlModule {
     private UserInput.Controller flightstickLeft;
@@ -15,13 +16,14 @@ public class TestTeleopModule implements IControlModule {
     private double lStick;
     private double rStick;
     private double slider;
+    
 
     @Override
     public void init() {
         flightstickLeft = Robot.userInput.getController(Controllers.L_FLIGHTSTICK);
         flightstickRight = Robot.userInput.getController(Controllers.R_FLIGHTSTICK);
         driverXbox = Robot.userInput.getController(Controllers.TEST_XBOX);
-        Robot.userInput.putValue("tab", "Joysticko Mode", true);
+        //Robot.userInput.putValue("tab", "Joysticko Mode", true);
     }
 
     @Override
@@ -34,7 +36,7 @@ public class TestTeleopModule implements IControlModule {
        updateControllers();
        Robot.userInput.putValue("John", "left Stick", lStick);
        Robot.userInput.putValue("John", "right Stick", rStick);
-       Robot.driveTrain.tankDrive(lStick, rStick, false);
+       Robot.driveTrain.tankDrive(lStick, rStick, false);       
     }
 
     @Override
@@ -46,9 +48,9 @@ public class TestTeleopModule implements IControlModule {
     public boolean isFinished() {
         return false;
     }
-
+    
     public void updateControllers() {
-        if (Robot.userInput.getNetworkTableValue("Joysticko Mode").getBoolean()) {
+        if (Robot.userInput.getCurrentControllerMode() == 0) {
             lStick = flightstickLeft.getJoystickY(Joystick.FLIGHTSTICK);
             rStick = flightstickRight.getJoystickY(Joystick.FLIGHTSTICK);
             if (flightstickLeft.getButton(Button.TRIGGER)) {
@@ -58,9 +60,15 @@ public class TestTeleopModule implements IControlModule {
                 rStick = rStick * .5;
                 }
         }
-        else {
+        else if (Robot.userInput.getCurrentControllerMode() == 1) {
             lStick = driverXbox.getJoystickY(Joystick.LEFT);
             rStick = driverXbox.getJoystickY(Joystick.RIGHT);
         }
     }
+
+ 
+    
+
+
+
 }

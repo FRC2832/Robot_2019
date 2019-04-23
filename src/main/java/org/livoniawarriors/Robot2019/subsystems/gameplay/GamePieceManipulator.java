@@ -74,34 +74,65 @@ public class GamePieceManipulator {
         }
         
         //Move intake motors
-        if (intakeDown) {
-            //Move Left Intake Motor
-            if (controller.getJoystickY(Joystick.LEFT) != 0) {
-                leftIntakeMotor.set(controller.getOtherAxis(1)); 
-            } else {
-                leftIntakeMotor.set(0);
+        if (Robot.userInput.getCurrentControllerMode() == 0 || Robot.userInput.getCurrentControllerMode() == 1) {
+            if (intakeDown) {
+                //Move Left Intake Motor
+                if (controller.getJoystickY(Joystick.LEFT) != 0) {
+                    leftIntakeMotor.set(controller.getOtherAxis(1)); 
+                } else {
+                    leftIntakeMotor.set(0);
 
+                }
+                //Move Right Intake Motor
+                if (controller.getJoystickY(Joystick.RIGHT) != 0) {
+                    rightIntakeMotor.set(controller.getOtherAxis(5)); 
+                } else {
+                    rightIntakeMotor.set(0);
+                }
             }
-            //Move Right Intake Motor
-            if (controller.getJoystickY(Joystick.RIGHT) != 0) {
-                rightIntakeMotor.set(controller.getOtherAxis(5)); 
-            } else {
-                rightIntakeMotor.set(0);
-            }
-        }
-
-        //Move Tilter
-        if (controller.getPOV() == 0) {
-            moveIntakeUp();
-        } else if (controller.getPOV() == 180) {
-            moveIntakeDown();
-        }
-
-        if (controller.getButtonPressed(Button.B)) {
-            moveFlower();
-        } 
         
-        Robot.userInput.putValue("John", "Do I have a ball?", hasBall());
+        //Move Tilter
+            if (controller.getPOV() == 0) {
+                moveIntakeUp();
+            } else if (controller.getPOV() == 180) {
+                moveIntakeDown();
+            }
+
+            if (controller.getButtonPressed(Button.B)) {
+                moveFlower();
+            } 
+            
+            Robot.userInput.putValue("John", "Do I have a ball?", hasBall());
+        } else if (Robot.userInput.getCurrentControllerMode() == 2) {
+            if (intakeDown) {
+                //Move Left Intake Motor
+                if (controller.getButton(Button.TWELVE_ONLYRIGHT)){
+                    leftIntakeMotor.set(-1);
+                    rightIntakeMotor.set(-1); 
+                } else {
+                    leftIntakeMotor.set(0);
+                }
+                    //Move Right Intake Motor
+                if (controller.getButton(Button.ELEVEN)) {
+                    leftIntakeMotor.set(1);
+                    rightIntakeMotor.set(1);
+                } else {
+                    rightIntakeMotor.set(0);
+                }
+            }
+
+            if (controller.getButtonPressed(Button.EIGHT)) {
+                moveIntakeUp();
+            } else if (controller.getButtonPressed(Button.FIVE)) {
+                moveIntakeDown();
+            }
+
+            if (controller.getButtonPressed(Button.THUMB)) {
+                moveFlower();
+            } 
+                
+             Robot.userInput.putValue("John", "Do I have a ball?", hasBall());
+        }
     }
 
     public boolean doingBall() {
